@@ -51,16 +51,28 @@
   }
   body::after{
     content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.35;
-    background-image: radial-gradient(rgba(255,255,255,.035) 1px, transparent 1px);
-    background-size: 26px 26px;
+    background-image:
+      linear-gradient(rgba(63,185,80,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(63,185,80,.045) 1px, transparent 1px);
+    background-size: 42px 42px;
+    animation: gridDrift 30s linear infinite;
   }
+  @keyframes gridDrift{ from{background-position:0 0, 0 0;} to{background-position:42px 84px, 84px 42px;} }
+  .scan-sweep{position:relative; overflow:hidden;}
+  .scan-sweep::before{
+    content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+    transform:skewX(-20deg); transition:left .6s ease; pointer-events:none;
+  }
+  .scan-sweep:hover::before{ left:120%; }
   @keyframes ambientDrift{
     0%{ transform:translate(0,0) scale(1); }
     100%{ transform:translate(-2%,2%) scale(1.05); }
   }
   .topbar{height:3px; background:linear-gradient(90deg,var(--green),var(--blue),var(--purple),var(--amber),var(--green)); background-size:200% 100%; animation:topbarShift 6s linear infinite;}
   @keyframes topbarShift{ from{background-position:0% 0;} to{background-position:200% 0;} }
-  .wrap{max-width:1300px; margin:0 auto; padding:24px 32px 0;}
+  .wrap{max-width:1300px; margin:0 auto; padding:24px 32px 0; animation:appBootIn .6s cubic-bezier(.16,1,.3,1);}
+  @keyframes appBootIn{ from{opacity:0; transform:translateY(14px) scale(.985); filter:blur(4px);} to{opacity:1; transform:translateY(0) scale(1); filter:blur(0);} }
 
   .titlebar{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
   .dots{display:flex; gap:6px;}
@@ -87,16 +99,19 @@
   .boot .focus{color:var(--purple);}
 
   .statrow{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px;}
-  .stat{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:14px 15px;}
-  .stat.countdown{cursor:pointer; transition:border-color .15s;}
+  .stat{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:14px 15px; transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease; position:relative;}
+  .stat:hover{transform:translateY(-3px); border-color:var(--green-dim); box-shadow:0 10px 28px -10px rgba(63,185,80,.35);}
+  .stat.countdown{cursor:pointer; transition:border-color .15s, transform .2s ease, box-shadow .2s ease;}
   .stat.countdown:hover{border-color:var(--border);}
-  .stat .n{font-family:var(--font-display); font-size:31.5px; font-weight:700; color:var(--green); letter-spacing:-.02em;}
+  .stat .n{font-family:var(--font-display); font-size:31.5px; font-weight:700; color:var(--green); letter-spacing:-.02em; text-shadow:0 0 18px rgba(63,185,80,.35); transition:text-shadow .2s ease;}
+  .stat:hover .n{text-shadow:0 0 26px rgba(63,185,80,.6);}
   .stat .n.zero{color:var(--text-dim);}
   .stat .l{font-size:13.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em; margin-top:3px;}
 
   /* quick launch */
   .quicklaunch{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:14px;}
-  .launch-chip{display:flex; align-items:stretch; background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; overflow:hidden;}
+  .launch-chip{display:flex; align-items:stretch; background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; overflow:hidden; transition:transform .2s ease, box-shadow .2s ease;}
+  .launch-chip:hover{transform:translateY(-2px); box-shadow:0 8px 22px -10px rgba(0,0,0,.5);}
   .lc-main{flex:1; display:flex; flex-direction:column; justify-content:center; padding:10px 12px; text-decoration:none; color:var(--text); min-width:0;}
   .lc-main:hover{background:var(--panel-2);}
   .lc-label{font-family:var(--font-display); font-weight:600; font-size:15.5px;}
@@ -237,13 +252,22 @@
   input[type=date]::-webkit-datetime-edit, input[type=date]::-webkit-datetime-edit-fields-wrapper{background:transparent; color:var(--text);}
   input[type=number]{width:72px;}
   input[type=date]:focus, input[type=search]:focus{border-color:var(--green-dim);}
+  input:focus, textarea:focus, select:focus{ box-shadow:0 0 0 3px rgba(63,185,80,.18); }
   input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.8); cursor:pointer;}
   input[type=search]::-webkit-search-cancel-button{filter:invert(.8);}
+  button{ transition: transform .12s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, background .2s ease; }
+  button:active{ transform:scale(.94); }
   button.primary{
     background:var(--green-dim); color:#fff; border:none; border-radius:8px;
     padding:9px 17px; font-family:var(--font-mono); font-size:15px; font-weight:600; cursor:pointer;
-    transition:box-shadow .2s, background .2s;
+    transition:box-shadow .2s, background .2s, transform .12s cubic-bezier(.34,1.56,.64,1);
+    position:relative; overflow:hidden;
   }
+  button.primary::after{
+    content:''; position:absolute; inset:0; border-radius:inherit;
+    box-shadow:0 0 0 0 rgba(63,185,80,.5); transition:box-shadow .6s ease;
+  }
+  button.primary:hover::after{ box-shadow:0 0 0 8px rgba(63,185,80,0); }
   button.primary:hover{background:var(--green-glow); box-shadow:0 0 16px rgba(63,185,80,.45);}
   button.primary:disabled{background:var(--border-soft); color:var(--text-faint); cursor:not-allowed; box-shadow:none;}
   button.secondary{
@@ -568,10 +592,10 @@
   <div class="boot" id="boot">$ status --check<br><span class="ok">day 1 of a new streak.</span> keep it going.</div>
 
   <div class="statrow">
-    <div class="stat"><div class="n" id="stat-streak">1</div><div class="l">day streak</div></div>
-    <div class="stat"><div class="n" id="stat-hours">1</div><div class="l">total hours</div></div>
-    <div class="stat"><div class="n" id="stat-pct">0%</div><div class="l">roadmap done</div></div>
-    <div class="stat countdown" id="countdown-stat" title="click to set your target date"><div class="n zero" id="stat-countdown">set</div><div class="l">days to placement</div></div>
+    <div class="stat scan-sweep hud-corners" style="--hud-color:var(--green);"><div class="n" id="stat-streak">1</div><div class="l">day streak</div></div>
+    <div class="stat scan-sweep hud-corners" style="--hud-color:var(--blue);"><div class="n" id="stat-hours">1</div><div class="l">total hours</div></div>
+    <div class="stat scan-sweep hud-corners" style="--hud-color:var(--purple);"><div class="n" id="stat-pct">0%</div><div class="l">roadmap done</div></div>
+    <div class="stat countdown scan-sweep hud-corners" style="--hud-color:var(--amber);" id="countdown-stat" title="click to set your target date"><div class="n zero" id="stat-countdown">set</div><div class="l">days to placement</div></div>
   </div>
 
   <div class="quicklaunch" id="quicklaunch"><div class="launch-chip">
@@ -1165,15 +1189,26 @@
         </div>
       </div>
       <div id="spotify-connected-block" style="display:none;">
-        <div id="spotify-mini-player" style="display:none; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--spotify); border-radius:10px; padding:10px 14px; margin-bottom:14px;">
-          <img id="spm-art" src="" alt="" style="width:48px; height:48px; border-radius:6px; background:var(--bg); flex-shrink:0;">
-          <div style="flex:1; min-width:0;">
-            <div id="spm-title" style="font-size:13.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
-            <div id="spm-artist" style="font-size:11.5px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+        <div id="spotify-mini-player" style="display:none; flex-direction:column; gap:8px; background:var(--panel); border:1px solid var(--spotify); border-radius:10px; padding:10px 14px; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img id="spm-art" src="" alt="" style="width:48px; height:48px; border-radius:6px; background:var(--bg); flex-shrink:0;">
+            <div style="flex:1; min-width:0;">
+              <div id="spm-title" style="font-size:13.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+              <div id="spm-artist" style="font-size:11.5px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+            </div>
+            <button class="secondary" id="spm-shuffle" type="button" style="padding:6px 9px; font-size:12px;" title="Shuffle">🔀</button>
+            <button class="secondary" id="spm-prev" type="button" style="padding:6px 10px;">⏮</button>
+            <button class="spotify-connect-btn" id="spm-toggle" type="button" style="padding:6px 14px;">⏸</button>
+            <button class="secondary" id="spm-next" type="button" style="padding:6px 10px;">⏭</button>
+            <button class="secondary" id="spm-repeat" type="button" style="padding:6px 9px; font-size:12px;" title="Repeat">🔁</button>
           </div>
-          <button class="secondary" id="spm-prev" type="button" style="padding:6px 10px;">⏮</button>
-          <button class="spotify-connect-btn" id="spm-toggle" type="button" style="padding:6px 14px;">⏸</button>
-          <button class="secondary" id="spm-next" type="button" style="padding:6px 10px;">⏭</button>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="spm-pos" style="font-size:10.5px; color:var(--text-faint); width:34px;">0:00</span>
+            <input type="range" id="spm-seek" min="0" max="1000" value="0" style="flex:1;">
+            <span id="spm-dur" style="font-size:10.5px; color:var(--text-faint); width:34px;">0:00</span>
+            <span style="font-size:12px; color:var(--text-faint);">🔊</span>
+            <input type="range" id="spm-volume" min="0" max="100" value="70" style="width:70px;">
+          </div>
         </div>
         <div class="add-row">
           <input id="spotify-search-input" type="text" placeholder="search a song to play">
@@ -1585,6 +1620,8 @@ async function spotifyPlayUri(uri){
     return true;
   }catch(e){ return false; }
 }
+function spotifyFmt(ms){ const s = Math.floor(ms/1000); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+let spmSeeking = false;
 function spotifyUpdateMiniPlayer(playerState){
   const bar = document.getElementById('spotify-mini-player'); if(!bar) return;
   if(!playerState || !playerState.track_window || !playerState.track_window.current_track){ bar.style.display='none'; return; }
@@ -1594,10 +1631,38 @@ function spotifyUpdateMiniPlayer(playerState){
   document.getElementById('spm-artist').textContent = (track.artists||[]).map(a=>a.name).join(', ');
   document.getElementById('spm-art').src = (track.album && track.album.images && track.album.images[0]) ? track.album.images[0].url : '';
   document.getElementById('spm-toggle').textContent = playerState.paused ? '▶' : '⏸';
+  document.getElementById('spm-shuffle').style.opacity = playerState.shuffle ? '1' : '.45';
+  document.getElementById('spm-repeat').style.opacity = playerState.repeat_mode ? '1' : '.45';
+  document.getElementById('spm-repeat').textContent = playerState.repeat_mode === 2 ? '🔂' : '🔁';
+  if(!spmSeeking){
+    const dur = playerState.duration || 1;
+    document.getElementById('spm-seek').value = Math.round((playerState.position / dur) * 1000);
+    document.getElementById('spm-pos').textContent = spotifyFmt(playerState.position);
+    document.getElementById('spm-dur').textContent = spotifyFmt(dur);
+  }
 }
 document.getElementById('spm-toggle').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.togglePlay());
 document.getElementById('spm-next').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.nextTrack());
 document.getElementById('spm-prev').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.previousTrack());
+document.getElementById('spm-shuffle').addEventListener('click', async ()=>{
+  const state = await spotifyPlayer?.getCurrentState(); const next = !(state && state.shuffle);
+  const token = await spotifyEnsureToken(); if(!token) return;
+  fetch(`https://api.spotify.com/v1/me/player/shuffle?state=${next}&device_id=${spotifyDeviceId}`, { method:'PUT', headers:{'Authorization':'Bearer '+token} });
+});
+document.getElementById('spm-repeat').addEventListener('click', async ()=>{
+  const state = await spotifyPlayer?.getCurrentState(); const modes = ['off','context','track'];
+  const next = modes[((state ? state.repeat_mode : 0) + 1) % 3];
+  const token = await spotifyEnsureToken(); if(!token) return;
+  fetch(`https://api.spotify.com/v1/me/player/repeat?state=${next}&device_id=${spotifyDeviceId}`, { method:'PUT', headers:{'Authorization':'Bearer '+token} });
+});
+document.getElementById('spm-volume').addEventListener('input', (e)=> spotifyPlayer && spotifyPlayer.setVolume(Number(e.target.value)/100));
+const spmSeekEl = document.getElementById('spm-seek');
+spmSeekEl.addEventListener('mousedown', ()=> spmSeeking = true);
+spmSeekEl.addEventListener('change', async (e)=>{
+  const state = await spotifyPlayer?.getCurrentState();
+  if(state) await spotifyPlayer.seek(Math.round((Number(e.target.value)/1000) * state.duration));
+  spmSeeking = false;
+});
 async function spotifySearchAndPlay(query){
   const track = await spotifySearch(query);
   if(track) await spotifyPlayUri(track.uri);
@@ -1673,12 +1738,14 @@ async function saveState(){
 const appTabs = [...document.querySelectorAll('.tab')];
 function activateTab(tab){
   if(!tab) return;
+  const wasActive = tab.classList.contains('active');
   appTabs.forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel-view').forEach(v=>v.classList.remove('active'));
   tab.classList.add('active');
   const view=document.getElementById('view-'+tab.dataset.tab);
   if(view) view.classList.add('active');
   tab.scrollIntoView({block:'nearest', inline:'center'});
+  if(!wasActive) playChime(520, 0.06);
 }
 function cycleTab(direction){
   const current=Math.max(0,appTabs.findIndex(tab=>tab.classList.contains('active')));
@@ -1853,12 +1920,25 @@ function computeChecklistPct(){
   ROADMAP.forEach(p=> p.items.forEach((_,i)=>{ total++; if(state.checklist[p.id+':'+i]) done++; }));
   return total ? Math.round((done/total)*100) : 0;
 }
+let _statsAnimatedOnce = false;
+function animateNum(el, target, suffix){
+  suffix = suffix || '';
+  if(_statsAnimatedOnce){ el.textContent = target + suffix; return; }
+  const dur = 800; const t0 = performance.now();
+  function step(t){
+    const p = Math.min(1, (t-t0)/dur); const eased = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.round(target*eased) + suffix;
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
 function renderStats(){
   const streak = computeStreak();
-  document.getElementById('stat-streak').textContent = streak;
   document.getElementById('stat-streak').className = 'n' + (streak===0 ? ' zero':'');
+  animateNum(document.getElementById('stat-streak'), streak, '');
   document.getElementById('stat-hours').textContent = Math.round(computeTotalHours()*10)/10;
-  document.getElementById('stat-pct').textContent = computeChecklistPct() + '%';
+  animateNum(document.getElementById('stat-pct'), computeChecklistPct(), '%');
+  _statsAnimatedOnce = true;
 }
 function renderCountdown(){
   const el = document.getElementById('stat-countdown');
@@ -1962,6 +2042,7 @@ function renderPhases(){
       row.querySelector('input').addEventListener('change', (e)=>{
         state.checklist[key] = e.target.checked;
         row.classList.toggle('done', e.target.checked);
+        playChime(e.target.checked ? 740 : 400, 0.08);
         saveState(); updatePhaseProgress(phase); renderStats(); checkAchievements();
       });
       items.appendChild(row);
