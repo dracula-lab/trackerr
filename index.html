@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- saved from url=(0039)https://dracula-lab.github.io/trackerr/ -->
-<html lang="en" crxlauncher=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- saved from url=(0127)file:///C:/Users/khark/Documents/Codex/2026-08-11/referenced-chatgpt-conversation-this-is-an/outputs/coding-journey-jarvis.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>~/coding-journey</title>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CodingJourney">
-<link rel="manifest" href="https://dracula-lab.github.io/trackerr/manifest.json">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com/">
 <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
 <style>
@@ -554,8 +554,8 @@
     .voice-popup { top: 16px; bottom: 80px; right: 16px; width: calc(100vw - 32px); }
   }
 </style>
-<style type="text/css" id="mytempCss">._8mqQwQ { display: none; } ._1TWLMK.icF5zO { opacity: 0.01; }</style><style type="text/css" id="mytempCss">._8mqQwQ { display: none; } ._1TWLMK.icF5zO { opacity: 0.01; }</style><style></style></head>
-<body data-layout="classic">
+</head>
+<body>
 <div class="topbar"></div>
 <div class="wrap">
   <button id="layout-toggle-btn" class="secondary" type="button">⇄ sidebar layout</button>
@@ -565,11 +565,11 @@
   </div>
   <h1>coding<span class="accent">-journey</span></h1>
   <p class="subtitle">B.Tech CSE (AI &amp; DS) · AI + DSA placement track</p>
-  <div class="boot" id="boot">$ status --check<br>welcome. first boot — log some progress on the dashboard tab to start your streak.</div>
+  <div class="boot" id="boot">$ status --check<br><span class="ok">day 1 of a new streak.</span> keep it going.</div>
 
   <div class="statrow">
-    <div class="stat"><div class="n zero" id="stat-streak">0</div><div class="l">day streak</div></div>
-    <div class="stat"><div class="n" id="stat-hours">0</div><div class="l">total hours</div></div>
+    <div class="stat"><div class="n" id="stat-streak">1</div><div class="l">day streak</div></div>
+    <div class="stat"><div class="n" id="stat-hours">1</div><div class="l">total hours</div></div>
     <div class="stat"><div class="n" id="stat-pct">0%</div><div class="l">roadmap done</div></div>
     <div class="stat countdown" id="countdown-stat" title="click to set your target date"><div class="n zero" id="stat-countdown">set</div><div class="l">days to placement</div></div>
   </div>
@@ -642,16 +642,13 @@
     </div>
   </div>
   <div id="streak-banner">
-      <div style="background:rgba(255,95,86,0.12); border:1px solid #ff5f56; border-radius:8px; padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <div style="background:rgba(63,185,80,0.1); border:1px solid var(--green); border-radius:8px; padding:10px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <span class="pulse-dot" style="background:#ff5f56; box-shadow:0 0 0 0 rgba(255,95,86,0.6);"></span>
-          <span style="color:#ff5f56; font-weight:700; font-size:13.5px;">⚠️ STREAK AT RISK!</span>
-          <span style="color:var(--text); font-size:13px;">No progress logged today. Log at least 30m of practice to save your <b>0-day streak</b>!</span>
+          <span class="pulse-dot"></span>
+          <span style="color:var(--green); font-weight:700; font-size:13.5px;">🔥 Streak Protected Today!</span>
+          <span style="color:var(--text-dim); font-size:13px;">Logged <b>1h</b> across 1 commit(s). Outstanding effort!</span>
         </div>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <button class="primary" id="quick-log-btn" style="padding:4px 10px; font-size:12.5px;" type="button">+ Log 1h Study</button>
-          <button class="lc-edit" id="set-alarm-btn" style="font-size:12px;" type="button">⏰ Alarm: 19:00</button>
-        </div>
+        <button class="lc-edit" id="set-alarm-btn" style="font-size:12px;" type="button">⏰ Alarm: 19:00</button>
       </div>
     </div>
 
@@ -668,7 +665,7 @@
     <div class="tab" data-tab="coderun"><span class="sq c-coderun"></span>code.run</div>
     <div class="tab" data-tab="notes"><span class="sq c-notes"></span>notes.txt</div>
     <div class="tab" data-tab="arcade"><span class="sq c-arcade"></span>arcade.game</div>
-    <div class="tab" data-tab="watch"><span class="sq c-watch"></span>watch.mp4</div>
+    <div class="tab" data-tab="watch"><span class="sq c-watch"></span>youtube</div>
     <div class="tab" data-tab="spotify"><span class="sq c-spotify"></span>spotify.fm</div>
   </div>
 
@@ -735,17 +732,17 @@
   <div class="panel-view" id="view-dashboard">
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>progress analytics</h2></div></div>
-      <div class="insight-grid" id="analytics-summary"><div class="insight-card"><div class="k">this week</div><div class="v">0h</div><div class="s">0 active days</div></div><div class="insight-card"><div class="k">completion</div><div class="v">0%</div><div class="s">roadmap checklist</div></div><div class="insight-card"><div class="k">next actions</div><div class="v">0</div><div class="s">upcoming reminders</div></div></div>
-      <div style="height:14px;"></div><div class="bar-list" id="analytics-categories"><div class="empty">log activity to see your strongest study areas</div></div>
+      <div class="insight-grid" id="analytics-summary"><div class="insight-card"><div class="k">this week</div><div class="v">1h</div><div class="s">1 active day</div></div><div class="insight-card"><div class="k">completion</div><div class="v">0%</div><div class="s">roadmap checklist</div></div><div class="insight-card"><div class="k">next actions</div><div class="v">0</div><div class="s">upcoming reminders</div></div></div>
+      <div style="height:14px;"></div><div class="bar-list" id="analytics-categories"><div class="bar-row"><span>dsa</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--purple)"></div></div><span>1h</span></div></div>
     </section>
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>topic mastery</h2></div></div>
       <div style="font-size:12px; color:var(--text-faint); margin-bottom:8px;">updates from your easy/hard feedback on today's task — low or stale topics get resurfaced first</div>
-      <div class="bar-list" id="mastery-bars"><div class="bar-row"><span>Python fundamentals</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div><span>not practiced yet</span></div><div class="bar-row"><span>DSA foundations</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div><span>not practiced yet</span></div><div class="bar-row"><span>CS core subjects</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div><span>not practiced yet</span></div><div class="bar-row"><span>AI &amp; Data Science Specialization</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div><span>not practiced yet</span></div><div class="bar-row"><span>NPTEL &amp; SWAYAM Certifications</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div><span>not practiced yet</span></div><div class="bar-row"><span>Campus Leadership &amp; Events</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div><span>not practiced yet</span></div><div class="bar-row"><span>Projects + GitHub</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div><span>not practiced yet</span></div><div class="bar-row"><span>Aptitude + verbal (CRT)</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div><span>not practiced yet</span></div><div class="bar-row"><span>Resume, LinkedIn, interviews</span><div class="bar-track"><div class="bar-fill" style="width:0%;background:var(--amber)"></div></div><span>not practiced yet</span></div></div>
+      <div class="bar-list" id="mastery-bars"></div>
     </section>
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>consistency calendar</h2></div></div>
-      <div class="calendar" id="calendar-view"><div class="cal-head">Sun</div><div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div><div class="cal-head">Thu</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div><div></div><div></div><div></div><div></div><div></div><div></div><div class="cal-day  " title="2026-08-01: no activity">1</div><div class="cal-day  " title="2026-08-02: no activity">2</div><div class="cal-day  " title="2026-08-03: no activity">3</div><div class="cal-day  " title="2026-08-04: no activity">4</div><div class="cal-day  " title="2026-08-05: no activity">5</div><div class="cal-day  " title="2026-08-06: no activity">6</div><div class="cal-day  " title="2026-08-07: no activity">7</div><div class="cal-day  " title="2026-08-08: no activity">8</div><div class="cal-day  " title="2026-08-09: no activity">9</div><div class="cal-day  " title="2026-08-10: no activity">10</div><div class="cal-day  " title="2026-08-11: no activity">11</div><div class="cal-day  " title="2026-08-12: no activity">12</div><div class="cal-day  " title="2026-08-13: no activity">13</div><div class="cal-day  " title="2026-08-14: no activity">14</div><div class="cal-day  today" title="2026-08-15: no activity">15</div><div class="cal-day  " title="2026-08-16: no activity">16</div><div class="cal-day  " title="2026-08-17: no activity">17</div><div class="cal-day  " title="2026-08-18: no activity">18</div><div class="cal-day  " title="2026-08-19: no activity">19</div><div class="cal-day  " title="2026-08-20: no activity">20</div><div class="cal-day  " title="2026-08-21: no activity">21</div><div class="cal-day  " title="2026-08-22: no activity">22</div><div class="cal-day  " title="2026-08-23: no activity">23</div><div class="cal-day  " title="2026-08-24: no activity">24</div><div class="cal-day  " title="2026-08-25: no activity">25</div><div class="cal-day  " title="2026-08-26: no activity">26</div><div class="cal-day  " title="2026-08-27: no activity">27</div><div class="cal-day  " title="2026-08-28: no activity">28</div><div class="cal-day  " title="2026-08-29: no activity">29</div><div class="cal-day  " title="2026-08-30: no activity">30</div><div class="cal-day  " title="2026-08-31: no activity">31</div></div>
+      <div class="calendar" id="calendar-view"><div class="cal-head">Sun</div><div class="cal-head">Mon</div><div class="cal-head">Tue</div><div class="cal-head">Wed</div><div class="cal-head">Thu</div><div class="cal-head">Fri</div><div class="cal-head">Sat</div><div></div><div></div><div></div><div></div><div></div><div></div><div class="cal-day  " title="2026-08-01: no activity">1</div><div class="cal-day  " title="2026-08-02: no activity">2</div><div class="cal-day  " title="2026-08-03: no activity">3</div><div class="cal-day  " title="2026-08-04: no activity">4</div><div class="cal-day  " title="2026-08-05: no activity">5</div><div class="cal-day  " title="2026-08-06: no activity">6</div><div class="cal-day  " title="2026-08-07: no activity">7</div><div class="cal-day  " title="2026-08-08: no activity">8</div><div class="cal-day  " title="2026-08-09: no activity">9</div><div class="cal-day  " title="2026-08-10: no activity">10</div><div class="cal-day  " title="2026-08-11: no activity">11</div><div class="cal-day  " title="2026-08-12: no activity">12</div><div class="cal-day active today" title="2026-08-13: 1h">13<span class="hours">1h</span></div><div class="cal-day  " title="2026-08-14: no activity">14</div><div class="cal-day  " title="2026-08-15: no activity">15</div><div class="cal-day  " title="2026-08-16: no activity">16</div><div class="cal-day  " title="2026-08-17: no activity">17</div><div class="cal-day  " title="2026-08-18: no activity">18</div><div class="cal-day  " title="2026-08-19: no activity">19</div><div class="cal-day  " title="2026-08-20: no activity">20</div><div class="cal-day  " title="2026-08-21: no activity">21</div><div class="cal-day  " title="2026-08-22: no activity">22</div><div class="cal-day  " title="2026-08-23: no activity">23</div><div class="cal-day  " title="2026-08-24: no activity">24</div><div class="cal-day  " title="2026-08-25: no activity">25</div><div class="cal-day  " title="2026-08-26: no activity">26</div><div class="cal-day  " title="2026-08-27: no activity">27</div><div class="cal-day  " title="2026-08-28: no activity">28</div><div class="cal-day  " title="2026-08-29: no activity">29</div><div class="cal-day  " title="2026-08-30: no activity">30</div><div class="cal-day  " title="2026-08-31: no activity">31</div></div>
     </section>
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>goals &amp; milestones</h2></div></div>
@@ -769,11 +766,11 @@
             <option value="other">other</option>
           </select>
         </div>
-      <div class="log-feed" id="activity-results"><div class="empty">no matching activity</div></div>
+      <div class="log-feed" id="activity-results"><div class="log-entry" style="--entry-color:var(--purple)"><div class="log-body"><div class="log-msg">1h DSA &amp; Placement practice</div><div class="log-tags"><span class="tag">dsa</span><span class="tag hrs">1h</span><span class="tag">today</span></div></div></div></div>
     </section>
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>achievements</h2></div></div>
-      <div class="badge-strip" id="badge-strip"><div class="badge " title="First Commit — locked">
+      <div class="badge-strip" id="badge-strip"><div class="badge unlocked" title="First Commit">
       <div class="badge-icon" style="--badge-color:var(--green)">FC</div>
       <div class="badge-label">First Commit</div>
     </div><div class="badge " title="7-Day Streak — locked">
@@ -835,7 +832,7 @@
     </section>
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>activity</h2></div></div>
-      <div class="heatmap" id="heatmap"><div class="cell" data-lvl="0" title="2026-02-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-31 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-31 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-31 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-15 — no activity"></div></div>
+      <div class="heatmap" id="heatmap"><div class="cell" data-lvl="0" title="2026-02-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-02-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-03-31 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-04-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-05-31 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-06-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-12 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-13 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-14 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-15 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-16 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-17 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-18 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-19 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-20 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-21 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-22 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-23 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-24 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-25 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-26 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-27 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-28 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-29 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-30 — no activity"></div><div class="cell" data-lvl="0" title="2026-07-31 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-01 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-02 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-03 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-04 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-05 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-06 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-07 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-08 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-09 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-10 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-11 — no activity"></div><div class="cell" data-lvl="0" title="2026-08-12 — no activity"></div><div class="cell" data-lvl="2" title="2026-08-13 — 1h"></div></div>
       <div class="heat-legend">less <span class="cell" data-lvl="0"></span><span class="cell" data-lvl="1"></span><span class="cell" data-lvl="2"></span><span class="cell" data-lvl="3"></span><span class="cell" data-lvl="4"></span> more</div>
     </section>
     <section>
@@ -859,7 +856,17 @@
           <button class="primary commit-btn" id="commit-btn">commit</button>
         </div>
       </div>
-      <div class="log-feed" id="log-feed"><div class="empty">no commits yet — log your first bit of progress above</div></div>
+      <div class="log-feed" id="log-feed"><div class="log-entry" style="--entry-color: var(--purple);">
+      <div class="log-body">
+        <div class="log-msg">1h DSA &amp; Placement practice</div>
+        <div class="log-tags">
+          <span class="tag" style="color:var(--purple);background:var(--purple-bg)">dsa</span>
+          <span class="tag hrs">1h</span>
+          <span class="tag">today</span>
+        </div>
+      </div>
+      <div class="company-actions"><button class="copy-btn log-copy" type="button">copy</button><button class="del-btn" title="delete entry" data-id="msrmfmsnspfa">×</button></div>
+    </div></div>
     </section>
     <section>
       <div class="sec-head">
@@ -987,7 +994,7 @@
             <button class="assistant-action" data-orbit-prompt="Make me a realistic 90-minute deep-work plan based on my tracker. Include breaks and a definition of done.">plan 90 minutes</button>
             <button class="assistant-action" data-orbit-prompt="Analyze my progress and tell me the highest-impact weakness to address next. Be honest and specific.">diagnose progress</button>
             <button class="assistant-action" data-orbit-prompt="Research the latest placement-preparation resources for a B.Tech CSE AI &amp; DS student in India. Give a short ranked list with sources.">research web</button>
-            <label class="assistant-web"><input id="assistant-web-toggle" type="checkbox"> web-aware answers <span title="Uses Google Search grounding via your Gemini key (free daily quota) for live answers — automatically, even if OpenRouter is your main provider. Add a Gemini key in the top bar to enable this; OpenRouter&#39;s web search isn&#39;t free, so it&#39;s not used here.">ⓘ</span></label>
+            <label class="assistant-web"><input id="assistant-web-toggle" type="checkbox"> web-aware answers <span title="Uses Google Search grounding via your Gemini key (free daily quota) for live answers — automatically, even if OpenRouter is your main provider. Add a Gemini key in the top bar to enable this; OpenRouter's web search isn't free, so it's not used here.">ⓘ</span></label>
             <label class="assistant-web"><input id="assistant-deepthink-toggle" type="checkbox"> deep think <span title="For studying: ORBIT reasons through the answer properly and gives a full explanation instead of a quick 1-2 sentence reply. Applies to both voice and typed questions. Takes a bit longer to respond — worth it when you actually want to learn something, not just get a quick fact.">ⓘ</span></label>
           </div>
         </div>
@@ -1072,63 +1079,7 @@
           <option value="core">Core CS &amp; Git</option>
         </select>
       </div>
-      <div id="cheatsheet-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
-    <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel); border-left:4px solid var(--purple);">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-        <span style="font-weight:700; font-family:var(--font-display); font-size:14px; color:var(--text);">DSA Time &amp; Space Complexities</span>
-        <span class="tag" style="font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border);">Big-O</span>
-      </div>
-      <div style="font-size:12.5px; color:var(--text-dim); line-height:1.5;"><b>Array/String:</b> Lookup O(1), Search O(n), Insert/Delete O(n)<br><b>Hash Table:</b> Avg O(1), Worst O(n)<br><b>BST:</b> Avg O(log n), Worst O(n)<br><b>Sorting:</b> QuickSort/MergeSort O(n log n), Bubble O(n²)<br><b>Heap:</b> Insert O(log n), Top O(1)</div>
-    </div>
-  
-    <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel); border-left:4px solid var(--purple);">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-        <span style="font-weight:700; font-family:var(--font-display); font-size:14px; color:var(--text);">Core DSA Patterns</span>
-        <span class="tag" style="font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border);">Patterns</span>
-      </div>
-      <div style="font-size:12.5px; color:var(--text-dim); line-height:1.5;"><b>Two Pointers:</b> Sorted arrays/strings (pairs, palindrome)<br><b>Sliding Window:</b> Subarrays of size K or max condition<br><b>Fast &amp; Slow Pointer:</b> Cycle detection, LinkedList middle<br><b>BFS/DFS:</b> Tree levels, shortest path, connected graph</div>
-    </div>
-  
-    <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel); border-left:4px solid var(--teal);">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-        <span style="font-weight:700; font-family:var(--font-display); font-size:14px; color:var(--text);">SQL Joins &amp; Order of Clauses</span>
-        <span class="tag" style="font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border);">SQL</span>
-      </div>
-      <div style="font-size:12.5px; color:var(--text-dim); line-height:1.5;"><b>Order:</b> FROM ➔ WHERE ➔ GROUP BY ➔ HAVING ➔ SELECT ➔ ORDER BY<br><b>INNER JOIN:</b> Matching rows in both tables<br><b>LEFT JOIN:</b> All left rows + matched right rows<br><b>HAVING vs WHERE:</b> WHERE before GROUP BY; HAVING after</div>
-    </div>
-  
-    <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel); border-left:4px solid var(--teal);">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-        <span style="font-weight:700; font-family:var(--font-display); font-size:14px; color:var(--text);">DBMS ACID &amp; Normalization</span>
-        <span class="tag" style="font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border);">DBMS</span>
-      </div>
-      <div style="font-size:12.5px; color:var(--text-dim); line-height:1.5;"><b>Atomicity:</b> All or nothing execution<br><b>Consistency:</b> Valid state transitions<br><b>Isolation:</b> Concurrent safety<br><b>Durability:</b> Committed data persists<br><b>1NF-3NF:</b> Atomic ➔ No partial ➔ No transitive deps</div>
-    </div>
-  
-    <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel); border-left:4px solid var(--amber);">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-        <span style="font-weight:700; font-family:var(--font-display); font-size:14px; color:var(--text);">Python &amp; Pandas Snippets</span>
-        <span class="tag" style="font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border);">Python/DS</span>
-      </div>
-      <div style="font-size:12.5px; color:var(--text-dim); line-height:1.5;"><b>List Comp:</b> <code>[x**2 for x in nums if x%2==0]</code><br><b>Pandas Filter:</b> <code>df[(df['age']&gt;20) &amp; (df['score']&gt;=80)]</code><br><b>NumPy Dot:</b> <code>np.dot(A, B)</code> or <code>A @ B</code><br><b>ML Flow:</b> <code>fit(X_train, y_train)</code> ➔ <code>predict(X_test)</code></div>
-    </div>
-  
-    <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel); border-left:4px solid var(--cyan);">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-        <span style="font-weight:700; font-family:var(--font-display); font-size:14px; color:var(--text);">OS &amp; Computer Networks</span>
-        <span class="tag" style="font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border);">Core CS</span>
-      </div>
-      <div style="font-size:12.5px; color:var(--text-dim); line-height:1.5;"><b>Process vs Thread:</b> Process = separate memory space; Thread = shared memory<br><b>Deadlock 4:</b> Mutual Exclusion, Hold &amp; Wait, No Preemption, Circular Wait<br><b>OSI 7 Layers:</b> App, Pres, Sess, Trans, Net, Link, Phys</div>
-    </div>
-  
-    <div style="border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--panel); border-left:4px solid var(--blue);">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-        <span style="font-weight:700; font-family:var(--font-display); font-size:14px; color:var(--text);">Git &amp; Command Line Cheatsheet</span>
-        <span class="tag" style="font-size:11px; font-weight:600; background:var(--bg); border:1px solid var(--border);">Git</span>
-      </div>
-      <div style="font-size:12.5px; color:var(--text-dim); line-height:1.5;"><code>git checkout -b feature</code> (New branch)<br><code>git commit -m "msg"</code> (Commit changes)<br><code>git stash</code> / <code>git stash pop</code> (Save draft)<br><code>git log --oneline --graph</code> (Commit tree)</div>
-    </div>
-  </div>
+      <div id="cheatsheet-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px;"></div>
     </section>
   </div>
 
@@ -1137,7 +1088,7 @@
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>placement arcade</h2></div><span class="level-label">offline daily quiz</span></div>
       <p class="solve-hint">a one-minute warm-up from DSA, core CS, and aptitude. Get it right to build a separate quiz streak and earn XP.</p>
-      <div class="arcade-card" id="arcade-card"><div class="arcade-head"><div><div class="arcade-rank">Placement Rookie</div><div class="arcade-meta">0 XP · 0-day quiz streak · 0% accuracy · adaptive: Easy</div></div><span class="tag" style="color:var(--purple);background:var(--purple-bg)">DBMS</span></div><div class="arcade-question">Which SQL clause filters grouped results after GROUP BY?</div><div class="arcade-options"><button class="arcade-option " data-answer="0" type="button">A. WHERE</button><button class="arcade-option " data-answer="1" type="button">B. ORDER BY</button><button class="arcade-option " data-answer="2" type="button">C. HAVING</button><button class="arcade-option " data-answer="3" type="button">D. LIMIT</button></div><div class="arcade-result ">Choose an answer — correct answers earn 25 XP.</div></div>
+      <div class="arcade-card" id="arcade-card"><div class="arcade-head"><div><div class="arcade-rank">Placement Rookie</div><div class="arcade-meta">25 XP · 1-day quiz streak · 100% accuracy · adaptive: Easy</div></div><span class="tag" style="color:var(--purple);background:var(--purple-bg)">DSA</span></div><div class="arcade-question">Which data structure is naturally used for breadth-first search (BFS)?</div><div class="arcade-options"><button class="arcade-option " data-answer="0" type="button">A. Stack</button><button class="arcade-option " data-answer="1" type="button">B. Queue</button><button class="arcade-option " data-answer="2" type="button">C. Heap</button><button class="arcade-option " data-answer="3" type="button">D. Hash map</button></div><div class="arcade-result ">Choose an answer — correct answers earn 25 XP.</div></div>
     </section>
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>take a break</h2></div></div>
@@ -1168,7 +1119,7 @@
           <span>best: <b id="typing-best">0</b> wpm</span>
           <button class="secondary" id="typing-new-btn" type="button">new passage</button>
         </div>
-        <div class="typing-passage" id="typing-passage"><span class="pending current">w</span><span class="pending">h</span><span class="pending">i</span><span class="pending">l</span><span class="pending">e</span><span class="pending">&nbsp;</span><span class="pending">(</span><span class="pending">l</span><span class="pending">e</span><span class="pending">f</span><span class="pending">t</span><span class="pending">&nbsp;</span><span class="pending">&lt;</span><span class="pending">=</span><span class="pending">&nbsp;</span><span class="pending">r</span><span class="pending">i</span><span class="pending">g</span><span class="pending">h</span><span class="pending">t</span><span class="pending">)</span><span class="pending">&nbsp;</span><span class="pending">{</span><span class="pending">&nbsp;</span><span class="pending">m</span><span class="pending">i</span><span class="pending">d</span><span class="pending">&nbsp;</span><span class="pending">=</span><span class="pending">&nbsp;</span><span class="pending">(</span><span class="pending">l</span><span class="pending">e</span><span class="pending">f</span><span class="pending">t</span><span class="pending">&nbsp;</span><span class="pending">+</span><span class="pending">&nbsp;</span><span class="pending">r</span><span class="pending">i</span><span class="pending">g</span><span class="pending">h</span><span class="pending">t</span><span class="pending">)</span><span class="pending">&nbsp;</span><span class="pending">/</span><span class="pending">&nbsp;</span><span class="pending">2</span><span class="pending">;</span><span class="pending">&nbsp;</span><span class="pending">}</span></div>
+        <div class="typing-passage" id="typing-passage"><span class="pending current">c</span><span class="pending">o</span><span class="pending">n</span><span class="pending">s</span><span class="pending">i</span><span class="pending">s</span><span class="pending">t</span><span class="pending">e</span><span class="pending">n</span><span class="pending">c</span><span class="pending">y</span><span class="pending">&nbsp;</span><span class="pending">b</span><span class="pending">e</span><span class="pending">a</span><span class="pending">t</span><span class="pending">s</span><span class="pending">&nbsp;</span><span class="pending">i</span><span class="pending">n</span><span class="pending">t</span><span class="pending">e</span><span class="pending">n</span><span class="pending">s</span><span class="pending">i</span><span class="pending">t</span><span class="pending">y</span><span class="pending">&nbsp;</span><span class="pending">w</span><span class="pending">h</span><span class="pending">e</span><span class="pending">n</span><span class="pending">&nbsp;</span><span class="pending">y</span><span class="pending">o</span><span class="pending">u</span><span class="pending">&nbsp;</span><span class="pending">a</span><span class="pending">r</span><span class="pending">e</span><span class="pending">&nbsp;</span><span class="pending">b</span><span class="pending">u</span><span class="pending">i</span><span class="pending">l</span><span class="pending">d</span><span class="pending">i</span><span class="pending">n</span><span class="pending">g</span><span class="pending">&nbsp;</span><span class="pending">a</span><span class="pending">&nbsp;</span><span class="pending">l</span><span class="pending">o</span><span class="pending">n</span><span class="pending">g</span><span class="pending">&nbsp;</span><span class="pending">t</span><span class="pending">e</span><span class="pending">r</span><span class="pending">m</span><span class="pending">&nbsp;</span><span class="pending">h</span><span class="pending">a</span><span class="pending">b</span><span class="pending">i</span><span class="pending">t</span></div>
         <input type="text" id="typing-input" class="typing-input" placeholder="click here and start typing..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <div class="typing-status" id="typing-status">click the box above and just start typing</div>
       </div>
@@ -1205,7 +1156,7 @@
       <div id="spotify-connect-block">
         <div style="font-size:12px; color:var(--text-faint); margin-bottom:10px; line-height:1.6;">
           One-time setup: create a free app at <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener noreferrer">developer.spotify.com/dashboard</a> (needs your Spotify Premium account). Set its <b>Redirect URI</b> to exactly this — copy it now:
-          <div style="background:var(--bg); border:1px solid var(--border-soft); border-radius:6px; padding:8px 10px; margin:6px 0; font-size:12px; word-break:break-all;" id="spotify-redirect-display">https://dracula-lab.github.io/trackerr/</div>
+          <div style="background:var(--bg); border:1px solid var(--border-soft); border-radius:6px; padding:8px 10px; margin:6px 0; font-size:12px; word-break:break-all;" id="spotify-redirect-display"></div>
           Spotify requires this page to be served over <b>HTTPS</b> (plain <code>http://localhost</code> won't work anymore) — host this file on a free static host with automatic HTTPS (e.g. GitHub Pages, Netlify, Cloudflare Pages) and open it from that URL before connecting. Then paste the Client ID from your app below.
         </div>
         <div class="add-row">
@@ -1214,6 +1165,16 @@
         </div>
       </div>
       <div id="spotify-connected-block" style="display:none;">
+        <div id="spotify-mini-player" style="display:none; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--spotify); border-radius:10px; padding:10px 14px; margin-bottom:14px;">
+          <img id="spm-art" src="" alt="" style="width:48px; height:48px; border-radius:6px; background:var(--bg); flex-shrink:0;">
+          <div style="flex:1; min-width:0;">
+            <div id="spm-title" style="font-size:13.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+            <div id="spm-artist" style="font-size:11.5px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+          </div>
+          <button class="secondary" id="spm-prev" type="button" style="padding:6px 10px;">⏮</button>
+          <button class="spotify-connect-btn" id="spm-toggle" type="button" style="padding:6px 14px;">⏸</button>
+          <button class="secondary" id="spm-next" type="button" style="padding:6px 10px;">⏭</button>
+        </div>
         <div class="add-row">
           <input id="spotify-search-input" type="text" placeholder="search a song to play">
           <button class="primary" id="spotify-search-btn" type="button">search</button>
@@ -1259,7 +1220,6 @@
     <input type="text" id="voice-type-input" placeholder="Type a command or ask ORBIT anything..." style="width:100%; box-sizing:border-box; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; font-size:13px; font-family:inherit;">
   </div>
   <div class="voice-popup-actions" id="voice-actions" style="display:flex; gap:8px; margin-top:8px; border-top:1px solid var(--border-soft); padding-top:8px; flex-wrap:wrap;">
-    <button class="secondary" id="voice-cheatsheet-btn" style="padding:6px 12px; font-size:12.5px; background:var(--purple-glow); border:1px solid var(--purple); color:var(--purple);" type="button">⚡ Cheatsheets</button>
     <button class="secondary" id="voice-copy-btn" style="padding:6px 12px; font-size:12.5px;" type="button">📋 Copy Answer</button>
     <button class="primary" id="voice-send-btn" style="flex:1; padding:6px 12px; font-size:12.5px;" type="button">Send 🚀</button>
     <button class="secondary" id="voice-clear-btn" style="padding:6px 12px; font-size:12.5px;" type="button">Clear</button>
@@ -1408,6 +1368,7 @@ function celebrate(){
 function escapeHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+let lastMediaSource = null; // 'youtube' | 'spotify' — lets ORBIT know what "pause"/"resume"/"next" without a name should control
 function ytExtractId(input){
   const s = (input||'').trim();
   if(!s) return null;
@@ -1418,7 +1379,12 @@ function ytExtractId(input){
 }
 function ytEmbed(videoId, autoplay){
   const wrap = document.getElementById('yt-player-wrap'); if(!wrap || !videoId) return;
-  wrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?${autoplay?'autoplay=1&':''}rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="YouTube player"></iframe>`;
+  wrap.innerHTML = `<iframe id="yt-live-iframe" src="https://www.youtube.com/embed/${videoId}?${autoplay?'autoplay=1&':''}enablejsapi=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="YouTube player"></iframe>`;
+  lastMediaSource = 'youtube';
+}
+function ytControl(func){
+  const f = document.getElementById('yt-live-iframe'); if(!f || !f.contentWindow) return;
+  f.contentWindow.postMessage(JSON.stringify({event:'command', func, args:[]}), '*');
 }
 async function ytSearch(query, autoplayFirst){
   const resultsEl = document.getElementById('yt-results');
@@ -1593,6 +1559,7 @@ function spotifyLoadSDK(){
         volume: 0.7
       });
       spotifyPlayer.addListener('ready', ({device_id}) => { spotifyDeviceId = device_id; resolve(spotifyPlayer); });
+      spotifyPlayer.addListener('player_state_changed', spotifyUpdateMiniPlayer);
       spotifyPlayer.addListener('not_ready', ()=>{ spotifyDeviceId = null; });
       spotifyPlayer.addListener('initialization_error', ({message})=> console.warn('Spotify init error:', message));
       spotifyPlayer.addListener('authentication_error', ({message})=> console.warn('Spotify auth error:', message));
@@ -1614,9 +1581,23 @@ async function spotifyPlayUri(uri){
       method:'PUT', headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
       body: JSON.stringify({ uris:[uri] })
     });
+    lastMediaSource = 'spotify';
     return true;
   }catch(e){ return false; }
 }
+function spotifyUpdateMiniPlayer(playerState){
+  const bar = document.getElementById('spotify-mini-player'); if(!bar) return;
+  if(!playerState || !playerState.track_window || !playerState.track_window.current_track){ bar.style.display='none'; return; }
+  const track = playerState.track_window.current_track;
+  bar.style.display = 'flex';
+  document.getElementById('spm-title').textContent = track.name;
+  document.getElementById('spm-artist').textContent = (track.artists||[]).map(a=>a.name).join(', ');
+  document.getElementById('spm-art').src = (track.album && track.album.images && track.album.images[0]) ? track.album.images[0].url : '';
+  document.getElementById('spm-toggle').textContent = playerState.paused ? '▶' : '⏸';
+}
+document.getElementById('spm-toggle').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.togglePlay());
+document.getElementById('spm-next').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.nextTrack());
+document.getElementById('spm-prev').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.previousTrack());
 async function spotifySearchAndPlay(query){
   const track = await spotifySearch(query);
   if(track) await spotifyPlayUri(track.uri);
@@ -3599,17 +3580,7 @@ function renderStreakBanner() {
   }
 }
 
-// Cheatsheet button now jumps to notes.txt, where the cheatsheets live inline
 setTimeout(() => {
-  const csBtn = document.getElementById('voice-cheatsheet-btn');
-  if (csBtn) {
-    csBtn.addEventListener('click', () => {
-      const tab = document.querySelector('.tab[data-tab="notes"]');
-      if (tab) activateTab(tab);
-      renderCheatsheetGrid();
-      document.getElementById('cheatsheet-search')?.scrollIntoView({behavior:'smooth', block:'center'});
-    });
-  }
   document.getElementById('cheatsheet-search')?.addEventListener('input', renderCheatsheetGrid);
   document.getElementById('cheatsheet-category')?.addEventListener('change', renderCheatsheetGrid);
   renderCheatsheetGrid();
@@ -4381,7 +4352,30 @@ setInterval(() => {
       return { intent: 'action', spoken: "Generated today's task.", display: "Generated a new task for today." };
     }
 
-    // 8. Tracker actions — real changes to your data by voice, not just navigation
+    // 8. Media controls — pause/resume/skip whichever of YouTube or Spotify you last played,
+    // and natural aliases like "play this song" / "play this video" (no name = resume, not search).
+    if (/^(pause|stop)(\s+(it|the\s+(song|video|music)))?$/.test(norm)) {
+      if (lastMediaSource === 'spotify' && spotifyPlayer) spotifyPlayer.pause();
+      else if (lastMediaSource === 'youtube') ytControl('pauseVideo');
+      else return { intent: 'media_pause', spoken: "Nothing's playing right now, sir.", display: "Nothing playing." };
+      return { intent: 'media_pause', spoken: "Paused.", display: "Paused playback." };
+    }
+    if (/^(resume|unpause|continue playing|play (it|this song|the song|this video|the video))$/.test(norm)) {
+      if (lastMediaSource === 'spotify' && spotifyPlayer) spotifyPlayer.resume();
+      else if (lastMediaSource === 'youtube') ytControl('playVideo');
+      else return { intent: 'media_resume', spoken: "There's nothing queued up to resume, sir.", display: "Nothing to resume." };
+      return { intent: 'media_resume', spoken: "Resuming.", display: "Resumed playback." };
+    }
+    if (/^(next|skip|next song|next track|skip (this|the) song)$/.test(norm)) {
+      if (lastMediaSource === 'spotify' && spotifyPlayer) { spotifyPlayer.nextTrack(); return { intent:'media_next', spoken:"Skipping.", display:"Skipped to next track." }; }
+      return { intent: 'media_next', spoken: "Skipping only works on Spotify right now, sir.", display: "Skip isn't supported for YouTube." };
+    }
+    if (/^(previous|back|last song|previous track|go back a song)$/.test(norm)) {
+      if (lastMediaSource === 'spotify' && spotifyPlayer) { spotifyPlayer.previousTrack(); return { intent:'media_prev', spoken:"Going back.", display:"Went to previous track." }; }
+      return { intent: 'media_prev', spoken: "Previous track only works on Spotify right now, sir.", display: "Previous isn't supported for YouTube." };
+    }
+
+    // 9. Tracker actions — real changes to your data by voice, not just navigation
     if (/^(mark|complete|finish)\b.*\btask\b/.test(norm) || norm === 'task done' || norm.includes('mark today')) {
       if (state.dailyTask && state.dailyTask.status !== 'done') {
         markTaskDone();
