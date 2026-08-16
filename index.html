@@ -70,6 +70,12 @@
     100%{ transform:translate(-2%,2%) scale(1.05); }
   }
   .topbar{height:3px; background:linear-gradient(90deg,var(--green),var(--blue),var(--purple),var(--amber),var(--green)); background-size:200% 100%; animation:topbarShift 6s linear infinite;}
+  #mood-overlay{
+    position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:0;
+    background:radial-gradient(circle at 12% 8%, var(--mood-glow, transparent), transparent 55%),
+               radial-gradient(circle at 88% 92%, var(--mood-glow, transparent), transparent 55%);
+    transition:opacity 1.1s ease;
+  }
   @keyframes topbarShift{ from{background-position:0% 0;} to{background-position:200% 0;} }
   .wrap{max-width:1300px; margin:0 auto; padding:24px 32px 0; animation:appBootIn .6s cubic-bezier(.16,1,.3,1);}
   @keyframes appBootIn{ from{opacity:0; transform:translateY(14px) scale(.985); filter:blur(4px);} to{opacity:1; transform:translateY(0) scale(1); filter:blur(0);} }
@@ -188,6 +194,25 @@
   .spotify-playlist-card img{width:100%; aspect-ratio:1; object-fit:cover; display:block; background:var(--bg);}
   .spotify-connect-btn{background:var(--spotify); color:#04150a; border:none; border-radius:8px; padding:10px 22px; font-family:var(--font-mono); font-size:15px; font-weight:700; cursor:pointer;}
   .spotify-connect-btn:hover{background:var(--spotify-dark); box-shadow:0 0 16px rgba(30,215,96,.4);}
+  .spm-card{
+    display:flex; flex-direction:column; gap:12px; margin-bottom:16px; padding:16px 18px; border-radius:14px;
+    background:linear-gradient(145deg, var(--mood-glow, rgba(30,215,96,.14)), var(--panel) 55%);
+    border:1px solid var(--mood-accent, rgba(30,215,96,.35)); box-shadow:0 12px 34px -14px var(--mood-glow, rgba(30,215,96,.3));
+    transition:border-color .9s ease, box-shadow .9s ease, background .9s ease;
+  }
+  .spm-row{display:flex; align-items:center; gap:10px;}
+  .spm-art{width:58px; height:58px; border-radius:9px; background:var(--bg); flex-shrink:0; box-shadow:0 6px 18px rgba(0,0,0,.4); object-fit:cover;}
+  .spm-title{font-size:14.5px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .spm-artist{font-size:12px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;}
+  .spm-btn{padding:7px 11px; border-radius:9px; font-size:14px; transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s;}
+  .spm-btn:hover{transform:translateY(-2px);}
+  .spm-toggle{background:var(--spotify); color:#04150a; border:none; padding:8px 16px; font-weight:700;}
+  .spm-toggle:hover{background:var(--spotify-dark); box-shadow:0 0 14px rgba(30,215,96,.5);}
+  .spm-time{font-size:10.5px; color:var(--text-faint); width:34px; flex-shrink:0; text-align:center;}
+  .spm-seek, .spm-vol{ -webkit-appearance:none; appearance:none; height:4px; border-radius:2px; background:var(--border-soft); outline:none; cursor:pointer; }
+  .spm-seek{flex:1;} .spm-vol{width:72px; flex-shrink:0;}
+  .spm-seek::-webkit-slider-thumb, .spm-vol::-webkit-slider-thumb{ -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--spotify); box-shadow:0 0 8px rgba(30,215,96,.6); cursor:pointer; }
+  .spm-seek::-moz-range-thumb, .spm-vol::-moz-range-thumb{ width:12px; height:12px; border-radius:50%; background:var(--spotify); border:none; box-shadow:0 0 8px rgba(30,215,96,.6); cursor:pointer; }
   .sq.c-solve{background:var(--amber);} .sq.c-notes{background:var(--purple);} .sq.c-interview{background:var(--rose);} .sq.c-coderun{background:var(--lime);} .sq.c-resume{background:var(--pink);}
 
   .panel-view{display:none; animation:fadeIn .2s ease;}
@@ -581,6 +606,7 @@
 </head>
 <body>
 <div class="topbar"></div>
+<div id="mood-overlay"></div>
 <div class="wrap">
   <button id="layout-toggle-btn" class="secondary" type="button">⇄ sidebar layout</button>
   <div class="titlebar">
@@ -1189,25 +1215,25 @@
         </div>
       </div>
       <div id="spotify-connected-block" style="display:none;">
-        <div id="spotify-mini-player" style="display:none; flex-direction:column; gap:8px; background:var(--panel); border:1px solid var(--spotify); border-radius:10px; padding:10px 14px; margin-bottom:14px;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <img id="spm-art" src="" alt="" style="width:48px; height:48px; border-radius:6px; background:var(--bg); flex-shrink:0;">
+        <div id="spotify-mini-player" class="spm-card" style="display:none;">
+          <div class="spm-row">
+            <img id="spm-art" src="" alt="" class="spm-art">
             <div style="flex:1; min-width:0;">
-              <div id="spm-title" style="font-size:13.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
-              <div id="spm-artist" style="font-size:11.5px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">—</div>
+              <div id="spm-title" class="spm-title">—</div>
+              <div id="spm-artist" class="spm-artist">—</div>
             </div>
-            <button class="secondary" id="spm-shuffle" type="button" style="padding:6px 9px; font-size:12px;" title="Shuffle">🔀</button>
-            <button class="secondary" id="spm-prev" type="button" style="padding:6px 10px;">⏮</button>
-            <button class="spotify-connect-btn" id="spm-toggle" type="button" style="padding:6px 14px;">⏸</button>
-            <button class="secondary" id="spm-next" type="button" style="padding:6px 10px;">⏭</button>
-            <button class="secondary" id="spm-repeat" type="button" style="padding:6px 9px; font-size:12px;" title="Repeat">🔁</button>
+            <button class="secondary spm-btn" id="spm-shuffle" type="button" title="Shuffle">🔀</button>
+            <button class="secondary spm-btn" id="spm-prev" type="button">⏮</button>
+            <button class="spm-btn spm-toggle" id="spm-toggle" type="button">⏸</button>
+            <button class="secondary spm-btn" id="spm-next" type="button">⏭</button>
+            <button class="secondary spm-btn" id="spm-repeat" type="button" title="Repeat">🔁</button>
           </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span id="spm-pos" style="font-size:10.5px; color:var(--text-faint); width:34px;">0:00</span>
-            <input type="range" id="spm-seek" min="0" max="1000" value="0" style="flex:1;">
-            <span id="spm-dur" style="font-size:10.5px; color:var(--text-faint); width:34px;">0:00</span>
+          <div class="spm-row">
+            <span id="spm-pos" class="spm-time">0:00</span>
+            <input type="range" id="spm-seek" class="spm-seek" min="0" max="1000" value="0">
+            <span id="spm-dur" class="spm-time">0:00</span>
             <span style="font-size:12px; color:var(--text-faint);">🔊</span>
-            <input type="range" id="spm-volume" min="0" max="100" value="70" style="width:70px;">
+            <input type="range" id="spm-volume" class="spm-vol" min="0" max="100" value="70">
           </div>
         </div>
         <div class="add-row">
@@ -1216,6 +1242,9 @@
           <button class="secondary" id="spotify-disconnect-btn" type="button">disconnect</button>
         </div>
         <div id="spotify-search-results"></div>
+        <div class="add-row">
+          <button class="secondary" id="spotify-new-playlist-btn" type="button">+ new playlist</button>
+        </div>
         <div id="spotify-library"><div class="empty">loading your library…</div></div>
       </div>
     </section>
@@ -1542,21 +1571,38 @@ function spotifyWireTrackButtons(root){
 async function spotifyLoadLibrary(){
   const wrap = document.getElementById('spotify-library'); if(!wrap) return;
   wrap.innerHTML = '<div class="empty">loading your library…</div>';
+  const [likedResult, playlistsResult] = await Promise.allSettled([
+    spotifyApi('/me/tracks?limit=20'),
+    spotifyApi('/me/playlists?limit=20')
+  ]);
+  let html = '<div class="spotify-section-label">liked songs</div><div class="spotify-track-list">';
+  if(likedResult.status === 'fulfilled'){
+    const liked = likedResult.value;
+    html += (liked && liked.items && liked.items.length) ? liked.items.map(it=>spotifyTrackRow(it.track)).join('') : '<div class="empty">no liked songs found.</div>';
+  } else {
+    html += `<div class="empty">Could not load liked songs: ${escapeHtml(likedResult.reason && likedResult.reason.message || 'unknown error')}</div>`;
+  }
+  html += '</div><div class="spotify-section-label">your playlists</div><div class="spotify-playlist-grid">';
+  if(playlistsResult.status === 'fulfilled'){
+    const playlists = playlistsResult.value;
+    html += (playlists && playlists.items && playlists.items.length)
+      ? playlists.items.map(p=>`<div class="spotify-playlist-card" data-pid="${p.id}"><img src="${(p.images&&p.images[0]&&p.images[0].url)||''}" alt="" loading="lazy"><div class="yt-title">${escapeHtml(p.name)}</div></div>`).join('')
+      : '<div class="empty">no playlists found.</div>';
+  } else {
+    html += `<div class="empty">Could not load playlists: ${escapeHtml(playlistsResult.reason && playlistsResult.reason.message || 'unknown error')}</div>`;
+  }
+  html += '</div><div id="spotify-playlist-tracks"></div>';
+  wrap.innerHTML = html;
+  spotifyWireTrackButtons(wrap);
+  wrap.querySelectorAll('.spotify-playlist-card').forEach(card=> card.onclick = ()=> spotifyLoadPlaylistTracks(card.dataset.pid));
+}
+async function spotifyCreatePlaylist(){
+  const name = prompt('Name your new Spotify playlist:'); if(!name || !name.trim()) return;
   try{
-    const [playlists, liked] = await Promise.all([
-      spotifyApi('/me/playlists?limit=20'),
-      spotifyApi('/me/tracks?limit=20')
-    ]);
-    let html = '';
-    html += `<div class="spotify-section-label">liked songs</div><div class="spotify-track-list">` +
-      ((liked && liked.items && liked.items.length) ? liked.items.map(it=>spotifyTrackRow(it.track)).join('') : '<div class="empty">no liked songs found.</div>') + `</div>`;
-    html += `<div class="spotify-section-label">your playlists</div><div class="spotify-playlist-grid">` +
-      ((playlists && playlists.items && playlists.items.length) ? playlists.items.map(p=>`<div class="spotify-playlist-card" data-pid="${p.id}"><img src="${(p.images&&p.images[0]&&p.images[0].url)||''}" alt="" loading="lazy"><div class="yt-title">${escapeHtml(p.name)}</div></div>`).join('') : '<div class="empty">no playlists found.</div>') + `</div>`;
-    html += `<div id="spotify-playlist-tracks"></div>`;
-    wrap.innerHTML = html;
-    spotifyWireTrackButtons(wrap);
-    wrap.querySelectorAll('.spotify-playlist-card').forEach(card=> card.onclick = ()=> spotifyLoadPlaylistTracks(card.dataset.pid));
-  }catch(e){ wrap.innerHTML = `<div class="empty">Could not load your library: ${escapeHtml(e.message)}</div>`; }
+    const me = await spotifyApi('/me');
+    await spotifyApi(`/users/${me.id}/playlists`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: name.trim(), public:false }) });
+    spotifyLoadLibrary();
+  }catch(e){ alert('Could not create playlist: ' + e.message); }
 }
 async function spotifyLoadPlaylistTracks(playlistId){
   const wrap = document.getElementById('spotify-playlist-tracks'); if(!wrap) return;
@@ -1621,26 +1667,81 @@ async function spotifyPlayUri(uri){
   }catch(e){ return false; }
 }
 function spotifyFmt(ms){ const s = Math.floor(ms/1000); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+// ---- Mood theming: samples the currently playing album art and washes the app's ambient
+// glow in that color. Only touches a dedicated overlay + the mini player's own glow — never
+// the app's core fixed colors — so this can never break the rest of the UI if extraction fails.
+let _lastMoodArt = null;
+function extractMoodColor(imgUrl, callback){
+  if(!imgUrl){ callback(null); return; }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    try{
+      const c = document.createElement('canvas'); c.width = 24; c.height = 24;
+      const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, 24, 24);
+      const data = ctx.getImageData(0, 0, 24, 24).data;
+      let r=0,g=0,b=0,n=0;
+      for(let i=0; i<data.length; i+=4){
+        const rr=data[i], gg=data[i+1], bb=data[i+2];
+        const max=Math.max(rr,gg,bb), min=Math.min(rr,gg,bb);
+        if(max<40 || min>230) continue; // skip near-black / near-white pixels for a more vivid pick
+        r+=rr; g+=gg; b+=bb; n++;
+      }
+      if(n===0){ r=data[0]; g=data[1]; b=data[2]; n=1; }
+      callback(`${Math.round(r/n)},${Math.round(g/n)},${Math.round(b/n)}`);
+    }catch(e){ callback(null); } // CORS/canvas issue — fail silently, theme just stays default
+  };
+  img.onerror = () => callback(null);
+  img.src = imgUrl;
+}
+function applyMoodTheme(rgb, active){
+  const root = document.documentElement;
+  const overlay = document.getElementById('mood-overlay');
+  if(rgb){
+    root.style.setProperty('--mood-accent', `rgba(${rgb},.5)`);
+    root.style.setProperty('--mood-glow', `rgba(${rgb},.22)`);
+  }
+  if(overlay) overlay.style.opacity = active ? '1' : (rgb ? '.25' : '0');
+}
+function spotifyUpdateMood(artUrl, paused){
+  if(!artUrl){ applyMoodTheme(null, false); _lastMoodArt = null; return; }
+  if(artUrl !== _lastMoodArt){
+    _lastMoodArt = artUrl;
+    extractMoodColor(artUrl, (rgb) => applyMoodTheme(rgb, !paused));
+  } else {
+    applyMoodTheme(null, !paused); // same track — just toggle intensity, keep already-applied color
+  }
+}
 let spmSeeking = false;
+let spmBaseline = null; // {position, duration, paused, capturedAt} — used to extrapolate a live-ticking clock between Spotify's infrequent state events
 function spotifyUpdateMiniPlayer(playerState){
   const bar = document.getElementById('spotify-mini-player'); if(!bar) return;
-  if(!playerState || !playerState.track_window || !playerState.track_window.current_track){ bar.style.display='none'; return; }
+  if(!playerState || !playerState.track_window || !playerState.track_window.current_track){ bar.style.display='none'; spmBaseline=null; spotifyUpdateMood(null, true); return; }
   const track = playerState.track_window.current_track;
   bar.style.display = 'flex';
   document.getElementById('spm-title').textContent = track.name;
   document.getElementById('spm-artist').textContent = (track.artists||[]).map(a=>a.name).join(', ');
-  document.getElementById('spm-art').src = (track.album && track.album.images && track.album.images[0]) ? track.album.images[0].url : '';
+  const artUrl = (track.album && track.album.images && track.album.images[0]) ? track.album.images[0].url : '';
+  document.getElementById('spm-art').src = artUrl;
+  spotifyUpdateMood(artUrl, playerState.paused);
   document.getElementById('spm-toggle').textContent = playerState.paused ? '▶' : '⏸';
   document.getElementById('spm-shuffle').style.opacity = playerState.shuffle ? '1' : '.45';
   document.getElementById('spm-repeat').style.opacity = playerState.repeat_mode ? '1' : '.45';
   document.getElementById('spm-repeat').textContent = playerState.repeat_mode === 2 ? '🔂' : '🔁';
+  spmBaseline = { position: playerState.position, duration: playerState.duration || 1, paused: playerState.paused, capturedAt: Date.now() };
   if(!spmSeeking){
-    const dur = playerState.duration || 1;
-    document.getElementById('spm-seek').value = Math.round((playerState.position / dur) * 1000);
+    document.getElementById('spm-seek').value = Math.round((playerState.position / spmBaseline.duration) * 1000);
     document.getElementById('spm-pos').textContent = spotifyFmt(playerState.position);
-    document.getElementById('spm-dur').textContent = spotifyFmt(dur);
+    document.getElementById('spm-dur').textContent = spotifyFmt(spmBaseline.duration);
   }
 }
+setInterval(()=>{
+  if(spmSeeking || !spmBaseline || spmBaseline.paused) return;
+  const bar = document.getElementById('spotify-mini-player'); if(!bar || bar.style.display === 'none') return;
+  const livePos = Math.min(spmBaseline.duration, spmBaseline.position + (Date.now() - spmBaseline.capturedAt));
+  document.getElementById('spm-seek').value = Math.round((livePos / spmBaseline.duration) * 1000);
+  document.getElementById('spm-pos').textContent = spotifyFmt(livePos);
+}, 500);
 document.getElementById('spm-toggle').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.togglePlay());
 document.getElementById('spm-next').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.nextTrack());
 document.getElementById('spm-prev').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.previousTrack());
@@ -2315,7 +2416,15 @@ function orbitContext(){
   const upcoming=(state.reminders||[]).filter(r=>!r.done && r.date).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3).map(r=>`${r.title} due ${r.date}`).join('; ') || 'no dated reminders';
   const focus=state.focusPhase ? (ROADMAP.find(p=>p.id===state.focusPhase)||{}).name : 'not selected';
   const weakTopics = ROADMAP.map(p=>({name:p.name, m:getMastery(p.id)})).filter(t=>t.m.attempts>0).sort((a,b)=>a.m.score-b.m.score).slice(0,2).map(t=>`${t.name} (${t.m.score}/100)`).join('; ') || 'no practice feedback logged yet';
-  return `Tracker context (STRICT RULE: ONLY reference this if the user explicitly asks about their streak, status, or what to focus on; NEVER nag or lecture unprompted): ${computeStreak()}-day activity streak, ${Math.round(computeTotalHours()*10)/10} total hours, ${computeChecklistPct()}% roadmap complete, focus: ${focus}. Weakest topics by practice feedback: ${weakTopics}. Open goals: ${openGoals}. Upcoming: ${upcoming}. Recent activity: ${recent}.`;
+  const notesSnippet = (state.notes||'').trim().slice(-600) || 'no scratch notes yet';
+  const resumeSnippet = (state.resumeText||'').trim().slice(0,500) || 'no resume uploaded yet';
+  const lastInterview = (state.mockInterview && state.mockInterview.history && state.mockInterview.history.length)
+    ? state.mockInterview.history.slice(-1)[0]
+    : null;
+  const interviewNote = lastInterview
+    ? `Last mock interview touched on: ${(lastInterview.question||'').slice(0,150)}`
+    : 'no mock interviews done yet';
+  return `Tracker context (STRICT RULE: ONLY reference any of this if the user explicitly asks or it's directly relevant to their question; NEVER nag, lecture, or volunteer it unprompted): ${computeStreak()}-day activity streak, ${Math.round(computeTotalHours()*10)/10} total hours, ${computeChecklistPct()}% roadmap complete, focus: ${focus}. Weakest topics by practice feedback: ${weakTopics}. Open goals: ${openGoals}. Upcoming: ${upcoming}. Recent activity: ${recent}. ${interviewNote}. Their own scratch notes (most recent): "${notesSnippet}". Resume excerpt: "${resumeSnippet}".`;
 }
 function orbitSystem(){
   const mode=ORBIT_MODE_CONFIG[state.assistantMode] || ORBIT_MODE_CONFIG.coach;
@@ -3269,6 +3378,7 @@ document.getElementById('spotify-search-btn').addEventListener('click', ()=>{
 document.getElementById('spotify-search-input').addEventListener('keydown', (e)=>{
   if(e.key==='Enter'){ const q=e.target.value.trim(); if(q) spotifySearch(q); }
 });
+document.getElementById('spotify-new-playlist-btn').addEventListener('click', spotifyCreatePlaylist);
 
 function applyLayout(){
   document.body.dataset.layout = state.uiLayout || 'classic';
@@ -3938,11 +4048,16 @@ setInterval(() => {
 
   function startMic() {
     if(!isListening && !isSpeaking) {
-      try { 
-        recognition.start(); 
-        isListening = true; 
+      try {
+        recognition.start();
+        isListening = true;
         if(fab) fab.className = 'voice-fab listening';
-      } catch(e){}
+      } catch(e){
+        // Engine thought it was already running (state desync) — force-reset and retry once.
+        try{ recognition.abort(); }catch(e2){}
+        isListening = false;
+        setTimeout(startMic, 400);
+      }
     }
   }
 
@@ -4593,7 +4708,7 @@ setInterval(() => {
       const lengthDirective = state.assistantDeepThink
         ? 'DEEP THINK MODE IS ON — the student is studying, not asking for small talk. Actually teach the concept: explain the reasoning, not just the headline answer. Speak it as 4-8 well-structured sentences, the way a sharp tutor would explain it out loud. Still no filler or repetition.'
         : 'Deliver your spoken reply in 1-2 fluent, natural, charismatic sentences.';
-      const systemInstruction = `You are ORBIT, the student's personal J.A.R.V.I.S. from Iron Man. Speak with Paul Bettany's iconic JARVIS persona: impeccably polite, articulate, cultured British delivery, addressing the student as 'sir', with subtle dry wit and absolute competence. Use simple, plain, everyday words — avoid fancy or obscure vocabulary even while staying articulate. ${streakDirective} ${lengthDirective} Never sound robotic, preachy, or repetitive.`;
+      const systemInstruction = `You are ORBIT, the student's personal J.A.R.V.I.S. from Iron Man. Speak with Paul Bettany's iconic JARVIS persona: impeccably polite, articulate, cultured British delivery, addressing the student as 'sir', with subtle dry wit and absolute competence. Use simple, plain, everyday words — avoid fancy or obscure vocabulary even while staying articulate. ${streakDirective} ${lengthDirective} Never sound robotic, preachy, or repetitive.\n\n${orbitContext()}`;
 
       popup.classList.remove('thinking-mode');
       const aiResponse = await callAIStream([{ role: 'user', content: commandText }], systemInstruction, (partial) => {
@@ -4688,6 +4803,8 @@ setInterval(() => {
     isListening = false;
     if (e.error !== 'no-speech' && e.error !== 'aborted') {
       console.warn('Microphone status: ' + e.error);
+      // Don't just log and stall — actively retry, in case onend doesn't reliably follow this error.
+      if (!isSpeaking) setTimeout(startMic, 600);
     }
   };
 
