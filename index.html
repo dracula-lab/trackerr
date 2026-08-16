@@ -83,11 +83,11 @@
     background-size:180% 180%;
     transition:opacity 1.1s ease;
   }
-  body.mood-active #mood-overlay{ animation: moodDrift 16s ease-in-out infinite alternate; }
+  body.mood-active #mood-overlay{ opacity:.55 !important; animation: moodDrift 22s ease-in-out infinite alternate; }
   @keyframes moodDrift{
     0%{ background-position:0% 0%, 100% 100%, 100% 0%, 0% 100%; }
-    50%{ background-position:8% 6%, 92% 94%, 88% 10%, 10% 88%; }
-    100%{ background-position:-4% 10%, 104% 90%, 96% -4%, -2% 104%; }
+    50%{ background-position:5% 4%, 95% 96%, 92% 6%, 6% 94%; }
+    100%{ background-position:-2% 6%, 102% 94%, 98% -2%, -1% 102%; }
   }
   @keyframes topbarShift{ from{background-position:0% 0;} to{background-position:200% 0;} }
   .wrap{max-width:1300px; margin:0 auto; padding:24px 32px 0; animation:appBootIn .6s cubic-bezier(.16,1,.3,1);}
@@ -211,25 +211,27 @@
   .spotify-playlist-card img{width:100%; aspect-ratio:1; object-fit:cover; display:block; background:var(--bg);}
   .spotify-connect-btn{background:var(--spotify); color:#04150a; border:none; border-radius:8px; padding:10px 22px; font-family:var(--font-mono); font-size:15px; font-weight:700; cursor:pointer;}
   .spotify-connect-btn:hover{background:var(--spotify-dark); box-shadow:0 0 16px rgba(30,215,96,.4);}
+  .yt-connect-btn{background:var(--ytred); color:#2a0a0a; border:none; border-radius:8px; padding:10px 22px; font-family:var(--font-mono); font-size:15px; font-weight:700; cursor:pointer;}
+  .yt-connect-btn:hover{background:#e03e3e; box-shadow:0 0 16px rgba(255,75,75,.4);}
   .spm-card{
     display:flex; flex-direction:column; gap:12px; margin-bottom:16px; padding:16px 18px; border-radius:14px;
-    background:linear-gradient(145deg, var(--mood-glow, rgba(30,215,96,.14)) 0%, var(--panel) 45%, var(--mood-glow-2, var(--panel)) 130%);
-    background-size:220% 220%;
+    background:linear-gradient(145deg, var(--mood-glow, rgba(30,215,96,.14)) 0%, var(--panel) 38%, var(--panel) 72%, var(--mood-glow-2, var(--panel)) 130%);
+    background-size:160% 160%;
     border:1px solid var(--mood-accent, rgba(30,215,96,.35)); box-shadow:0 12px 34px -14px var(--mood-glow, rgba(30,215,96,.3));
     transition:border-color .9s ease, box-shadow .9s ease;
     position:relative; overflow:hidden;
   }
-  body.mood-active .spm-card{ animation: spmPulse 4.5s ease-in-out infinite; }
+  body.mood-active .spm-card{ animation: spmPulse 6s ease-in-out infinite; }
   @keyframes spmPulse{
     0%,100%{ background-position:0% 0%; box-shadow:0 12px 34px -14px var(--mood-glow); }
-    50%{ background-position:100% 100%; box-shadow:0 16px 42px -12px var(--mood-glow-2); }
+    50%{ background-position:35% 30%; box-shadow:0 16px 42px -12px var(--mood-glow-2); }
   }
   .spm-row{display:flex; align-items:center; gap:10px;}
   .spm-art{width:58px; height:58px; border-radius:9px; background:var(--bg); flex-shrink:0; box-shadow:0 6px 18px rgba(0,0,0,.4); object-fit:cover; transition:box-shadow .9s ease;}
-  body.mood-active .spm-art{ box-shadow:0 0 0 2px var(--mood-accent), 0 6px 18px rgba(0,0,0,.4), 0 0 20px var(--mood-glow-2); }
-  .spm-title{font-size:14.5px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  body.mood-active .spm-art{ box-shadow:0 0 0 2px var(--mood-accent), 0 6px 18px rgba(0,0,0,.4), 0 0 16px var(--mood-glow-2); }
+  .spm-title{font-size:14.5px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 1px 4px rgba(0,0,0,.55);}
   .spm-artist-row{display:flex; align-items:center; gap:7px; margin-top:2px;}
-  .spm-artist{font-size:12px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .spm-artist{font-size:12px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 1px 4px rgba(0,0,0,.5);}
   .spm-eq{display:inline-flex; align-items:flex-end; gap:2px; height:11px; flex-shrink:0;}
   .spm-eq span{width:2.5px; background:var(--mood-accent, var(--spotify)); border-radius:1px; animation:spmEq 1s ease-in-out infinite;}
   .spm-eq span:nth-child(1){ animation-delay:-.8s; }
@@ -1223,6 +1225,30 @@
       <div class="yt-results" id="yt-results"></div>
     </section>
     <section>
+      <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>your subscriptions</h2></div></div>
+      <div id="yt-connect-block">
+        <div style="font-size:12px; color:var(--text-faint); margin-bottom:10px; line-height:1.6;">
+          Connect your Google account so this shows recent uploads from channels you're actually subscribed to — the API key below can only search, it can't see your subscriptions. One-time setup: create an <b>OAuth Client ID</b> (type: Web application) at <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">console.cloud.google.com/apis/credentials</a>, enable "YouTube Data API v3" for the project, and add this exact URL as an <b>Authorized redirect URI</b>:
+          <div style="background:var(--bg); border:1px solid var(--border-soft); border-radius:6px; padding:8px 10px; margin:6px 0; font-size:12px; word-break:break-all;" id="yt-redirect-display"></div>
+          Then paste the Client ID below (add the Client Secret too only if Google's console generated one for your client — some Web application clients need it for the token exchange, some don't; leave it blank first and only add it if connecting fails).
+        </div>
+        <div class="add-row">
+          <input id="yt-client-id-input" type="text" placeholder="Google OAuth Client ID">
+        </div>
+        <div class="add-row">
+          <input id="yt-client-secret-input" type="text" placeholder="Client Secret (optional)">
+          <button class="yt-connect-btn" id="yt-connect-btn" type="button">▶ connect youtube</button>
+        </div>
+      </div>
+      <div id="yt-connected-block" style="display:none;">
+        <div class="add-row">
+          <button class="secondary" id="yt-home-refresh-btn" type="button">↻ refresh</button>
+          <button class="secondary" id="yt-disconnect-btn" type="button">disconnect</button>
+        </div>
+        <div class="yt-results" id="yt-home-feed"></div>
+      </div>
+    </section>
+    <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>youtube data api key (optional)</h2></div></div>
       <div style="font-size:12px; color:var(--text-faint); margin-bottom:8px;">without a key, search opens YouTube in a new tab instead. add a free key to see results embedded here, and to let ORBIT auto-play the top result by voice. get one free at <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener noreferrer">console.cloud.google.com</a> — enable "YouTube Data API v3", then create an API key.</div>
       <div class="add-row">
@@ -1420,7 +1446,7 @@ let state = {
   taskLevel:1, tasksCompleted:0, dailyTask:null,
   course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
   targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-  companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+  companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
 };
 let saveTimer = null;
 let pendingAttachment = null; 
@@ -1508,6 +1534,131 @@ async function ytSearch(query, autoplayFirst){
     if(autoplayFirst && items.length) ytEmbed(items[0].id.videoId, true);
     return items[0] || null;
   }catch(e){ if(resultsEl) resultsEl.innerHTML = `<div class="empty">YouTube search failed: ${escapeHtml(e.message||'network error')}</div>`; return null; }
+}
+
+// ---- YouTube: Google OAuth (PKCE) so we can read the signed-in user's subscriptions —
+// a plain API key can only search public data, it can never see what you're subscribed to. ----
+function ytRedirectUri(){ return window.location.origin + window.location.pathname; }
+async function ytConnect(){
+  const idInput = document.getElementById('yt-client-id-input');
+  const clientId = ((idInput && idInput.value) || state.ytClientId || '').trim();
+  if(!clientId){ alert('Add your Google OAuth Client ID first (from console.cloud.google.com/apis/credentials).'); return; }
+  const secretInput = document.getElementById('yt-client-secret-input');
+  state.ytClientId = clientId;
+  state.ytClientSecret = ((secretInput && secretInput.value) || '').trim();
+  saveState();
+  const verifier = spotifyRandomString(64);
+  sessionStorage.setItem('yt_pkce_verifier', verifier);
+  const challenge = await spotifyCodeChallenge(verifier);
+  const params = new URLSearchParams({
+    client_id: clientId, response_type: 'code', redirect_uri: ytRedirectUri(),
+    code_challenge_method: 'S256', code_challenge: challenge,
+    scope: 'https://www.googleapis.com/auth/youtube.readonly',
+    access_type: 'offline', prompt: 'consent', state: 'ytauth'
+  });
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+async function ytHandleCallback(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get('state') !== 'ytauth') return; // not our callback (could be Spotify's)
+  const code = params.get('code');
+  const err = params.get('error');
+  history.replaceState({}, document.title, window.location.pathname);
+  if(err || !code) return;
+  const verifier = sessionStorage.getItem('yt_pkce_verifier');
+  if(!verifier || !state.ytClientId) return;
+  try{
+    const body = new URLSearchParams({
+      grant_type:'authorization_code', code, redirect_uri: ytRedirectUri(),
+      client_id: state.ytClientId, code_verifier: verifier
+    });
+    if(state.ytClientSecret) body.set('client_secret', state.ytClientSecret);
+    const res = await fetch('https://oauth2.googleapis.com/token', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+    const data = await res.json();
+    if(!res.ok){ alert('YouTube connection failed: ' + (data.error_description || data.error || 'unknown error') + (data.error === 'invalid_client' ? ' — this Google OAuth client needs its Client Secret pasted in too.' : '')); return; }
+    state.ytAccessToken = data.access_token;
+    state.ytRefreshToken = data.refresh_token || state.ytRefreshToken;
+    state.ytTokenExpiry = Date.now() + (data.expires_in*1000) - 60000;
+    saveState(); renderYtSubscriptions();
+  }catch(e){ /* network hiccup — user can just try connecting again */ }
+}
+async function ytEnsureToken(){
+  if(!state.ytAccessToken) return null;
+  if(Date.now() < state.ytTokenExpiry) return state.ytAccessToken;
+  if(!state.ytRefreshToken || !state.ytClientId) return null;
+  try{
+    const body = new URLSearchParams({ grant_type:'refresh_token', refresh_token: state.ytRefreshToken, client_id: state.ytClientId });
+    if(state.ytClientSecret) body.set('client_secret', state.ytClientSecret);
+    const res = await fetch('https://oauth2.googleapis.com/token', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body });
+    const data = await res.json();
+    if(!res.ok) return null;
+    state.ytAccessToken = data.access_token;
+    state.ytTokenExpiry = Date.now() + (data.expires_in*1000) - 60000;
+    saveState();
+    return state.ytAccessToken;
+  }catch(e){ return null; }
+}
+function ytDisconnect(){
+  state.ytAccessToken=''; state.ytRefreshToken=''; state.ytTokenExpiry=0; ytHomeFeedLoaded=false;
+  saveState(); renderYtSubscriptions();
+}
+async function ytApi(path){
+  const token = await ytEnsureToken(); if(!token) throw new Error('Not connected to YouTube.');
+  const res = await fetch('https://www.googleapis.com/youtube/v3'+path, { headers:{ 'Authorization':'Bearer '+token } });
+  const data = await res.json().catch(()=>null);
+  if(!res.ok) throw new Error((data && data.error && data.error.message) || res.statusText || ('HTTP '+res.status));
+  return data;
+}
+let ytHomeFeedLoaded = false;
+async function ytLoadHomeFeed(){
+  const feedEl = document.getElementById('yt-home-feed'); if(!feedEl) return;
+  feedEl.innerHTML = '<div class="empty">loading your subscriptions…</div>';
+  try{
+    // 1) list subscribed channels (cheap: 1 unit per page, up to 50 per page)
+    let channelIds = []; let pageToken = '';
+    for(let page=0; page<3 && channelIds.length < 120; page++){
+      const data = await ytApi(`/subscriptions?part=snippet&mine=true&maxResults=50&order=alphabetical${pageToken?'&pageToken='+pageToken:''}`);
+      channelIds = channelIds.concat((data.items||[]).map(it=>it.snippet.resourceId.channelId));
+      pageToken = data.nextPageToken;
+      if(!pageToken) break;
+    }
+    if(!channelIds.length){ feedEl.innerHTML = '<div class="empty">no subscriptions found on this Google account.</div>'; return; }
+    // cap how many channels we pull uploads for, to keep this fast and quota-cheap
+    channelIds = channelIds.slice(0, 60);
+    // 2) batch-resolve each channel's "uploads" playlist id (1 unit per 50 ids, batched)
+    let uploadsPlaylistIds = [];
+    for(let i=0; i<channelIds.length; i+=50){
+      const batch = channelIds.slice(i, i+50);
+      const data = await ytApi(`/channels?part=contentDetails&id=${batch.join(',')}`);
+      uploadsPlaylistIds = uploadsPlaylistIds.concat((data.items||[]).map(it=>it.contentDetails && it.contentDetails.relatedPlaylists && it.contentDetails.relatedPlaylists.uploads).filter(Boolean));
+    }
+    // 3) pull each channel's most recent uploads (1 unit per playlist, parallelized)
+    const perChannel = await Promise.allSettled(uploadsPlaylistIds.map(pid => ytApi(`/playlistItems?part=snippet&maxResults=3&playlistId=${pid}`)));
+    let videos = [];
+    perChannel.forEach(r=>{
+      if(r.status !== 'fulfilled') return;
+      (r.value.items||[]).forEach(it=>{
+        const s = it.snippet; if(!s || !s.resourceId || !s.resourceId.videoId) return;
+        videos.push({ id: s.resourceId.videoId, title: s.title, channel: s.channelTitle, publishedAt: s.publishedAt, thumb: (s.thumbnails && (s.thumbnails.medium||s.thumbnails.default)) ? (s.thumbnails.medium||s.thumbnails.default).url : '' });
+      });
+    });
+    videos.sort((a,b)=> String(b.publishedAt).localeCompare(String(a.publishedAt)));
+    videos = videos.slice(0, 40);
+    feedEl.innerHTML = videos.length ? videos.map(v=>
+      `<div class="yt-result-card" data-vid="${v.id}"><img src="${v.thumb}" alt="" loading="lazy"><div class="yt-title">${escapeHtml(v.title)}<br><span style="color:var(--text-faint);">${escapeHtml(v.channel)}</span></div></div>`
+    ).join('') : '<div class="empty">no recent uploads found from your subscriptions.</div>';
+    feedEl.querySelectorAll('.yt-result-card').forEach(card=> card.onclick = ()=> ytEmbed(card.dataset.vid, true));
+    ytHomeFeedLoaded = true;
+  }catch(e){ feedEl.innerHTML = `<div class="empty">Could not load your subscriptions: ${escapeHtml(e.message)}</div>`; }
+}
+function renderYtSubscriptions(){
+  const redirEl = document.getElementById('yt-redirect-display'); if(redirEl) redirEl.textContent = ytRedirectUri();
+  const idInput = document.getElementById('yt-client-id-input'); if(idInput && !idInput.value) idInput.value = state.ytClientId || '';
+  const connectBlock = document.getElementById('yt-connect-block'); const connectedBlock = document.getElementById('yt-connected-block');
+  const connected = !!(state.ytAccessToken && state.ytRefreshToken);
+  if(connectBlock) connectBlock.style.display = connected ? 'none' : '';
+  if(connectedBlock) connectedBlock.style.display = connected ? '' : 'none';
+  if(connected && !ytHomeFeedLoaded) ytLoadHomeFeed();
 }
 
 // ---- Spotify: PKCE auth (client-side only, no server/secret needed) ----
@@ -1814,10 +1965,10 @@ function applyMoodTheme(colors, active){
   const root = document.documentElement;
   const overlay = document.getElementById('mood-overlay');
   if(colors){
-    root.style.setProperty('--mood-accent', `rgba(${colors.primary},.5)`);
-    root.style.setProperty('--mood-glow', `rgba(${colors.primary},.22)`);
-    root.style.setProperty('--mood-accent-2', `rgba(${colors.secondary},.55)`);
-    root.style.setProperty('--mood-glow-2', `rgba(${colors.secondary},.2)`);
+    root.style.setProperty('--mood-accent', `rgba(${colors.primary},.4)`);
+    root.style.setProperty('--mood-glow', `rgba(${colors.primary},.16)`);
+    root.style.setProperty('--mood-accent-2', `rgba(${colors.secondary},.4)`);
+    root.style.setProperty('--mood-glow-2', `rgba(${colors.secondary},.14)`);
     _moodColorSet = true;
   }
   if(!colors && !active) _moodColorSet = false; // track fully stopped — drop back to default theme
@@ -1925,7 +2076,7 @@ async function loadState(){
         selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free',
         noteAttachments:[],
         targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-        companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+        companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
       }, loaded);
       if(!state.arcade || typeof state.arcade !== 'object') state.arcade = {xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}};
       if(!state.arcade.answers) state.arcade.answers = {};
@@ -1944,6 +2095,7 @@ async function loadState(){
   }catch(e){}
   
   await spotifyHandleCallback();
+  await ytHandleCallback();
   if(!state.links) state.links = {};
   if(!state.links.course || state.links.course.includes('jecrcuniversity.edu.in')) {
       state.links.course = 'https://courses.aajsecode.com/s/courses/663f10c1b48d0c3f23f4ac0b/take';
@@ -3124,7 +3276,7 @@ document.getElementById('import-file-input').addEventListener('change', async (e
       taskLevel:1, tasksCompleted:0, dailyTask:null,
       course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
       targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-      companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+      companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
     }, imported);
     if(!imported.geminiKey) state.geminiKey = keepKey;
     if(!imported.noteAttachments || !imported.noteAttachments.length) state.noteAttachments = keepAttachments;
@@ -3494,6 +3646,9 @@ document.getElementById('run-code-btn').addEventListener('click', async ()=>{
 
 document.getElementById('spotify-connect-btn').addEventListener('click', spotifyConnect);
 document.getElementById('spotify-disconnect-btn').addEventListener('click', spotifyDisconnect);
+document.getElementById('yt-connect-btn').addEventListener('click', ytConnect);
+document.getElementById('yt-disconnect-btn').addEventListener('click', ytDisconnect);
+document.getElementById('yt-home-refresh-btn').addEventListener('click', ()=>{ ytHomeFeedLoaded = false; ytLoadHomeFeed(); });
 document.getElementById('spotify-search-btn').addEventListener('click', ()=>{
   const q = document.getElementById('spotify-search-input').value.trim(); if(q) spotifySearch(q);
 });
@@ -3599,7 +3754,7 @@ document.getElementById('reset-btn').addEventListener('click', async ()=>{
     course:{items:[]}, courseLog:[], geminiKey: keepKey, openrouterKey: keepOpenrouterKey, grokKey: keepGrokKey,
     aiProvider: keepProvider, selectedOpenrouterModel: keepOpenrouterModel, selectedGrokModel: keepGrokModel,
     noteAttachments:[], targetDate: state.targetDate, achievements:[], mockInterview:{history:[], currentQuestion:null},
-    companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+    companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
   };
   state.links.course = 'https://courses.aajsecode.com/s/courses/663f10c1b48d0c3f23f4ac0b/take'; await saveState(); render();
 });
@@ -3766,7 +3921,7 @@ function render(){
   renderHeatmap(); renderFocusRow(); renderPhases(); renderLog(); renderChat(); renderAssistantModes();
   renderDailyTask(); renderCourseTab(); renderNoteAttachments(); renderAchievements();
   renderTimer(); renderInterview(); renderCompanies(); renderWeeklyRecaps(); renderResumeReviews();
-  applyLayout(); renderAnalytics(); renderMastery(); renderSpotify(); renderCalendar(); renderGoals(); renderReminders(); renderActivityResults(); renderArcade();
+  applyLayout(); renderAnalytics(); renderMastery(); renderSpotify(); renderYtSubscriptions(); renderCalendar(); renderGoals(); renderReminders(); renderActivityResults(); renderArcade();
   renderStreakBanner();
   if(window.refreshSnakeBest) window.refreshSnakeBest();
   if(window.refreshTypingBest) window.refreshTypingBest();
