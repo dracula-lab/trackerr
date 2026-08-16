@@ -1230,7 +1230,7 @@
         <div style="font-size:12px; color:var(--text-faint); margin-bottom:10px; line-height:1.6;">
           Connect your Google account so this shows recent uploads from channels you're actually subscribed to — the API key below can only search, it can't see your subscriptions. One-time setup: create an <b>OAuth Client ID</b> (type: Web application) at <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">console.cloud.google.com/apis/credentials</a>, enable "YouTube Data API v3" for the project, and add this exact URL as an <b>Authorized redirect URI</b>:
           <div style="background:var(--bg); border:1px solid var(--border-soft); border-radius:6px; padding:8px 10px; margin:6px 0; font-size:12px; word-break:break-all;" id="yt-redirect-display"></div>
-          Then paste the Client ID below (add the Client Secret too only if Google's console generated one for your client — some Web application clients need it for the token exchange, some don't; leave it blank first and only add it if connecting fails).
+          Then paste the Client ID below (add the Client Secret too only if Google's console generated one for your client — some Web application clients need it for the token exchange, some don't; leave it blank first and only add it if connecting fails). If Google shows "Access blocked: ... has not completed the Google verification process" — go to <b>OAuth consent screen</b> in your Cloud project, leave Publishing status as <b>Testing</b>, and add your own Google account under <b>Test users</b>.
         </div>
         <div class="add-row">
           <input id="yt-client-id-input" type="text" placeholder="Google OAuth Client ID">
@@ -1746,13 +1746,28 @@ function spotifyTrackRow(track, idx){
   if(!track) return '';
   const artists = (track.artists||[]).map(a=>a.name).join(', ');
   const art = (track.album && track.album.images && track.album.images.length) ? track.album.images[track.album.images.length-1].url : '';
-  return `<div class="spotify-track-row"><img src="${art}" alt="" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title">${escapeHtml(track.name)}</div><div class="spotify-track-artist">${escapeHtml(artists)}</div></div><button class="secondary" data-spotify-play="${track.uri}" data-idx="${idx||0}" type="button">▶ play</button></div>`;
+  return `<div class="spotify-track-row"><img src="${art}" alt="" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title">${escapeHtml(track.name)}</div><div class="spotify-track-artist">${escapeHtml(artists)}</div></div><button class="secondary" data-spotify-play="${track.uri}" data-idx="${idx||0}" type="button">▶ play</button><button class="secondary" data-spotify-queue="${track.uri}" type="button" title="add to queue">+ queue</button></div>`;
 }
 // contextOpts lets the play button queue up the rest of the visible list (or the full Spotify
 // playlist server-side) so the mini player's next/prev actually has something to move to,
 // instead of replaying a single lone track. See spotifyPlayUri.
 function spotifyWireTrackButtons(root, contextOpts){
   root.querySelectorAll('[data-spotify-play]').forEach(btn=> btn.onclick = ()=> spotifyPlayUri(btn.dataset.spotifyPlay, Object.assign({index: Number(btn.dataset.idx)||0}, contextOpts||{})));
+  root.querySelectorAll('[data-spotify-queue]').forEach(btn=> btn.onclick = (e)=> spotifyAddToQueue(btn.dataset.spotifyQueue, e.currentTarget));
+}
+// Spotify's Web API only supports appending to the END of the playback queue — there's no
+// public endpoint to insert a track at the front ("play next"), so this is queue-only.
+async function spotifyAddToQueue(uri, btn){
+  if(!uri) return;
+  const original = btn ? btn.textContent : '';
+  try{
+    await spotifyLoadSDK();
+    for(let i=0; i<10 && !spotifyDeviceId; i++) await new Promise(r=> setTimeout(r, 300));
+    const token = await spotifyEnsureToken();
+    if(!token || !spotifyDeviceId){ if(btn){ btn.textContent = 'no active player'; setTimeout(()=> btn.textContent=original, 1500); } return; }
+    const res = await fetch(`https://api.spotify.com/v1/me/player/queue?uri=${encodeURIComponent(uri)}&device_id=${spotifyDeviceId}`, { method:'POST', headers:{ 'Authorization':'Bearer '+token } });
+    if(btn){ btn.textContent = res.ok ? '✓ queued' : 'failed'; setTimeout(()=> btn.textContent = original, 1500); }
+  }catch(e){ if(btn){ btn.textContent = 'failed'; setTimeout(()=> btn.textContent = original, 1500); } }
 }
 let likedSongsOffset = 0;
 const LIKED_PAGE_SIZE = 50;
