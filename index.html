@@ -16,6 +16,8 @@
   .lc-select-strong{font-weight:600;}
   @property --mood-accent{ syntax:'<color>'; inherits:true; initial-value: transparent; }
   @property --mood-glow{ syntax:'<color>'; inherits:true; initial-value: transparent; }
+  @property --mood-accent-2{ syntax:'<color>'; inherits:true; initial-value: transparent; }
+  @property --mood-glow-2{ syntax:'<color>'; inherits:true; initial-value: transparent; }
   :root{
     color-scheme: dark;
     --bg:#0d1117; --panel:#161b22; --panel-2:#1c2129; --border:#30363d; --border-soft:#21262d;
@@ -75,8 +77,17 @@
   #mood-overlay{
     position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:0;
     background:radial-gradient(circle at 12% 8%, var(--mood-glow, transparent), transparent 55%),
-               radial-gradient(circle at 88% 92%, var(--mood-glow, transparent), transparent 55%);
+               radial-gradient(circle at 88% 92%, var(--mood-glow-2, var(--mood-glow, transparent)), transparent 60%),
+               radial-gradient(circle at 80% 15%, var(--mood-accent-2, transparent), transparent 45%),
+               radial-gradient(circle at 15% 90%, var(--mood-accent, transparent), transparent 45%);
+    background-size:180% 180%;
     transition:opacity 1.1s ease;
+  }
+  body.mood-active #mood-overlay{ animation: moodDrift 16s ease-in-out infinite alternate; }
+  @keyframes moodDrift{
+    0%{ background-position:0% 0%, 100% 100%, 100% 0%, 0% 100%; }
+    50%{ background-position:8% 6%, 92% 94%, 88% 10%, 10% 88%; }
+    100%{ background-position:-4% 10%, 104% 90%, 96% -4%, -2% 104%; }
   }
   @keyframes topbarShift{ from{background-position:0% 0;} to{background-position:200% 0;} }
   .wrap{max-width:1300px; margin:0 auto; padding:24px 32px 0; animation:appBootIn .6s cubic-bezier(.16,1,.3,1);}
@@ -202,14 +213,29 @@
   .spotify-connect-btn:hover{background:var(--spotify-dark); box-shadow:0 0 16px rgba(30,215,96,.4);}
   .spm-card{
     display:flex; flex-direction:column; gap:12px; margin-bottom:16px; padding:16px 18px; border-radius:14px;
-    background:linear-gradient(145deg, var(--mood-glow, rgba(30,215,96,.14)), var(--panel) 55%);
+    background:linear-gradient(145deg, var(--mood-glow, rgba(30,215,96,.14)) 0%, var(--panel) 45%, var(--mood-glow-2, var(--panel)) 130%);
+    background-size:220% 220%;
     border:1px solid var(--mood-accent, rgba(30,215,96,.35)); box-shadow:0 12px 34px -14px var(--mood-glow, rgba(30,215,96,.3));
-    transition:border-color .9s ease, box-shadow .9s ease, background .9s ease;
+    transition:border-color .9s ease, box-shadow .9s ease;
+    position:relative; overflow:hidden;
+  }
+  body.mood-active .spm-card{ animation: spmPulse 4.5s ease-in-out infinite; }
+  @keyframes spmPulse{
+    0%,100%{ background-position:0% 0%; box-shadow:0 12px 34px -14px var(--mood-glow); }
+    50%{ background-position:100% 100%; box-shadow:0 16px 42px -12px var(--mood-glow-2); }
   }
   .spm-row{display:flex; align-items:center; gap:10px;}
-  .spm-art{width:58px; height:58px; border-radius:9px; background:var(--bg); flex-shrink:0; box-shadow:0 6px 18px rgba(0,0,0,.4); object-fit:cover;}
+  .spm-art{width:58px; height:58px; border-radius:9px; background:var(--bg); flex-shrink:0; box-shadow:0 6px 18px rgba(0,0,0,.4); object-fit:cover; transition:box-shadow .9s ease;}
+  body.mood-active .spm-art{ box-shadow:0 0 0 2px var(--mood-accent), 0 6px 18px rgba(0,0,0,.4), 0 0 20px var(--mood-glow-2); }
   .spm-title{font-size:14.5px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .spm-artist{font-size:12px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;}
+  .spm-artist-row{display:flex; align-items:center; gap:7px; margin-top:2px;}
+  .spm-artist{font-size:12px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .spm-eq{display:inline-flex; align-items:flex-end; gap:2px; height:11px; flex-shrink:0;}
+  .spm-eq span{width:2.5px; background:var(--mood-accent, var(--spotify)); border-radius:1px; animation:spmEq 1s ease-in-out infinite;}
+  .spm-eq span:nth-child(1){ animation-delay:-.8s; }
+  .spm-eq span:nth-child(2){ animation-delay:-.4s; }
+  .spm-eq span:nth-child(3){ animation-delay:-1.1s; }
+  @keyframes spmEq{ 0%,100%{ height:3px; } 50%{ height:11px; } }
   .spm-btn{padding:7px 11px; border-radius:9px; font-size:14px; transition:transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s;}
   .spm-btn:hover{transform:translateY(-2px);}
   .spm-toggle{background:var(--spotify); color:#04150a; border:none; padding:8px 16px; font-weight:700;}
@@ -1226,7 +1252,7 @@
             <img id="spm-art" src="" alt="" class="spm-art">
             <div style="flex:1; min-width:0;">
               <div id="spm-title" class="spm-title">—</div>
-              <div id="spm-artist" class="spm-artist">—</div>
+              <div class="spm-artist-row"><div id="spm-artist" class="spm-artist">—</div><span id="spm-eq" class="spm-eq" style="display:none;"><span></span><span></span><span></span></span></div>
             </div>
             <button class="secondary spm-btn" id="spm-shuffle" type="button" title="Shuffle">🔀</button>
             <button class="secondary spm-btn" id="spm-prev" type="button">⏮</button>
@@ -1565,42 +1591,91 @@ async function spotifyApi(path, opts){
 }
 
 // ---- Spotify: library rendering ----
-function spotifyTrackRow(track){
+function spotifyTrackRow(track, idx){
   if(!track) return '';
   const artists = (track.artists||[]).map(a=>a.name).join(', ');
   const art = (track.album && track.album.images && track.album.images.length) ? track.album.images[track.album.images.length-1].url : '';
-  return `<div class="spotify-track-row"><img src="${art}" alt="" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title">${escapeHtml(track.name)}</div><div class="spotify-track-artist">${escapeHtml(artists)}</div></div><button class="secondary" data-spotify-play="${track.uri}" type="button">▶ play</button></div>`;
+  return `<div class="spotify-track-row"><img src="${art}" alt="" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title">${escapeHtml(track.name)}</div><div class="spotify-track-artist">${escapeHtml(artists)}</div></div><button class="secondary" data-spotify-play="${track.uri}" data-idx="${idx||0}" type="button">▶ play</button></div>`;
 }
-function spotifyWireTrackButtons(root){
-  root.querySelectorAll('[data-spotify-play]').forEach(btn=> btn.onclick = ()=> spotifyPlayUri(btn.dataset.spotifyPlay));
+// contextOpts lets the play button queue up the rest of the visible list (or the full Spotify
+// playlist server-side) so the mini player's next/prev actually has something to move to,
+// instead of replaying a single lone track. See spotifyPlayUri.
+function spotifyWireTrackButtons(root, contextOpts){
+  root.querySelectorAll('[data-spotify-play]').forEach(btn=> btn.onclick = ()=> spotifyPlayUri(btn.dataset.spotifyPlay, Object.assign({index: Number(btn.dataset.idx)||0}, contextOpts||{})));
 }
-async function spotifyLoadLibrary(){
+let likedSongsOffset = 0;
+const LIKED_PAGE_SIZE = 50;
+async function spotifyLoadLibrary(resetPaging){
   const wrap = document.getElementById('spotify-library'); if(!wrap) return;
+  if(resetPaging !== false) likedSongsOffset = 0;
   wrap.innerHTML = '<div class="empty">loading your library…</div>';
   const [likedResult, playlistsResult] = await Promise.allSettled([
-    spotifyApi('/me/tracks?limit=20'),
-    spotifyApi('/me/playlists?limit=20')
+    spotifyApi(`/me/tracks?limit=${LIKED_PAGE_SIZE}&offset=0`),
+    spotifyApi('/me/playlists?limit=50')
   ]);
-  let html = '<div class="spotify-section-label">liked songs</div><div class="spotify-track-list">';
-  if(likedResult.status === 'fulfilled'){
-    const liked = likedResult.value;
-    html += (liked && liked.items && liked.items.length) ? liked.items.map(it=>spotifyTrackRow(it.track)).join('') : '<div class="empty">no liked songs found.</div>';
-  } else {
-    html += `<div class="empty">Could not load liked songs: ${escapeHtml(likedResult.reason && likedResult.reason.message || 'unknown error')}</div>`;
-  }
-  html += '</div><div class="spotify-section-label">your playlists</div><div class="spotify-playlist-grid">';
+  let html = '<div class="spotify-section-label">liked songs</div><div class="spotify-track-list" id="spotify-liked-list"></div><div id="spotify-liked-more"></div>';
+  html += '<div class="spotify-section-label">your playlists</div><div class="spotify-playlist-grid">';
   if(playlistsResult.status === 'fulfilled'){
     const playlists = playlistsResult.value;
     html += (playlists && playlists.items && playlists.items.length)
-      ? playlists.items.map(p=>`<div class="spotify-playlist-card" data-pid="${p.id}"><img src="${(p.images&&p.images[0]&&p.images[0].url)||''}" alt="" loading="lazy"><div class="yt-title">${escapeHtml(p.name)}</div></div>`).join('')
+      ? playlists.items.map(p=>{
+          const curated = p.owner && p.owner.id === 'spotify';
+          return `<div class="spotify-playlist-card" data-pid="${p.id}" data-curated="${curated?'1':''}"><img src="${(p.images&&p.images[0]&&p.images[0].url)||''}" alt="" loading="lazy"><div class="yt-title">${escapeHtml(p.name)}${curated ? ' <span class="tag" style="margin-left:4px;">spotify-curated</span>' : ''}</div></div>`;
+        }).join('')
       : '<div class="empty">no playlists found.</div>';
   } else {
     html += `<div class="empty">Could not load playlists: ${escapeHtml(playlistsResult.reason && playlistsResult.reason.message || 'unknown error')}</div>`;
   }
   html += '</div><div id="spotify-playlist-tracks"></div>';
   wrap.innerHTML = html;
-  spotifyWireTrackButtons(wrap);
-  wrap.querySelectorAll('.spotify-playlist-card').forEach(card=> card.onclick = ()=> spotifyLoadPlaylistTracks(card.dataset.pid));
+  renderLikedSongsPage(likedResult, wrap);
+  wrap.querySelectorAll('.spotify-playlist-card').forEach(card=> card.onclick = ()=> spotifyLoadPlaylistTracks(card.dataset.pid, card.dataset.curated === '1'));
+}
+let likedSongsUris = [];
+function renderLikedSongsPage(likedResult, wrap){
+  const listEl = document.getElementById('spotify-liked-list');
+  const moreEl = document.getElementById('spotify-liked-more');
+  if(!listEl) return;
+  if(likedResult.status !== 'fulfilled'){
+    listEl.innerHTML = `<div class="empty">Could not load liked songs: ${escapeHtml(likedResult.reason && likedResult.reason.message || 'unknown error')}</div>`;
+    return;
+  }
+  const liked = likedResult.value;
+  const items = (liked && liked.items) || [];
+  if(!items.length){ listEl.innerHTML = '<div class="empty">no liked songs found.</div>'; return; }
+  likedSongsUris = items.map(it=>it.track && it.track.uri).filter(Boolean);
+  listEl.innerHTML = items.map((it,i)=>spotifyTrackRow(it.track, i)).join('');
+  spotifyWireTrackButtons(listEl, {uris: likedSongsUris});
+  likedSongsOffset = items.length;
+  const total = liked && liked.total || 0;
+  if(moreEl){
+    moreEl.innerHTML = likedSongsOffset < total
+      ? `<button class="secondary" id="spotify-liked-more-btn" type="button">load more liked songs (${likedSongsOffset}/${total})</button>`
+      : (total > LIKED_PAGE_SIZE ? `<div class="empty" style="margin-top:6px;">all ${total} liked songs loaded.</div>` : '');
+    const moreBtn = document.getElementById('spotify-liked-more-btn');
+    if(moreBtn) moreBtn.onclick = spotifyLoadMoreLiked;
+  }
+}
+async function spotifyLoadMoreLiked(){
+  const moreEl = document.getElementById('spotify-liked-more'); if(moreEl) moreEl.innerHTML = '<div class="empty">loading more…</div>';
+  try{
+    const data = await spotifyApi(`/me/tracks?limit=${LIKED_PAGE_SIZE}&offset=${likedSongsOffset}`);
+    const items = (data && data.items) || [];
+    const listEl = document.getElementById('spotify-liked-list');
+    const startIdx = likedSongsUris.length;
+    likedSongsUris = likedSongsUris.concat(items.map(it=>it.track && it.track.uri).filter(Boolean));
+    listEl.insertAdjacentHTML('beforeend', items.map((it,i)=>spotifyTrackRow(it.track, startIdx+i)).join(''));
+    spotifyWireTrackButtons(listEl, {uris: likedSongsUris});
+    likedSongsOffset += items.length;
+    const total = data && data.total || 0;
+    if(moreEl){
+      moreEl.innerHTML = likedSongsOffset < total
+        ? `<button class="secondary" id="spotify-liked-more-btn" type="button">load more liked songs (${likedSongsOffset}/${total})</button>`
+        : `<div class="empty" style="margin-top:6px;">all ${total} liked songs loaded.</div>`;
+      const moreBtn = document.getElementById('spotify-liked-more-btn');
+      if(moreBtn) moreBtn.onclick = spotifyLoadMoreLiked;
+    }
+  }catch(e){ if(moreEl) moreEl.innerHTML = `<div class="empty">Could not load more: ${escapeHtml(e.message)}</div>`; }
 }
 async function spotifyCreatePlaylist(){
   const name = prompt('Name your new Spotify playlist:'); if(!name || !name.trim()) return;
@@ -1610,16 +1685,25 @@ async function spotifyCreatePlaylist(){
     spotifyLoadLibrary();
   }catch(e){ alert('Could not create playlist: ' + e.message); }
 }
-async function spotifyLoadPlaylistTracks(playlistId){
+async function spotifyLoadPlaylistTracks(playlistId, isCurated){
   const wrap = document.getElementById('spotify-playlist-tracks'); if(!wrap) return;
+  if(isCurated){
+    wrap.innerHTML = `<div class="empty">This is one of Spotify's own algorithmic playlists (Daily Mix, Discover Weekly, Release Radar, etc). Spotify stopped allowing apps to read the tracks in these via the API — that's the "Forbidden" error you were seeing. Play it straight from the Spotify app, or add its songs to a playlist you own to see them here.</div>`;
+    return;
+  }
   wrap.innerHTML = '<div class="empty">loading tracks…</div>';
   try{
     const data = await spotifyApi(`/playlists/${playlistId}/tracks?limit=50`);
-    const items = (data && data.items) || [];
+    const items = ((data && data.items) || []).filter(it => it && it.track);
     wrap.innerHTML = `<div class="spotify-section-label">tracks</div><div class="spotify-track-list">` +
-      (items.length ? items.map(it=>spotifyTrackRow(it.track)).join('') : '<div class="empty">empty playlist.</div>') + `</div>`;
-    spotifyWireTrackButtons(wrap);
-  }catch(e){ wrap.innerHTML = `<div class="empty">Could not load tracks: ${escapeHtml(e.message)}</div>`; }
+      (items.length ? items.map((it,i)=>spotifyTrackRow(it.track, i)).join('') : '<div class="empty">empty playlist.</div>') + `</div>`;
+    // use context_uri so Spotify manages next/prev server-side through the whole playlist,
+    // not just the 50 tracks loaded here
+    spotifyWireTrackButtons(wrap, {contextUri: 'spotify:playlist:'+playlistId});
+  }catch(e){
+    const scopeIssue = /scope|forbidden|403/i.test(e.message||'');
+    wrap.innerHTML = `<div class="empty">Could not load tracks: ${escapeHtml(e.message)}${scopeIssue ? ' — if this happens on a playlist you own, try disconnecting and reconnecting Spotify below to refresh permissions.' : ''}</div>`;
+  }
 }
 async function spotifySearch(query){
   const resultsEl = document.getElementById('spotify-search-results'); if(!resultsEl) return null;
@@ -1628,8 +1712,9 @@ async function spotifySearch(query){
     const data = await spotifyApi('/search?type=track&limit=8&q='+encodeURIComponent(query));
     const items = (data && data.tracks && data.tracks.items) || [];
     resultsEl.innerHTML = `<div class="spotify-section-label">results for "${escapeHtml(query)}"</div><div class="spotify-track-list">` +
-      (items.length ? items.map(spotifyTrackRow).join('') : '<div class="empty">no results.</div>') + `</div>`;
-    spotifyWireTrackButtons(resultsEl);
+      (items.length ? items.map((t,i)=>spotifyTrackRow(t,i)).join('') : '<div class="empty">no results.</div>') + `</div>`;
+    const searchUris = items.map(t=>t.uri).filter(Boolean);
+    spotifyWireTrackButtons(resultsEl, {uris: searchUris});
     return items[0] || null;
   }catch(e){ resultsEl.innerHTML = `<div class="empty">Search failed: ${escapeHtml(e.message)}</div>`; return null; }
 }
@@ -1657,16 +1742,31 @@ function spotifyLoadSDK(){
   });
   return spotifySDKLoading;
 }
-async function spotifyPlayUri(uri){
+// opts.contextUri: play a whole Spotify context (e.g. 'spotify:playlist:ID') starting at `uri`,
+//   so Spotify handles the full queue server-side — next/prev work through the entire playlist.
+// opts.uris: play a specific list of track uris (e.g. the liked-songs page or search results)
+//   starting at `opts.index`, so next/prev walk through that list instead of stopping dead.
+// Neither opt given (or just a bare uri) still works — it plays that single track alone, which
+// is the only case where next/prev legitimately have nothing further to go to.
+async function spotifyPlayUri(uri, opts){
   if(!uri) return false;
+  opts = opts || {};
   try{
     await spotifyLoadSDK();
     for(let i=0; i<10 && !spotifyDeviceId; i++) await new Promise(r=> setTimeout(r, 300)); // give the player a moment to register as a device
     if(!spotifyDeviceId) return false;
     const token = await spotifyEnsureToken(); if(!token) return false;
+    let body;
+    if(opts.contextUri){
+      body = { context_uri: opts.contextUri, offset: { uri } };
+    } else if(opts.uris && opts.uris.length > 1){
+      body = { uris: opts.uris, offset: { position: Math.max(0, opts.index||0) } };
+    } else {
+      body = { uris: [uri] };
+    }
     await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
       method:'PUT', headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
-      body: JSON.stringify({ uris:[uri] })
+      body: JSON.stringify(body)
     });
     lastMediaSource = 'spotify';
     return true;
@@ -1677,6 +1777,9 @@ function spotifyFmt(ms){ const s = Math.floor(ms/1000); return Math.floor(s/60)+
 // glow in that color. Only touches a dedicated overlay + the mini player's own glow — never
 // the app's core fixed colors — so this can never break the rest of the UI if extraction fails.
 let _lastMoodArt = null;
+// Returns two colors via callback({primary, secondary}) instead of one flat average: primary is
+// the overall vivid tone (old behavior), secondary is the single most-saturated pixel found —
+// usually the "pop" color in the artwork — so the theme has real contrast instead of one wash.
 function extractMoodColor(imgUrl, callback){
   if(!imgUrl){ callback(null); return; }
   const img = new Image();
@@ -1687,39 +1790,48 @@ function extractMoodColor(imgUrl, callback){
       const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, 24, 24);
       const data = ctx.getImageData(0, 0, 24, 24).data;
       let r=0,g=0,b=0,n=0;
+      let bestSat=-1, sr=0, sg=0, sb=0;
       for(let i=0; i<data.length; i+=4){
         const rr=data[i], gg=data[i+1], bb=data[i+2];
         const max=Math.max(rr,gg,bb), min=Math.min(rr,gg,bb);
         if(max<40 || min>230) continue; // skip near-black / near-white pixels for a more vivid pick
         r+=rr; g+=gg; b+=bb; n++;
+        const sat = max - min; // simple per-pixel saturation proxy
+        if(sat > bestSat){ bestSat = sat; sr=rr; sg=gg; sb=bb; }
       }
-      if(n===0){ r=data[0]; g=data[1]; b=data[2]; n=1; }
-      callback(`${Math.round(r/n)},${Math.round(g/n)},${Math.round(b/n)}`);
+      if(n===0){ r=data[0]; g=data[1]; b=data[2]; n=1; sr=r; sg=g; sb=b; }
+      callback({
+        primary: `${Math.round(r/n)},${Math.round(g/n)},${Math.round(b/n)}`,
+        secondary: `${sr},${sg},${sb}`
+      });
     }catch(e){ callback(null); } // CORS/canvas issue — fail silently, theme just stays default
   };
   img.onerror = () => callback(null);
   img.src = imgUrl;
 }
 let _moodColorSet = false;
-function applyMoodTheme(rgb, active){
+function applyMoodTheme(colors, active){
   const root = document.documentElement;
   const overlay = document.getElementById('mood-overlay');
-  if(rgb){
-    root.style.setProperty('--mood-accent', `rgba(${rgb},.5)`);
-    root.style.setProperty('--mood-glow', `rgba(${rgb},.22)`);
+  if(colors){
+    root.style.setProperty('--mood-accent', `rgba(${colors.primary},.5)`);
+    root.style.setProperty('--mood-glow', `rgba(${colors.primary},.22)`);
+    root.style.setProperty('--mood-accent-2', `rgba(${colors.secondary},.55)`);
+    root.style.setProperty('--mood-glow-2', `rgba(${colors.secondary},.2)`);
     _moodColorSet = true;
   }
-  if(!rgb && !active) _moodColorSet = false; // track fully stopped — drop back to default theme
+  if(!colors && !active) _moodColorSet = false; // track fully stopped — drop back to default theme
   if(overlay) overlay.style.opacity = active ? '1' : (_moodColorSet ? '.25' : '0');
   document.body.classList.toggle('mood-active', !!(active && _moodColorSet));
+  const eq = document.getElementById('spm-eq'); if(eq) eq.style.display = active ? 'inline-flex' : 'none';
 }
 function spotifyUpdateMood(artUrl, paused){
   if(!artUrl){ applyMoodTheme(null, false); _lastMoodArt = null; return; }
   if(artUrl !== _lastMoodArt){
     _lastMoodArt = artUrl;
-    extractMoodColor(artUrl, (rgb) => applyMoodTheme(rgb, !paused));
+    extractMoodColor(artUrl, (colors) => applyMoodTheme(colors, !paused));
   } else {
-    applyMoodTheme(null, !paused); // same track — just toggle intensity, keep already-applied color
+    applyMoodTheme(null, !paused); // same track — just toggle intensity, keep already-applied colors
   }
 }
 let spmSeeking = false;
