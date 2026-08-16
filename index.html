@@ -99,7 +99,7 @@
   .dot.r{background:#ff5f56;} .dot.a{background:#ffbd2e;} .dot.g{background:#27c93f;}
   .titlebar .path{color:var(--text-faint); font-size:14.5px;}
   h1{font-family:var(--font-display); font-size:30px; font-weight:700; margin:15px 0 3px; color:var(--text); letter-spacing:-.01em; text-shadow:0 0 24px rgba(63,185,80,.25);}
-  h1 .accent{background:linear-gradient(120deg, var(--green) 0%, var(--mood-accent, var(--blue)) 50%, var(--purple) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; transition:background 1.1s ease;}
+  h1 .accent{background:linear-gradient(120deg, var(--green) 0%, var(--mood-accent-2, var(--blue)) 50%, var(--purple) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 1px 10px rgba(0,0,0,.4); transition:background 1.1s ease;}
   .hud-corners{position:relative;}
   .hud-corners::before,.hud-corners::after{
     content:''; position:absolute; width:10px; height:10px; border-color:var(--hud-color,var(--green)); opacity:.7; pointer-events:none;
@@ -219,8 +219,14 @@
     background-size:160% 160%;
     border:1px solid var(--mood-accent, rgba(30,215,96,.35)); box-shadow:0 12px 34px -14px var(--mood-glow, rgba(30,215,96,.3));
     transition:border-color .9s ease, box-shadow .9s ease;
-    position:relative; overflow:hidden;
+    position:relative; overflow:hidden; isolation:isolate;
   }
+  .spm-card::before{
+    content:''; position:absolute; inset:-20%; z-index:-1;
+    background-image:var(--spm-backdrop, none); background-size:cover; background-position:center;
+    filter:blur(28px) saturate(1.3) brightness(.55); opacity:.55; transition:opacity .8s ease;
+  }
+  .spm-card::after{ content:''; position:absolute; inset:0; z-index:-1; background:rgba(13,17,23,.35); }
   body.mood-active .spm-card{ animation: spmPulse 6s ease-in-out infinite; }
   @keyframes spmPulse{
     0%,100%{ background-position:0% 0%; box-shadow:0 12px 34px -14px var(--mood-glow); }
@@ -251,7 +257,8 @@
 
   .panel-view{display:none; animation:fadeIn .2s ease;}
   .panel-view.active{display:block;}
-  @keyframes fadeIn{from{opacity:0; transform:translateY(6px) scale(.995);} to{opacity:1; transform:translateY(0) scale(1);}}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(10px) scale(.985);} to{opacity:1; transform:translateY(0) scale(1);}}
+  .panel-view.active{animation-duration:.45s; animation-timing-function:cubic-bezier(.16,1,.3,1);}
   .skeleton-line{height:12px; border-radius:4px; background:linear-gradient(90deg, var(--panel-2) 25%, var(--border-soft) 50%, var(--panel-2) 75%); background-size:200% 100%; animation:skeletonShine 1.3s ease-in-out infinite; margin:5px 0;}
   @keyframes skeletonShine{0%{background-position:200% 0;} 100%{background-position:-200% 0;}}
 
@@ -528,13 +535,27 @@
   #code-editor{width:100%; min-height:440px; background:var(--bg); border:1px solid var(--border-soft); border-radius:10px; color:var(--text); font-family:var(--font-mono); font-size:17.5px; line-height:1.65; padding:16px; resize:vertical; outline:none; tab-size:2;}
   #code-editor:focus{border-color:var(--lime);}
   .code-output img{max-width:100%; display:block; margin:10px 0; border-radius:8px; border:1px solid var(--border-soft);}
-  .yt-player-wrap{position:relative; width:100%; aspect-ratio:16/9; background:var(--bg); border:1px solid var(--border-soft); border-radius:10px; overflow:hidden; margin:10px 0;}
+  #theater-scrim{position:fixed; inset:0; z-index:5; pointer-events:none; opacity:0;
+    background:radial-gradient(ellipse at 50% 38%, rgba(0,0,0,.15), rgba(0,0,0,.82) 78%);
+    transition:opacity .6s cubic-bezier(.16,1,.3,1);
+  }
+  body.theater-active #theater-scrim{opacity:1;}
+  .yt-player-wrap{position:relative; z-index:6; width:100%; aspect-ratio:16/9; background:var(--bg); border:1px solid var(--border-soft); border-radius:14px; overflow:hidden; margin:14px 0; box-shadow:0 18px 50px -18px rgba(0,0,0,.6); transition:box-shadow .6s ease, border-color .6s ease;}
+  body.theater-active .yt-player-wrap{border-color:var(--mood-accent, var(--ytred)); box-shadow:0 26px 80px -14px rgba(0,0,0,.8), 0 0 50px var(--mood-glow, rgba(255,60,60,.28)); animation:cinematicIn .55s cubic-bezier(.16,1,.3,1);}
+  @keyframes cinematicIn{from{opacity:0; transform:scale(.965);} to{opacity:1; transform:scale(1);}}
   .yt-player-wrap iframe{width:100%; height:100%; border:0;}
   .yt-player-wrap .empty{display:flex; align-items:center; justify-content:center; height:100%; color:var(--text-faint); font-size:13px; text-align:center; padding:0 20px;}
-  .yt-results{display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:10px; margin-top:4px;}
-  .yt-result-card{cursor:pointer; border:1px solid var(--border-soft); border-radius:8px; overflow:hidden; background:var(--panel-2); transition:border-color .15s;}
-  .yt-result-card:hover{border-color:var(--ytred);}
-  .yt-result-card img{width:100%; display:block;}
+  .yt-results{display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:14px; margin-top:6px; position:relative; z-index:1;}
+  .yt-result-card{cursor:pointer; border:1px solid var(--border-soft); border-radius:12px; overflow:hidden; background:var(--panel-2); transition:transform .3s cubic-bezier(.16,1,.3,1), border-color .3s ease, box-shadow .3s ease;}
+  .yt-result-card:hover{border-color:var(--ytred); transform:translateY(-4px); box-shadow:0 16px 34px -14px rgba(0,0,0,.6);}
+  .yt-thumb-wrap{position:relative; overflow:hidden; background:var(--bg);}
+  .yt-thumb-wrap img{width:100%; display:block; transition:transform .5s cubic-bezier(.16,1,.3,1);}
+  .yt-result-card:hover .yt-thumb-wrap img{transform:scale(1.07);}
+  .yt-play-hint{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px; color:#fff; opacity:0; background:rgba(0,0,0,0); transition:opacity .25s ease, background .25s ease;}
+  .yt-result-card:hover .yt-play-hint{opacity:1; background:rgba(0,0,0,.3);}
+  .yt-short-badge{position:absolute; top:6px; right:6px; background:rgba(0,0,0,.78); color:#fff; font-size:10px; font-weight:600; padding:2px 6px; border-radius:5px; letter-spacing:.02em;}
+  .yt-title{font-size:11.5px; padding:8px 9px; color:var(--text-dim); line-height:1.35; max-height:60px; overflow:hidden;}
+  .yt-meta{font-size:10.5px; color:var(--text-faint); margin-top:3px;}
   .yt-result-card .yt-title{font-size:11.5px; padding:6px 8px; color:var(--text-dim); line-height:1.35; max-height:44px; overflow:hidden;}
   .code-controls{display:flex; gap:10px; margin-top:14px; align-items:center; flex-wrap:wrap;}
   .run-btn{background:var(--lime); color:#0d1117; border:none; border-radius:8px; padding:10px 22px; font-family:var(--font-mono); font-size:16px; font-weight:700; cursor:pointer;}
@@ -597,12 +618,17 @@
   
   /* Voice Assistant Styles — audio-reactive orb + glassmorphic HUD popup */
   @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-  .voice-fab { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #1c2129, #0a0d11); border: 1px solid rgba(176,131,247,.35); padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.55); z-index: 1000; transition: transform .2s, border-color .3s, box-shadow .3s; overflow: hidden; }
+  .voice-fab { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #1c2129, #0a0d11); border: 1px solid rgba(176,131,247,.35); padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.55); z-index: 1000; transition: transform .2s, border-color .3s, box-shadow .3s; overflow: visible; animation: voiceFabBreathe 3.6s ease-in-out infinite; }
+  @keyframes voiceFabBreathe{ 0%,100%{ box-shadow:0 6px 20px rgba(0,0,0,.55), 0 0 0 rgba(176,131,247,0); } 50%{ box-shadow:0 6px 20px rgba(0,0,0,.55), 0 0 14px rgba(176,131,247,.22); } }
+  .voice-fab canvas { width: 100%; height: 100%; display: block; border-radius:50%; overflow:hidden; }
+  .voice-fab::before{ content:''; position:absolute; inset:-8px; border-radius:50%; border:1px solid rgba(176,131,247,.4); opacity:0; pointer-events:none; }
+  .voice-fab.listening::before{ animation: voiceRipple 1.8s cubic-bezier(.16,1,.3,1) infinite; }
+  .voice-fab.speaking::before{ border-color:rgba(63,185,80,.45); animation: voiceRipple 1.8s cubic-bezier(.16,1,.3,1) infinite; }
+  @keyframes voiceRipple{ 0%{ transform:scale(.85); opacity:.7; } 100%{ transform:scale(1.5); opacity:0; } }
   .voice-fab:hover { transform: scale(1.06); }
-  .voice-fab canvas { width: 100%; height: 100%; display: block; }
-  .voice-fab.listening { border-color: rgba(176,131,247,.8); box-shadow: 0 0 26px rgba(176,131,247,.45), 0 6px 20px rgba(0,0,0,.55); }
-  .voice-fab.speaking { border-color: rgba(63,185,80,.8); box-shadow: 0 0 26px rgba(63,185,80,.45), 0 6px 20px rgba(0,0,0,.55); }
-  .voice-fab.thinking { border-color: rgba(255,138,101,.8); box-shadow: 0 0 26px rgba(255,138,101,.4), 0 6px 20px rgba(0,0,0,.55); }
+  .voice-fab.listening { border-color: rgba(176,131,247,.8); box-shadow: 0 0 26px rgba(176,131,247,.45), 0 6px 20px rgba(0,0,0,.55); animation:none; }
+  .voice-fab.speaking { border-color: rgba(63,185,80,.8); box-shadow: 0 0 26px rgba(63,185,80,.45), 0 6px 20px rgba(0,0,0,.55); animation:none; }
+  .voice-fab.thinking { border-color: rgba(255,138,101,.8); box-shadow: 0 0 26px rgba(255,138,101,.4), 0 6px 20px rgba(0,0,0,.55); animation:none; }
 
   .voice-popup { position: fixed; top: 24px; bottom: 94px; right: 24px; width: 450px; background: rgba(17,21,27,.82); backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.55); z-index: 999; display: none; flex-direction: column; opacity: 0; transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   .voice-popup.show { display: flex; opacity: 1; transform: translateY(0) scale(1); }
@@ -641,6 +667,7 @@
 <body>
 <div class="topbar"></div>
 <div id="mood-overlay"></div>
+<div id="theater-scrim"></div>
 <div class="wrap">
   <button id="layout-toggle-btn" class="secondary" type="button">⇄ sidebar layout</button>
   <div class="titlebar">
@@ -1503,6 +1530,7 @@ function ytEmbed(videoId, autoplay){
   const wrap = document.getElementById('yt-player-wrap'); if(!wrap || !videoId) return;
   wrap.innerHTML = `<iframe id="yt-live-iframe" src="https://www.youtube.com/embed/${videoId}?${autoplay?'autoplay=1&':''}enablejsapi=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="YouTube player"></iframe>`;
   lastMediaSource = 'youtube';
+  document.body.classList.add('theater-active');
 }
 function ytControl(func){
   const f = document.getElementById('yt-live-iframe'); if(!f || !f.contentWindow) return;
@@ -1516,7 +1544,7 @@ async function ytSearch(query, autoplayFirst){
     if(resultsEl) resultsEl.innerHTML = '<div class="empty">no YouTube API key set — opened search in a new tab instead. Add a free key below to see results embedded here.</div>';
     return null;
   }
-  if(resultsEl) resultsEl.innerHTML = '<div class="empty">searching…</div>';
+  if(resultsEl) resultsEl.innerHTML = '<div class="thinking" style="padding:4px 0;"><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line" style="width:45%"></div><div class="skeleton-line" style="width:58%"></div></div>';
   try{
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=8&q=${encodeURIComponent(query)}&key=${encodeURIComponent(key)}`;
     const res = await fetch(url);
@@ -1527,7 +1555,7 @@ async function ytSearch(query, autoplayFirst){
       resultsEl.innerHTML = items.length ? items.map(it=>{
         const vid = it.id.videoId; const title = it.snippet.title;
         const thumb = (it.snippet.thumbnails && (it.snippet.thumbnails.medium||it.snippet.thumbnails.default)) ? (it.snippet.thumbnails.medium||it.snippet.thumbnails.default).url : '';
-        return `<div class="yt-result-card" data-vid="${vid}"><img src="${thumb}" alt="" loading="lazy"><div class="yt-title">${escapeHtml(title)}</div></div>`;
+        return `<div class="yt-result-card" data-vid="${vid}"><div class="yt-thumb-wrap"><img src="${thumb}" alt="" loading="lazy"><span class="yt-play-hint">▶</span></div><div class="yt-title">${escapeHtml(title)}<div class="yt-meta">${escapeHtml(it.snippet.channelTitle||'')} · ${formatRelativeTime(it.snippet.publishedAt)}</div></div></div>`;
       }).join('') : '<div class="empty">no results.</div>';
       resultsEl.querySelectorAll('.yt-result-card').forEach(card=> card.onclick = ()=> ytEmbed(card.dataset.vid, true));
     }
@@ -1612,7 +1640,7 @@ async function ytApi(path){
 let ytHomeFeedLoaded = false;
 async function ytLoadHomeFeed(){
   const feedEl = document.getElementById('yt-home-feed'); if(!feedEl) return;
-  feedEl.innerHTML = '<div class="empty">loading your subscriptions…</div>';
+  feedEl.innerHTML = '<div class="thinking" style="padding:4px 0;"><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line" style="width:45%"></div><div class="skeleton-line" style="width:58%"></div></div>';
   try{
     // 1) list subscribed channels (cheap: 1 unit per page, up to 50 per page)
     let channelIds = []; let pageToken = '';
@@ -1643,13 +1671,50 @@ async function ytLoadHomeFeed(){
       });
     });
     videos.sort((a,b)=> String(b.publishedAt).localeCompare(String(a.publishedAt)));
-    videos = videos.slice(0, 40);
-    feedEl.innerHTML = videos.length ? videos.map(v=>
-      `<div class="yt-result-card" data-vid="${v.id}"><img src="${v.thumb}" alt="" loading="lazy"><div class="yt-title">${escapeHtml(v.title)}<br><span style="color:var(--text-faint);">${escapeHtml(v.channel)}</span></div></div>`
+    videos = videos.slice(0, 90); // trim before the duration lookup below, to keep that batch small
+    // 4) batch-fetch durations so Shorts (<=60s) can be identified and capped, not just guessed
+    const durById = {};
+    for(let i=0; i<videos.length; i+=50){
+      const batch = videos.slice(i, i+50).map(v=>v.id);
+      try{
+        const data = await ytApi(`/videos?part=contentDetails&id=${batch.join(',')}`);
+        (data.items||[]).forEach(it=>{ durById[it.id] = ytParseIsoDuration(it.contentDetails && it.contentDetails.duration); });
+      }catch(e){ /* if this batch fails we just treat those as regular-length videos below */ }
+    }
+    videos.forEach(v=> v.isShort = (durById[v.id] || 999) <= 60);
+    // 5) build the final mix: fewer videos overall, and Shorts capped so they don't flood the feed
+    const REGULAR_CAP = 16, SHORTS_CAP = 4;
+    let regularCount=0, shortsCount=0;
+    const finalVideos = videos.filter(v=>{
+      if(v.isShort){ if(shortsCount>=SHORTS_CAP) return false; shortsCount++; return true; }
+      if(regularCount>=REGULAR_CAP) return false; regularCount++; return true;
+    });
+    feedEl.innerHTML = finalVideos.length ? finalVideos.map(v=>
+      `<div class="yt-result-card" data-vid="${v.id}"><div class="yt-thumb-wrap"><img src="${v.thumb}" alt="" loading="lazy">${v.isShort ? '<span class="yt-short-badge">Short</span>' : ''}<span class="yt-play-hint">▶</span></div><div class="yt-title">${escapeHtml(v.title)}<div class="yt-meta">${escapeHtml(v.channel)} · ${formatRelativeTime(v.publishedAt)}</div></div></div>`
     ).join('') : '<div class="empty">no recent uploads found from your subscriptions.</div>';
     feedEl.querySelectorAll('.yt-result-card').forEach(card=> card.onclick = ()=> ytEmbed(card.dataset.vid, true));
     ytHomeFeedLoaded = true;
   }catch(e){ feedEl.innerHTML = `<div class="empty">Could not load your subscriptions: ${escapeHtml(e.message)}</div>`; }
+}
+// Parses YouTube's ISO 8601 duration format (e.g. "PT4M13S") into whole seconds.
+function ytParseIsoDuration(iso){
+  if(!iso) return 999;
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if(!m) return 999;
+  return (parseInt(m[1]||0)*3600) + (parseInt(m[2]||0)*60) + parseInt(m[3]||0);
+}
+// "3 hours ago" / "5 minutes ago" / "2 days ago" style relative timestamp, falling back to a
+// plain date once it's old enough that "N days ago" stops being useful.
+function formatRelativeTime(isoDate){
+  if(!isoDate) return '';
+  const then = new Date(isoDate).getTime(); if(isNaN(then)) return '';
+  const diffSec = Math.max(0, Math.floor((Date.now() - then) / 1000));
+  const units = [['year',31536000],['month',2592000],['week',604800],['day',86400],['hour',3600],['minute',60]];
+  for(const [label, secs] of units){
+    const n = Math.floor(diffSec / secs);
+    if(n >= 1) return `${n} ${label}${n>1?'s':''} ago`;
+  }
+  return 'just now';
 }
 function renderYtSubscriptions(){
   const redirEl = document.getElementById('yt-redirect-display'); if(redirEl) redirEl.textContent = ytRedirectUri();
@@ -1684,7 +1749,7 @@ async function spotifyConnect(){
   const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative user-library-read user-read-playback-state user-modify-playback-state streaming';
   const params = new URLSearchParams({
     client_id: clientId, response_type: 'code', redirect_uri: spotifyRedirectUri(),
-    code_challenge_method: 'S256', code_challenge: challenge, scope
+    code_challenge_method: 'S256', code_challenge: challenge, scope, show_dialog: 'true'
   });
   window.location.href = 'https://accounts.spotify.com/authorize?' + params.toString();
 }
@@ -1738,7 +1803,7 @@ async function spotifyApi(path, opts){
   const res = await fetch('https://api.spotify.com/v1'+path, Object.assign({}, opts, { headers: Object.assign({ 'Authorization':'Bearer '+token }, (opts&&opts.headers)||{}) }));
   if(res.status === 204) return null;
   const data = await res.json().catch(()=>null);
-  if(!res.ok) throw new Error((data && data.error && data.error.message) || res.statusText || ('HTTP '+res.status));
+  if(!res.ok) throw new Error((data && data.error && data.error.message) ? `${res.status}: ${data.error.message}` : (res.statusText || ('HTTP '+res.status)));
   return data;
 }
 
@@ -1775,7 +1840,7 @@ const LIKED_PAGE_SIZE = 50;
 async function spotifyLoadLibrary(resetPaging){
   const wrap = document.getElementById('spotify-library'); if(!wrap) return;
   if(resetPaging !== false) likedSongsOffset = 0;
-  wrap.innerHTML = '<div class="empty">loading your library…</div>';
+  wrap.innerHTML = '<div class="thinking" style="padding:4px 0;"><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line" style="width:45%"></div><div class="skeleton-line" style="width:58%"></div></div>';
   const [likedResult, playlistsResult] = await Promise.allSettled([
     spotifyApi(`/me/tracks?limit=${LIKED_PAGE_SIZE}&offset=0`),
     spotifyApi('/me/playlists?limit=50')
@@ -1858,7 +1923,7 @@ async function spotifyLoadPlaylistTracks(playlistId, isCurated){
     wrap.innerHTML = `<div class="empty">This is one of Spotify's own algorithmic playlists (Daily Mix, Discover Weekly, Release Radar, etc). Spotify stopped allowing apps to read the tracks in these via the API — that's the "Forbidden" error you were seeing. Play it straight from the Spotify app, or add its songs to a playlist you own to see them here.</div>`;
     return;
   }
-  wrap.innerHTML = '<div class="empty">loading tracks…</div>';
+  wrap.innerHTML = '<div class="thinking" style="padding:4px 0;"><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line" style="width:45%"></div><div class="skeleton-line" style="width:58%"></div></div>';
   try{
     const data = await spotifyApi(`/playlists/${playlistId}/tracks?limit=50`);
     const items = ((data && data.items) || []).filter(it => it && it.track);
@@ -1869,12 +1934,12 @@ async function spotifyLoadPlaylistTracks(playlistId, isCurated){
     spotifyWireTrackButtons(wrap, {contextUri: 'spotify:playlist:'+playlistId});
   }catch(e){
     const scopeIssue = /scope|forbidden|403/i.test(e.message||'');
-    wrap.innerHTML = `<div class="empty">Could not load tracks: ${escapeHtml(e.message)}${scopeIssue ? ' — if this happens on a playlist you own, try disconnecting and reconnecting Spotify below to refresh permissions.' : ''}</div>`;
+    wrap.innerHTML = `<div class="empty">Could not load tracks: ${escapeHtml(e.message)}${scopeIssue ? ' — this usually means your Spotify app is in Development Mode and the Spotify account you\'re logged into isn\'t allow-listed for it. In the Developer Dashboard, open your app → Settings → User Management, and add the exact email of the Spotify account you\'re connecting with (it must match exactly, even if it\'s the same account that created the app).' : ''}</div>`;
   }
 }
 async function spotifySearch(query){
   const resultsEl = document.getElementById('spotify-search-results'); if(!resultsEl) return null;
-  resultsEl.innerHTML = '<div class="empty">searching…</div>';
+  resultsEl.innerHTML = '<div class="thinking" style="padding:4px 0;"><div class="skeleton-line" style="width:70%"></div><div class="skeleton-line" style="width:45%"></div><div class="skeleton-line" style="width:58%"></div></div>';
   try{
     const data = await spotifyApi('/search?type=track&limit=8&q='+encodeURIComponent(query));
     const items = (data && data.tracks && data.tracks.items) || [];
@@ -2012,6 +2077,7 @@ function spotifyUpdateMiniPlayer(playerState){
   document.getElementById('spm-artist').textContent = (track.artists||[]).map(a=>a.name).join(', ');
   const artUrl = (track.album && track.album.images && track.album.images[0]) ? track.album.images[0].url : '';
   document.getElementById('spm-art').src = artUrl;
+  bar.style.setProperty('--spm-backdrop', artUrl ? `url("${artUrl}")` : 'none');
   spotifyUpdateMood(artUrl, playerState.paused);
   document.getElementById('spm-toggle').textContent = playerState.paused ? '▶' : '⏸';
   document.getElementById('spm-shuffle').style.opacity = playerState.shuffle ? '1' : '.45';
@@ -2135,6 +2201,7 @@ function activateTab(tab){
   tab.classList.add('active');
   const view=document.getElementById('view-'+tab.dataset.tab);
   if(view) view.classList.add('active');
+  if(tab.dataset.tab !== 'watch') document.body.classList.remove('theater-active');
   tab.scrollIntoView({block:'nearest', inline:'center'});
   if(!wasActive) playChime(520, 0.06);
 }
