@@ -1693,6 +1693,7 @@ async function spotifyHandleCallback(){
   const code = params.get('code');
   const err = params.get('error');
   if(!code && !err) return;
+  if(params.get('state') === 'ytauth') return; // this redirect is YouTube's OAuth callback, not ours — let ytHandleCallback handle (and strip) it
   history.replaceState({}, document.title, window.location.pathname); // strip ?code=... from the URL
   if(err) return;
   const verifier = sessionStorage.getItem('spotify_pkce_verifier');
