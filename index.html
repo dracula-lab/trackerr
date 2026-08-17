@@ -48,10 +48,13 @@
   body::before{
     content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
     background:
-      radial-gradient(600px circle at 15% 8%, rgba(63,185,80,.10), transparent 60%),
-      radial-gradient(500px circle at 85% 20%, rgba(88,166,255,.08), transparent 60%),
-      radial-gradient(550px circle at 50% 95%, rgba(176,131,247,.07), transparent 60%);
-    animation: ambientDrift 22s ease-in-out infinite alternate;
+      radial-gradient(850px circle at 10% 6%, rgba(63,185,80,.15), transparent 62%),
+      radial-gradient(750px circle at 90% 12%, rgba(88,166,255,.13), transparent 62%),
+      radial-gradient(700px circle at 25% 98%, rgba(176,131,247,.12), transparent 60%),
+      radial-gradient(600px circle at 95% 90%, rgba(255,138,101,.09), transparent 58%),
+      radial-gradient(500px circle at 55% 45%, rgba(88,166,255,.05), transparent 65%),
+      linear-gradient(155deg, rgba(88,166,255,.035) 0%, transparent 45%, rgba(176,131,247,.04) 100%);
+    animation: ambientDrift 26s ease-in-out infinite alternate;
   }
   body::after{
     content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.35;
@@ -239,7 +242,13 @@
     50%{ background-position:35% 30%; box-shadow:0 16px 42px -12px var(--mood-glow-2); }
   }
   .spm-row{display:flex; align-items:center; gap:10px;}
-  .spm-art{width:58px; height:58px; border-radius:9px; background:var(--bg); flex-shrink:0; box-shadow:0 6px 18px rgba(0,0,0,.4); object-fit:cover; transition:box-shadow .9s ease; cursor:pointer;}
+  .spm-art-wrap{position:relative; width:60px; height:60px; flex-shrink:0;}
+  .spm-art-ring-svg{position:absolute; inset:-6px; width:72px; height:72px; transform:rotate(-90deg); pointer-events:none;}
+  .spm-art-ring-track{fill:none; stroke:var(--border-soft); stroke-width:2.2;}
+  .spm-art-ring{fill:none; stroke:var(--spotify); stroke-width:2.2; stroke-linecap:round; stroke-dasharray:100; stroke-dashoffset:100; transition:stroke-dashoffset .5s linear, stroke .6s ease;}
+  body.mood-active .spm-art-ring{ stroke:var(--mood-accent-2, var(--spotify)); }
+  .spm-art{width:60px; height:60px; border-radius:12px; background:var(--bg); flex-shrink:0; box-shadow:0 6px 18px rgba(0,0,0,.4); object-fit:cover; transition:box-shadow .9s ease, transform .2s ease; cursor:pointer;}
+  .spm-art:hover{transform:scale(1.04);}
   body.mood-active .spm-art{ box-shadow:0 0 0 2px var(--mood-accent), 0 6px 18px rgba(0,0,0,.4), 0 0 16px var(--mood-glow-2); }
   #spm-heart{ font-size:16px; color:var(--text-faint); }
   #spm-heart.liked, #spm-expand-heart.liked{ color:#ff4d6d; }
@@ -569,9 +578,26 @@
     transition:opacity .6s cubic-bezier(.16,1,.3,1);
   }
   body.theater-active #theater-scrim{opacity:1;}
+  #cmdk-overlay{position:fixed; inset:0; z-index:3000; display:none; align-items:flex-start; justify-content:center; padding-top:14vh; background:rgba(5,7,10,.6); backdrop-filter:blur(4px);}
+  #cmdk-overlay.show{display:flex; animation:cmdkFadeIn .18s ease;}
+  @keyframes cmdkFadeIn{from{opacity:0;} to{opacity:1;}}
+  #cmdk-box{width:min(560px,88vw); background:linear-gradient(165deg, rgba(24,28,36,.95) 0%, rgba(15,18,23,.97) 100%); border:1px solid var(--border); border-radius:16px; box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 30px 80px -12px rgba(0,0,0,.7); overflow:hidden; animation:cmdkPop .22s cubic-bezier(.16,1,.3,1); }
+  @keyframes cmdkPop{from{opacity:0; transform:translateY(-10px) scale(.97);} to{opacity:1; transform:translateY(0) scale(1);}}
+  #cmdk-input-row{display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border-soft);}
+  #cmdk-icon{font-size:15px; color:var(--text-faint);}
+  #cmdk-input{flex:1; background:none; border:none; outline:none; color:var(--text); font-size:16px; font-family:var(--font-mono);}
+  #cmdk-input::placeholder{color:var(--text-faint);}
+  #cmdk-hint{font-size:11px; color:var(--text-faint); background:var(--bg); border:1px solid var(--border); padding:2px 7px; border-radius:5px;}
+  #cmdk-list{max-height:340px; overflow-y:auto; padding:8px;}
+  .cmdk-item{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:9px; cursor:pointer; transition:background .1s ease;}
+  .cmdk-item .sq{flex-shrink:0; width:8px; height:8px; border-radius:2px;}
+  .cmdk-item-label{font-size:14px; color:var(--text); flex:1;}
+  .cmdk-item-tag{font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.05em;}
+  .cmdk-item.active{background:var(--panel-2); box-shadow:inset 0 0 0 1px var(--border);}
+  .cmdk-empty{padding:18px 12px; text-align:center; color:var(--text-faint); font-size:13px;}
   .yt-player-wrap{position:relative; z-index:6; width:100%; aspect-ratio:16/9; background:var(--bg); border:1px solid var(--border-soft); border-radius:14px; overflow:hidden; margin:14px 0; box-shadow:0 18px 50px -18px rgba(0,0,0,.6); transition:box-shadow .6s ease, border-color .6s ease, width .3s ease;}
-  body[data-layout="classic"] #view-watch .yt-player-wrap{ width:100vw; max-width:1780px; position:relative; left:50%; transform:translateX(-50%); z-index:6; }
-  body[data-layout="sidebar"] #view-watch .yt-player-wrap{ width:min(100% + 140px, 1500px); position:relative; left:50%; transform:translateX(-50%); z-index:6; }
+  body[data-layout="classic"] #view-watch .yt-player-wrap{ width:100vw; max-width:1440px; position:relative; left:50%; transform:translateX(-50%); z-index:6; }
+  body[data-layout="sidebar"] #view-watch .yt-player-wrap{ width:min(100% + 90px, 1300px); position:relative; left:50%; transform:translateX(-50%); z-index:6; }
   body.theater-active .yt-player-wrap{border-color:var(--mood-accent, var(--ytred)); box-shadow:0 26px 80px -14px rgba(0,0,0,.8), 0 0 50px var(--mood-glow, rgba(255,60,60,.28)); animation:cinematicIn .55s cubic-bezier(.16,1,.3,1);}
   @keyframes cinematicIn{from{opacity:0; transform:scale(.965);} to{opacity:1; transform:scale(1);}}
   .yt-player-wrap iframe{width:100%; height:100%; border:0;}
@@ -660,6 +686,9 @@
   .voice-fab.listening { border-color: rgba(176,131,247,.8); box-shadow: 0 0 26px rgba(176,131,247,.45), 0 6px 20px rgba(0,0,0,.55); animation:none; }
   .voice-fab.speaking { border-color: rgba(63,185,80,.8); box-shadow: 0 0 26px rgba(63,185,80,.45), 0 6px 20px rgba(0,0,0,.55); animation:none; }
   .voice-fab.thinking { border-color: rgba(255,138,101,.8); box-shadow: 0 0 26px rgba(255,138,101,.4), 0 6px 20px rgba(0,0,0,.55); animation:none; }
+  .voice-fab.off { opacity:.4; filter:grayscale(.8); animation:none; box-shadow:0 6px 20px rgba(0,0,0,.55); }
+  .voice-fab.off::before { display:none; }
+  .voice-fab.off:hover { opacity:.65; }
 
   .voice-popup { position: fixed; top: 24px; bottom: 94px; right: 24px; width: 460px; background: linear-gradient(165deg, rgba(24,28,36,.86) 0%, rgba(15,18,23,.86) 100%); backdrop-filter: blur(22px) saturate(1.4); -webkit-backdrop-filter: blur(22px) saturate(1.4); border: 1px solid var(--border); border-radius: 18px; padding: 18px 20px; box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 24px 70px -10px rgba(0,0,0,.65); z-index: 999; display: none; flex-direction: column; opacity: 0; transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow:hidden; }
   .voice-popup.show { display: flex; opacity: 1; transform: translateY(0) scale(1); }
@@ -679,6 +708,13 @@
   .voice-popup-title { font-size: 12px; text-transform: uppercase; color: var(--text-faint); letter-spacing: 0.12em; font-weight: 700; display:flex; justify-content:space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border-soft); flex-shrink: 0; position:relative; z-index:1; }
   .voice-popup-settings { font-size: 13px; color: var(--text-faint); margin: 10px 0; display: flex; gap: 10px; align-items: center; flex-shrink: 0; position:relative; z-index:1; }
   .voice-popup-settings input[type=text] { width: 110px; padding: 4px 8px; font-size: 13px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-family: var(--font-mono); }
+  .voice-history { max-height:0; overflow-y:auto; transition:max-height .35s cubic-bezier(.16,1,.3,1); position:relative; z-index:1; }
+  .voice-history:not(:empty) { max-height:150px; margin-top:8px; padding-right:6px; }
+  .voice-history::-webkit-scrollbar { width: 6px; }
+  .voice-history::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .voice-history-item { font-size:13px; color:var(--text-faint); line-height:1.5; padding:8px 0; border-bottom:1px solid var(--border-soft); opacity:.85; }
+  .voice-history-item:first-child{ padding-top:2px; }
+  .voice-history-item .voice-history-status{ font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); opacity:.7; margin-bottom:3px; }
   .voice-popup-text { font-size: 16px; color: var(--text); line-height: 1.65; overflow-y: auto; flex: 1; padding-right: 8px; margin-top: 10px; position:relative; z-index:1; }
   .voice-popup-text::-webkit-scrollbar { width: 6px; }
   .voice-popup-text::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -700,8 +736,19 @@
 <div class="topbar"></div>
 <div id="mood-overlay"></div>
 <div id="theater-scrim"></div>
+<div id="cmdk-overlay">
+  <div id="cmdk-box">
+    <div id="cmdk-input-row">
+      <span id="cmdk-icon">⌘</span>
+      <input type="text" id="cmdk-input" placeholder="Jump to a tab or run an action…" autocomplete="off">
+      <span id="cmdk-hint">esc</span>
+    </div>
+    <div id="cmdk-list"></div>
+  </div>
+</div>
 <div class="wrap">
   <button id="layout-toggle-btn" class="secondary" type="button">⇄ sidebar layout</button>
+  <span id="cmdk-open-hint" style="cursor:pointer; font-size:11.5px; color:var(--text-faint); background:var(--panel-2); border:1px solid var(--border); padding:5px 10px; border-radius:7px; margin-left:8px;" title="Quick jump to any tab">⌘K quick jump</span>
   <div class="titlebar">
     <div class="dots"><span class="dot r"></span><span class="dot a"></span><span class="dot g"></span></div>
     <span class="path">~/coding-journey — tracker</span>
@@ -1303,6 +1350,7 @@
         <div class="add-row">
           <button class="secondary" id="yt-home-refresh-btn" type="button">↻ refresh</button>
           <button class="secondary" id="yt-disconnect-btn" type="button">disconnect</button>
+          <span id="yt-last-updated" style="font-size:12px; color:var(--text-faint); align-self:center;"></span>
         </div>
         <div class="yt-results" id="yt-home-feed"></div>
       </div>
@@ -1334,7 +1382,10 @@
       <div id="spotify-connected-block" style="display:none;">
         <div id="spotify-mini-player" class="spm-card" style="display:none;">
           <div class="spm-row">
-            <img id="spm-art" src="" alt="" class="spm-art" title="click to expand">
+            <div class="spm-art-wrap">
+              <svg class="spm-art-ring-svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" pathLength="100" class="spm-art-ring-track"/><circle id="spm-art-ring" cx="32" cy="32" r="30" pathLength="100" class="spm-art-ring"/></svg>
+              <img id="spm-art" src="" alt="" class="spm-art" title="click to expand">
+            </div>
             <div style="flex:1; min-width:0;">
               <div id="spm-title" class="spm-title">—</div>
               <div class="spm-artist-row"><div id="spm-artist" class="spm-artist">—</div><span id="spm-eq" class="spm-eq" style="display:none;"><span></span><span></span><span></span></span></div>
@@ -1401,7 +1452,7 @@
 </div>
 
 <!-- Voice Assistant Elements -->
-<button class="voice-fab listening" id="voice-fab" title="ORBIT Voice Assistant (Click, say ORBIT, or press Ctrl+Space)"><canvas id="voice-orb" width="120" height="120"></canvas></button>
+<button class="voice-fab listening" id="voice-fab" title="ORBIT Voice Assistant (Click, say ORBIT, or press Ctrl+Space — Ctrl+Alt to turn off)"><canvas id="voice-orb" width="120" height="120"></canvas></button>
 <div class="voice-popup" id="voice-popup">
   <div class="voice-popup-title">
     <span id="voice-status">Listening...</span> 
@@ -1410,10 +1461,11 @@
   <div class="voice-popup-settings">
     <span class="pulse-dot" style="background:var(--purple); box-shadow:0 0 0 0 rgba(176,131,247,.6);"></span>
     <span style="color:var(--purple); font-weight:600;">Hands-free active</span>
-    <span style="margin-left:auto; font-size:11.5px; color:var(--text-faint); background:var(--bg); border:1px solid var(--border); padding:2px 6px; border-radius:4px;">Ctrl+Space</span>
+    <span style="margin-left:auto; font-size:11.5px; color:var(--text-faint); background:var(--bg); border:1px solid var(--border); padding:2px 6px; border-radius:4px;" title="Ctrl+Alt turns ORBIT off">Ctrl+Space · Ctrl+Alt off</span>
     <span style="margin-left:4px;">Wake:</span>
     <input type="text" id="wake-word-input" value="orbit" style="width:65px;">
   </div>
+  <div class="voice-history" id="voice-history"></div>
   <div class="voice-popup-text reveal" id="voice-text"><b>ORBIT Active!</b><br>Speak your question or type it below...</div>
   <div style="margin-top:8px;">
     <input type="text" id="voice-type-input" placeholder="Type a command or ask ORBIT anything..." style="width:100%; box-sizing:border-box; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; font-size:13px; font-family:inherit;">
@@ -1765,6 +1817,7 @@ async function ytLoadHomeFeed(){
     // cache so a page refresh shows the same set instead of silently re-rolling — only the
     // explicit refresh button (or a stale/missing cache) triggers a real re-fetch
     state.ytHomeFeedCache = { videos: finalVideos, cachedAt: Date.now() };
+    const lastUpdEl = document.getElementById('yt-last-updated'); if(lastUpdEl) lastUpdEl.textContent = 'updated just now';
     saveState();
     ytHomeFeedLoaded = true;
   }catch(e){ feedEl.innerHTML = `<div class="empty">Could not load your subscriptions: ${escapeHtml(e.message)}</div>`; }
@@ -1797,13 +1850,18 @@ function renderYtSubscriptions(){
   if(connectBlock) connectBlock.style.display = connected ? 'none' : '';
   if(connectedBlock) connectedBlock.style.display = connected ? '' : 'none';
   if(connected && !ytHomeFeedLoaded){
-    if(state.ytHomeFeedCache && state.ytHomeFeedCache.videos && state.ytHomeFeedCache.videos.length){
-      ytRenderFeed(state.ytHomeFeedCache.videos);
+    const cache = state.ytHomeFeedCache;
+    const cacheAge = cache ? Date.now() - cache.cachedAt : Infinity;
+    const STALE_MS = 3 * 60 * 60 * 1000; // auto-refetch after 3 hours so it never feels permanently frozen
+    if(cache && cache.videos && cache.videos.length && cacheAge < STALE_MS){
+      ytRenderFeed(cache.videos);
       ytHomeFeedLoaded = true;
     } else {
       ytLoadHomeFeed();
     }
   }
+  const lastUpdEl = document.getElementById('yt-last-updated');
+  if(lastUpdEl) lastUpdEl.textContent = state.ytHomeFeedCache ? `updated ${formatRelativeTime(new Date(state.ytHomeFeedCache.cachedAt).toISOString())}` : '';
 }
 
 // ---- Spotify: PKCE auth (client-side only, no server/secret needed) ----
@@ -2166,9 +2224,11 @@ function spotifyUpdateMiniPlayer(playerState){
   document.getElementById('spm-repeat').textContent = playerState.repeat_mode === 2 ? '🔂' : '🔁';
   spmBaseline = { position: playerState.position, duration: playerState.duration || 1, paused: playerState.paused, capturedAt: Date.now() };
   if(!spmSeeking){
-    document.getElementById('spm-seek').value = Math.round((playerState.position / spmBaseline.duration) * 1000);
+    const frac = playerState.position / spmBaseline.duration;
+    document.getElementById('spm-seek').value = Math.round(frac * 1000);
     document.getElementById('spm-pos').textContent = spotifyFmt(playerState.position);
     document.getElementById('spm-dur').textContent = spotifyFmt(spmBaseline.duration);
+    const ring = document.getElementById('spm-art-ring'); if(ring) ring.style.strokeDashoffset = String(100 - frac*100);
   }
   const isNewTrack = !spmCurrentTrack || spmCurrentTrack.id !== track.id;
   spmCurrentTrack = { id: track.id, uri: track.uri, name: track.name, artist: (track.artists||[]).map(a=>a.name).join(', '), artUrl };
@@ -2205,8 +2265,10 @@ setInterval(()=>{
   if(spmSeeking || !spmBaseline || spmBaseline.paused) return;
   const bar = document.getElementById('spotify-mini-player'); if(!bar || bar.style.display === 'none') return;
   const livePos = Math.min(spmBaseline.duration, spmBaseline.position + (Date.now() - spmBaseline.capturedAt));
-  document.getElementById('spm-seek').value = Math.round((livePos / spmBaseline.duration) * 1000);
+  const frac = livePos / spmBaseline.duration;
+  document.getElementById('spm-seek').value = Math.round(frac * 1000);
   document.getElementById('spm-pos').textContent = spotifyFmt(livePos);
+  const ring = document.getElementById('spm-art-ring'); if(ring) ring.style.strokeDashoffset = String(100 - frac*100);
 }, 500);
 document.getElementById('spm-toggle').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.togglePlay());
 document.getElementById('spm-next').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.nextTrack());
@@ -2349,6 +2411,57 @@ function cycleTab(direction){
   activateTab(appTabs[(current+direction+appTabs.length)%appTabs.length]);
 }
 appTabs.forEach(tab=>tab.addEventListener('click', ()=>activateTab(tab)));
+
+// ---- Command palette (Ctrl/Cmd+K): quick jump to any tab or a handful of common actions ----
+const cmdkItems = appTabs.map(tab => ({
+  label: tab.textContent.trim(),
+  tag: 'go to',
+  sqClass: tab.querySelector('.sq') ? tab.querySelector('.sq').className : '',
+  run: () => activateTab(tab)
+})).concat([
+  { label:'Toggle sidebar/classic layout', tag:'action', run: ()=> document.getElementById('layout-toggle-btn').click() },
+  { label:'Mark today\'s task as done', tag:'action', run: ()=> { if(typeof markTaskDone==='function') markTaskDone(); } },
+  { label:'Open ORBIT', tag:'action', run: ()=> { const fab=document.getElementById('voice-fab'); if(fab) fab.click(); } },
+  { label:'Export backup (download JSON)', tag:'action', run: ()=> { if(typeof exportData==='function') exportData(); } },
+]);
+let cmdkActiveIndex = 0, cmdkFiltered = cmdkItems;
+const cmdkOverlay = document.getElementById('cmdk-overlay');
+const cmdkInput = document.getElementById('cmdk-input');
+const cmdkListEl = document.getElementById('cmdk-list');
+function cmdkRender(){
+  const q = cmdkInput.value.trim().toLowerCase();
+  cmdkFiltered = q ? cmdkItems.filter(it => it.label.toLowerCase().includes(q)) : cmdkItems;
+  cmdkActiveIndex = 0;
+  cmdkListEl.innerHTML = cmdkFiltered.length ? cmdkFiltered.map((it,i)=>
+    `<div class="cmdk-item${i===0?' active':''}" data-idx="${i}">${it.sqClass?`<span class="${it.sqClass}"></span>`:''}<span class="cmdk-item-label">${escapeHtml(it.label)}</span><span class="cmdk-item-tag">${it.tag}</span></div>`
+  ).join('') : '<div class="cmdk-empty">no matches</div>';
+  cmdkListEl.querySelectorAll('.cmdk-item').forEach(el => el.addEventListener('click', ()=> cmdkRun(Number(el.dataset.idx))));
+}
+function cmdkHighlight(){
+  cmdkListEl.querySelectorAll('.cmdk-item').forEach((el,i)=> el.classList.toggle('active', i===cmdkActiveIndex));
+  const activeEl = cmdkListEl.querySelector('.cmdk-item.active'); if(activeEl) activeEl.scrollIntoView({block:'nearest'});
+}
+function cmdkRun(idx){
+  const item = cmdkFiltered[idx]; if(!item) return;
+  cmdkClose(); item.run();
+}
+function cmdkOpen(){
+  cmdkOverlay.classList.add('show'); cmdkInput.value = ''; cmdkRender();
+  setTimeout(()=> cmdkInput.focus(), 10);
+}
+function cmdkClose(){ cmdkOverlay.classList.remove('show'); }
+cmdkInput.addEventListener('input', cmdkRender);
+cmdkInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'ArrowDown'){ e.preventDefault(); cmdkActiveIndex = Math.min(cmdkFiltered.length-1, cmdkActiveIndex+1); cmdkHighlight(); }
+  else if(e.key === 'ArrowUp'){ e.preventDefault(); cmdkActiveIndex = Math.max(0, cmdkActiveIndex-1); cmdkHighlight(); }
+  else if(e.key === 'Enter'){ e.preventDefault(); cmdkRun(cmdkActiveIndex); }
+  else if(e.key === 'Escape'){ e.preventDefault(); cmdkClose(); }
+});
+cmdkOverlay.addEventListener('click', (e)=>{ if(e.target.id === 'cmdk-overlay') cmdkClose(); });
+window.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){ e.preventDefault(); cmdkOpen(); }
+});
+const cmdkHintEl = document.getElementById('cmdk-open-hint'); if(cmdkHintEl) cmdkHintEl.addEventListener('click', cmdkOpen);
 window.addEventListener('keydown', (event)=>{
   if(event.ctrlKey && event.key==='Tab'){
     event.preventDefault(); cycleTab(event.shiftKey ? -1 : 1);
@@ -4539,6 +4652,7 @@ setInterval(() => {
 
   let isListening = false;
   let isSpeaking = false;
+  let orbitDisabled = false;
   let wakeWord = "orbit";
   let listeningForCommand = false;
   let currentTranscript = "";
@@ -4546,6 +4660,7 @@ setInterval(() => {
   let lastAssistantResponse = "";
 
   function startMic() {
+    if(orbitDisabled) return;
     if(!isListening && !isSpeaking) {
       try {
         recognition.start();
@@ -4558,6 +4673,19 @@ setInterval(() => {
         setTimeout(startMic, 400);
       }
     }
+  }
+  function orbitTurnOff(){
+    orbitDisabled = true;
+    try{ recognition.abort(); }catch(e){}
+    isListening = false;
+    stopAll();
+    if(popup) popup.classList.remove('show');
+    if(fab) fab.className = 'voice-fab off';
+  }
+  function orbitTurnOn(){
+    orbitDisabled = false;
+    if(fab) fab.className = 'voice-fab';
+    startMic();
   }
 
   setTimeout(startMic, 1000);
@@ -4572,9 +4700,15 @@ setInterval(() => {
   // Global Keyboard Shortcut: Ctrl + Space or Alt + M to open Voice Assistant
   document.addEventListener('keydown', (e) => {
     if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (e.ctrlKey && e.altKey && (e.key === 'Alt' || e.key === 'Control') && !e.shiftKey && !e.metaKey) {
+      e.preventDefault();
+      orbitTurnOff();
+      return;
+    }
     if ((e.ctrlKey || e.metaKey || e.altKey) && (e.code === 'Space' || e.key.toLowerCase() === 'm')) {
       e.preventDefault();
-      if (fab) fab.click();
+      if (orbitDisabled) orbitTurnOn();
+      else if (fab) fab.click();
     }
   });
 
@@ -4597,18 +4731,28 @@ setInterval(() => {
     });
   }
 
+  let _pendingArchive = null; // the last finalized turn, archived just before the next one starts
   function showPopup(status, htmlContent, showActions = false, rawTextToCopy = '') {
     if(!popup) return;
     popup.classList.add('show');
     if(statusEl) statusEl.textContent = status;
     if(textEl) {
+      const historyEl = document.getElementById('voice-history');
+      if(_pendingArchive && historyEl){
+        const row = document.createElement('div');
+        row.className = 'voice-history-item';
+        row.innerHTML = `<div class="voice-history-status">${escapeHtml(_pendingArchive.status)}</div>${_pendingArchive.html}`;
+        historyEl.appendChild(row);
+        historyEl.scrollTop = historyEl.scrollHeight;
+      }
       textEl.innerHTML = htmlContent;
       textEl.classList.remove('reveal');
       void textEl.offsetWidth; // force reflow so the animation restarts every update
       textEl.classList.add('reveal');
       textEl.scrollTop = textEl.scrollHeight;
     }
-    if(rawTextToCopy) lastAssistantResponse = rawTextToCopy;
+    if(rawTextToCopy){ lastAssistantResponse = rawTextToCopy; _pendingArchive = { status, html: htmlContent }; }
+    else { _pendingArchive = null; } // "thinking…" placeholders never get archived
     if(actionsEl) actionsEl.style.display = 'flex'; // Always show action buttons when popup is visible!
   }
 
@@ -4835,6 +4979,8 @@ setInterval(() => {
     clearBtn.addEventListener('click', () => {
       clearTimeout(silenceTimer);
       currentTranscript = "";
+      const historyEl = document.getElementById('voice-history'); if(historyEl) historyEl.innerHTML = '';
+      _pendingArchive = null;
       showPopup('Listening...', `Listening... State your command or question out loud.`, true);
     });
   }
@@ -4869,6 +5015,7 @@ setInterval(() => {
 
   if(fab) {
     fab.addEventListener('click', () => {
+      if(orbitDisabled){ orbitTurnOn(); return; }
       if(isSpeaking) {
         stopAll();
         showPopup('Stopped', 'Speech interrupted.');
@@ -5130,7 +5277,27 @@ setInterval(() => {
       return { intent: 'media_seek', spoken: "Nothing's playing right now, sir.", display: "Nothing playing." };
     }
 
-    // 9. Tracker actions — real changes to your data by voice, not just navigation
+    // free personality easter eggs — no API call, just banter
+    if (/^(tell me a joke|make me laugh|say something funny)$/.test(norm)) {
+      const jokes = [
+        "Why do programmers prefer dark mode, sir? Because light attracts bugs.",
+        "There are only 10 types of people, sir — those who understand binary and those who don't.",
+        "A SQL query walks into a bar, walks up to two tables, and asks: 'Can I join you?'",
+        "Why did the developer go broke, sir? Because he used up all his cache.",
+        "I would tell you a UDP joke, sir, but you might not get it."
+      ];
+      return { intent:'easter_egg', spoken: jokes[Math.floor(Math.random()*jokes.length)], display: "😄" };
+    }
+    if (/^(sing (me )?a song|sing something)$/.test(norm)) {
+      return { intent:'easter_egg', spoken: "I'm an assistant, sir, not a jukebox — but I can queue up an actual song on Spotify if you'd like.", display: "🎵 Not much of a singer, sir." };
+    }
+    if (/^(who('s| is) the best|are you better than siri|are you better than alexa)$/.test(norm)) {
+      return { intent:'easter_egg', spoken: "I couldn't possibly comment on the competition, sir. I just try to be useful.", display: "🤖" };
+    }
+    if (/^(do a barrel roll)$/.test(norm)) {
+      document.body.animate([{ transform:'rotate(0deg)' }, { transform:'rotate(360deg)' }], { duration: 700, easing:'ease-in-out' });
+      return { intent:'easter_egg', spoken: "Hold on tight, sir.", display: "🌀" };
+    }
     if (/^(mark|complete|finish)\b.*\btask\b/.test(norm) || norm === 'task done' || norm.includes('mark today')) {
       if (state.dailyTask && state.dailyTask.status !== 'done') {
         markTaskDone();
