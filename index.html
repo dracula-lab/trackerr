@@ -78,7 +78,8 @@
     100%{ transform:translate(-2%,2%) scale(1.05); }
   }
   .topbar{height:3px; background:linear-gradient(90deg,var(--green),var(--blue),var(--purple),var(--amber),var(--mood-accent,var(--green)),var(--green)); background-size:200% 100%; animation:topbarShift 6s linear infinite; transition:background 1.1s ease, box-shadow .4s ease, animation-duration .4s ease;}
-  body.mood-active .topbar{ height:4px; box-shadow:0 0 16px var(--mood-glow), 0 0 30px var(--mood-glow-2); animation-duration:4.5s; }
+  body.mood-active .topbar{ height:4px; box-shadow:0 0 16px var(--mood-glow), 0 0 30px var(--mood-glow-2); background:linear-gradient(90deg,var(--mood-accent),var(--mood-accent-2),var(--green),var(--mood-accent),var(--mood-accent-2)); background-size:300% 100%; animation:discoStrobe 1.6s linear infinite; }
+  @keyframes discoStrobe{ 0%{background-position:0% 0; filter:brightness(1);} 25%{filter:brightness(1.5);} 50%{background-position:100% 0; filter:brightness(1);} 75%{filter:brightness(1.5);} 100%{background-position:200% 0; filter:brightness(1);} }
   body[data-orbit-state="listening"] .topbar{ box-shadow:0 0 14px rgba(176,131,247,.65); animation-duration:2.6s; }
   body[data-orbit-state="speaking"] .topbar{ box-shadow:0 0 14px rgba(63,185,80,.65); animation-duration:2.6s; }
   body[data-orbit-state="thinking"] .topbar{ box-shadow:0 0 14px rgba(255,138,101,.6); animation-duration:1.8s; }
@@ -517,6 +518,11 @@
   .timer-display{font-family:var(--font-display); font-size:60.5px; font-weight:700; letter-spacing:.02em; margin:6px 0 16px; color:var(--text);}
   .timer-display.running{color:var(--coral); text-shadow:0 0 20px rgba(255,138,101,.4);}
   .timer-controls{display:flex; gap:10px; justify-content:center;}
+  .timer-custom-row{display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap;}
+  .timer-custom-row input{background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:7px; padding:6px 10px; font-family:var(--font-mono); font-size:13px; width:150px;}
+  .timer-custom-row input:focus{outline:none; border-color:var(--coral);}
+  .timer-alarm-status{font-size:12px; color:var(--green); margin-top:8px; min-height:15px;}
+  .timer-orbit-hint{font-size:11.5px; color:var(--text-faint); margin-top:10px; font-style:italic;}
 
   /* achievements */
   .badge-strip{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;}
@@ -1085,6 +1091,16 @@
           <button class="primary" id="timer-start-btn" type="button">start</button>
           <button class="secondary" id="timer-reset-btn" type="button">reset</button>
         </div>
+        <div class="timer-custom-row">
+          <input type="number" id="timer-custom-mins" min="1" max="300" placeholder="custom minutes">
+          <button class="secondary" id="timer-custom-btn" type="button">set &amp; start</button>
+        </div>
+        <div class="timer-custom-row">
+          <input type="time" id="timer-alarm-input">
+          <button class="secondary" id="timer-alarm-set-btn" type="button">⏰ set alarm</button>
+        </div>
+        <div class="timer-alarm-status" id="timer-alarm-status"></div>
+        <div class="timer-orbit-hint">or just tell ORBIT — type or say "set a timer for 12 minutes" / "set an alarm for 6:30 pm"</div>
       </div>
     </section>
     <section>
@@ -1763,6 +1779,48 @@ function orbitScheduleTimer(ms, label){
     if(window.Notification && Notification.permission === 'granted') { try{ new Notification('ORBIT', {body: label}); }catch(e){} }
   }, ms);
   return true;
+}
+// Shared by the voice assistant AND the orbit.ai chat box (askSolver) so typing "set a timer for
+// 12 minutes" there works instantly too, without spending an API call. Returns null if the text
+// isn't a timer/alarm command, so the caller knows to fall through to the AI or other handling.
+function tryTimerAlarmCommand(text){
+  const raw = text.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+  if (/^set (a |an )?timer for /.test(raw)) {
+    const label = raw.replace(/^set (a |an )?timer for /, '').trim();
+    const ms = orbitParseDuration(label);
+    if(ms > 0){
+      orbitScheduleTimer(ms, `timer for ${label}`);
+      return { intent:'set_timer', spoken:`Timer set for ${label}, sir. I'll let you know.`, display:`⏱️ Timer set: ${escapeHtml(label)}` };
+    }
+    return { intent:'set_timer', spoken:"I didn't catch how long, sir — try something like 'set a timer for 10 minutes'.", display:"Couldn't parse the timer duration." };
+  }
+  if (/^set (an |a )?alarm for /.test(raw)) {
+    const label = raw.replace(/^set (an |a )?alarm for /, '').trim();
+    const ms = orbitParseAlarmMs(label);
+    if(ms !== null && ms > 0){
+      orbitScheduleTimer(ms, `alarm for ${label}`);
+      return { intent:'set_alarm', spoken:`Alarm set for ${label}, sir.`, display:`⏰ Alarm set: ${escapeHtml(label)}` };
+    }
+    return { intent:'set_alarm', spoken:"I couldn't make out that time, sir — try something like 'set an alarm for 5:30 pm'.", display:"Couldn't parse the alarm time." };
+  }
+  if (/\b(timer|pomodoro|stopwatch)\b/.test(raw)) {
+    if (/\b(reset|clear|stop)\b/.test(raw)) {
+      resetTimer();
+      return { intent: 'timer', spoken: "Timer reset.", display: "Focus timer has been reset." };
+    }
+    const numMatch = raw.match(/\b(\d+)\b/);
+    if (numMatch) {
+      const mins = parseInt(numMatch[1], 10);
+      if (mins > 0 && mins <= 180) {
+        setTimerPreset(mins * 60);
+        if (!timerRunning) toggleTimer();
+        return { intent: 'timer', spoken: `Started ${mins} minute timer.`, display: `Timer started for <b>${mins} minutes</b>.` };
+      }
+    }
+    toggleTimer();
+    return { intent: 'timer', spoken: timerRunning ? "Timer started." : "Timer paused.", display: timerRunning ? "Focus timer started." : "Focus timer paused." };
+  }
+  return null;
 }
 function celebrate(){
   playChime(784, 0.1); setTimeout(()=> playChime(1047, 0.15), 90);
@@ -3281,6 +3339,17 @@ async function askSolver(){
   if(!q && !pendingAttachment) { input.focus(); return; }
   if(!q) q = pendingAttachment.isImage ? 'Take a look at this image and tell me about it.' : 'Take a look at this file and tell me about it.';
 
+  // Instant local command — timers & alarms don't need the AI, so handle them here for free.
+  if(!pendingAttachment){
+    const local = tryTimerAlarmCommand(q);
+    if(local){
+      state.chat.push({role:'user', content:q});
+      state.chat.push({role:'assistant', content: local.display.replace(/<\/?b>/g,'')});
+      input.value=''; renderChat(); saveState();
+      return;
+    }
+  }
+
   const attachmentForThisMsg = pendingAttachment;
   state.chat.push({role:'user', content:q, attachmentName: attachmentForThisMsg ? attachmentForThisMsg.name : null});
   input.value=''; pendingAttachment = null; renderAttachPreview(); renderChat(); saveState();
@@ -3655,6 +3724,23 @@ function completeTimerSession(){
 document.querySelectorAll('.timer-preset').forEach(b=>{ b.addEventListener('click', ()=> setTimerPreset(Number(b.dataset.secs))); });
 document.getElementById('timer-start-btn').addEventListener('click', toggleTimer);
 document.getElementById('timer-reset-btn').addEventListener('click', resetTimer);
+document.getElementById('timer-custom-btn').addEventListener('click', ()=>{
+  const el = document.getElementById('timer-custom-mins'); const mins = Number(el.value);
+  if(!(mins > 0 && mins <= 300)){ el.focus(); return; }
+  setTimerPreset(mins*60);
+  if(!timerRunning) toggleTimer();
+  el.value = '';
+});
+document.getElementById('timer-alarm-set-btn').addEventListener('click', ()=>{
+  const el = document.getElementById('timer-alarm-input'); const statusEl = document.getElementById('timer-alarm-status');
+  const val = el.value; if(!val){ el.focus(); return; }
+  const ms = orbitParseAlarmMs(val);
+  if(ms === null || !(ms > 0)){ statusEl.style.color = 'var(--coral)'; statusEl.textContent = "couldn't parse that time."; return; }
+  orbitScheduleTimer(ms, `alarm for ${val}`);
+  const hrs = Math.floor(ms/3600000), mn = Math.round((ms%3600000)/60000);
+  statusEl.style.color = 'var(--green)';
+  statusEl.textContent = `⏰ alarm set for ${val} (in ${hrs?hrs+'h ':''}${mn}m) — stays active while this tab is open.`;
+});
 
 async function generateInterviewQuestion(){
   const container = document.getElementById('interview-container');
@@ -5643,41 +5729,8 @@ setInterval(() => {
     }
 
     // 4. Timer commands
-    if (/^set (a |an )?timer for /.test(norm)) {
-      const label = norm.replace(/^set (a |an )?timer for /, '').trim();
-      const ms = orbitParseDuration(label);
-      if(ms > 0){
-        orbitScheduleTimer(ms, `timer for ${label}`);
-        return { intent:'set_timer', spoken:`Timer set for ${label}, sir. I'll let you know.`, display:`⏱️ Timer set: ${escapeHtml(label)}` };
-      }
-      return { intent:'set_timer', spoken:"I didn't catch how long, sir — try something like 'set a timer for 10 minutes'.", display:"Couldn't parse the timer duration." };
-    }
-    if (/^set (an |a )?alarm for /.test(norm)) {
-      const label = norm.replace(/^set (an |a )?alarm for /, '').trim();
-      const ms = orbitParseAlarmMs(label);
-      if(ms !== null && ms > 0){
-        orbitScheduleTimer(ms, `alarm for ${label}`);
-        return { intent:'set_alarm', spoken:`Alarm set for ${label}, sir.`, display:`⏰ Alarm set: ${escapeHtml(label)}` };
-      }
-      return { intent:'set_alarm', spoken:"I couldn't make out that time, sir — try something like 'set an alarm for 5:30 pm'.", display:"Couldn't parse the alarm time." };
-    }
-    if (norm.includes('timer') || norm.includes('pomodoro') || norm.includes('stopwatch')) {
-      if (norm.includes('reset') || norm.includes('clear') || norm.includes('stop')) {
-        resetTimer();
-        return { intent: 'timer', spoken: "Timer reset.", display: "Focus timer has been reset." };
-      }
-      const numMatch = norm.match(/\b(\d+)\b/);
-      if (numMatch) {
-        const mins = parseInt(numMatch[1], 10);
-        if (mins > 0 && mins <= 180) {
-          setTimerPreset(mins * 60);
-          if (!timerRunning) toggleTimer();
-          return { intent: 'timer', spoken: `Started ${mins} minute timer.`, display: `Timer started for <b>${mins} minutes</b>.` };
-        }
-      }
-      toggleTimer();
-      return { intent: 'timer', spoken: timerRunning ? "Timer started." : "Timer paused.", display: timerRunning ? "Focus timer started." : "Focus timer paused." };
-    }
+    const timerAlarmResult = tryTimerAlarmCommand(norm);
+    if (timerAlarmResult) return timerAlarmResult;
 
     // 5. Progress logging commands
     if (norm.includes('log') || norm.includes('commit') || norm.includes('add hours')) {
