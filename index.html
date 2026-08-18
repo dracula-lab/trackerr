@@ -5106,19 +5106,27 @@ setInterval(() => {
 (function initClapTrigger(){
   const toggleBtn = document.getElementById('clap-toggle-btn'); if(!toggleBtn) return;
   const statusEl = document.getElementById('clap-status');
-  const CLAP = { spikeRatio:6.0, cooldownS:0.6, minGapS:0.05, maxGapS:0.4, minRms:0.02, retriggerRatio:0.55, noiseAlpha:0.98 };
+  const CLAP = { spikeRatio:4.5, cooldownS:0.6, minGapS:0.05, maxGapS:0.45, minRms:0.012, retriggerRatio:0.55, noiseAlpha:0.98 };
   let audioCtx = null, analyser = null, buf = null, pollId = null;
   let noiseFloor = 1e-4, lastDouble = 0, firstClapTime = null, armedSpike = true, welcomeCooldownUntil = 0;
+  let peakSinceLastPaint = 0, lastStatusPaint = 0;
 
   function rms(data){ let sum=0; for(let i=0;i<data.length;i++) sum += data[i]*data[i]; return Math.sqrt(sum/data.length); }
 
   function pollClap(){
     analyser.getFloatTimeDomainData(buf);
     const level = rms(buf);
+    peakSinceLastPaint = Math.max(peakSinceLastPaint, level);
     const quietGate = noiseFloor * 2.2;
     if(level < quietGate){ noiseFloor = CLAP.noiseAlpha*noiseFloor + (1-CLAP.noiseAlpha)*level; noiseFloor = Math.max(noiseFloor, 1e-7); }
     const threshold = Math.max(noiseFloor * CLAP.spikeRatio, CLAP.minRms);
     const now = performance.now()/1000;
+    // Live meter so you can see it's actually hearing you, not just guess — repaints ~4x/sec.
+    if(now - lastStatusPaint > 0.25){
+      lastStatusPaint = now;
+      statusEl.textContent = `armed — level ${peakSinceLastPaint.toFixed(3)} / threshold ${threshold.toFixed(3)} (clap louder than threshold, twice, fast)`;
+      peakSinceLastPaint = 0;
+    }
     const retriggerLevel = threshold * CLAP.retriggerRatio;
     if(level < retriggerLevel) armedSpike = true;
     if(armedSpike && level >= threshold && (now - lastDouble) >= CLAP.cooldownS){
@@ -5129,7 +5137,10 @@ setInterval(() => {
         if(gap < CLAP.minGapS){ /* too fast, ignore */ }
         else if(gap <= CLAP.maxGapS){
           firstClapTime = null; lastDouble = now;
-          if(now > welcomeCooldownUntil){ welcomeCooldownUntil = now + 3; triggerClapWelcome(); }
+          if(now > welcomeCooldownUntil){
+            welcomeCooldownUntil = now + 3; triggerClapWelcome();
+            statusEl.textContent = '✓ double clap detected!'; lastStatusPaint = now + 1.2; // hold the message ~1.2s before the meter resumes
+          }
         } else { firstClapTime = now; }
       }
     }
@@ -5137,15 +5148,18 @@ setInterval(() => {
 
   async function enableClap(){
     try{
-      const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false }
+      });
       audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') await audioCtx.resume();
       analyser = audioCtx.createAnalyser(); analyser.fftSize = 1024;
       buf = new Float32Array(analyser.fftSize);
       audioCtx.createMediaStreamSource(stream).connect(analyser);
       pollId = setInterval(pollClap, 30);
       state.clapEnabled = true; saveState();
       toggleBtn.textContent = '🎙️ disarm clap detector'; toggleBtn.classList.add('armed');
-      statusEl.textContent = 'armed — double clap near your mic to trigger the welcome'; statusEl.classList.add('armed');
+      statusEl.classList.add('armed');
     }catch(e){
       statusEl.textContent = 'mic permission denied or unavailable.'; statusEl.classList.remove('armed');
     }
