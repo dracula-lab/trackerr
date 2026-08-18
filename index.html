@@ -530,6 +530,7 @@
   #clap-toggle-btn.armed{border-color:var(--green); color:var(--green);}
   .clap-settings{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
   .clap-hint{font-size:11.5px; color:var(--text-faint); margin-top:10px; font-style:italic;}
+  .clap-divider{height:1px; background:var(--border-soft); margin:16px 0;}
 
   /* achievements */
   .badge-strip{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;}
@@ -1124,6 +1125,18 @@
           <button class="lc-edit" id="clap-voice-btn" type="button">voice ID</button>
         </div>
         <div class="clap-hint">double clap near your mic to play the song and speak the welcome line. no ElevenLabs key set → falls back to your browser's built-in voice.</div>
+        <div class="clap-divider"></div>
+        <div class="clap-row">
+          <button class="secondary" id="win-grant-btn" type="button">🖥️ enable multi-monitor</button>
+          <button class="secondary" id="win-open-btn" type="button">▶ open workspace now</button>
+          <button class="secondary" id="cursor-open-btn" type="button">📝 open Cursor</button>
+        </div>
+        <div class="clap-settings">
+          <button class="lc-edit" id="win-a-btn" type="button">window A (url + monitor)</button>
+          <button class="lc-edit" id="win-b-btn" type="button">window B (url + monitor)</button>
+          <button class="lc-edit" id="cursor-path-btn" type="button">Cursor path</button>
+        </div>
+        <div class="clap-hint" id="win-status">multi-monitor positioning needs Chrome/Edge and a one-time permission grant — click "enable multi-monitor" first. Cursor needs its cursor:// URL handler registered, and your browser will ask to confirm each time.</div>
       </div>
     </section>
     <section>
@@ -1736,7 +1749,7 @@ let state = {
   taskLevel:1, tasksCompleted:0, dailyTask:null,
   course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
   targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, clapEnabled:false, elevenlabsKey:'', elevenlabsVoiceId:'', clapWelcomePhrase:'Welcome back. Ready to lock in?', clapSongUri:'', resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, clapEnabled:false, elevenlabsKey:'', elevenlabsVoiceId:'', clapWelcomePhrase:'Welcome back. Ready to lock in?', clapSongUri:'', winAUrl:'', winAMonitor:1, winBUrl:'', winBMonitor:2, cursorPath:'', resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
 };
 let saveTimer = null;
 let pendingAttachment = null; 
@@ -2610,7 +2623,7 @@ async function loadState(){
         selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free',
         noteAttachments:[],
         targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, clapEnabled:false, elevenlabsKey:'', elevenlabsVoiceId:'', clapWelcomePhrase:'Welcome back. Ready to lock in?', clapSongUri:'', resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, clapEnabled:false, elevenlabsKey:'', elevenlabsVoiceId:'', clapWelcomePhrase:'Welcome back. Ready to lock in?', clapSongUri:'', winAUrl:'', winAMonitor:1, winBUrl:'', winBMonitor:2, cursorPath:'', resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
       }, loaded);
       if(!state.arcade || typeof state.arcade !== 'object') state.arcade = {xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}};
       if(!state.arcade.answers) state.arcade.answers = {};
@@ -3896,7 +3909,7 @@ document.getElementById('import-file-input').addEventListener('change', async (e
       taskLevel:1, tasksCompleted:0, dailyTask:null,
       course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
       targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, clapEnabled:false, elevenlabsKey:'', elevenlabsVoiceId:'', clapWelcomePhrase:'Welcome back. Ready to lock in?', clapSongUri:'', resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, clapEnabled:false, elevenlabsKey:'', elevenlabsVoiceId:'', clapWelcomePhrase:'Welcome back. Ready to lock in?', clapSongUri:'', winAUrl:'', winAMonitor:1, winBUrl:'', winBMonitor:2, cursorPath:'', resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
     }, imported);
     if(!imported.geminiKey) state.geminiKey = keepKey;
     if(!imported.noteAttachments || !imported.noteAttachments.length) state.noteAttachments = keepAttachments;
@@ -4374,7 +4387,7 @@ document.getElementById('reset-btn').addEventListener('click', async ()=>{
     course:{items:[]}, courseLog:[], geminiKey: keepKey, openrouterKey: keepOpenrouterKey, grokKey: keepGrokKey,
     aiProvider: keepProvider, selectedOpenrouterModel: keepOpenrouterModel, selectedGrokModel: keepGrokModel,
     noteAttachments:[], targetDate: state.targetDate, achievements:[], mockInterview:{history:[], currentQuestion:null},
-        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, clapEnabled:false, elevenlabsKey: state.elevenlabsKey, elevenlabsVoiceId: state.elevenlabsVoiceId, clapWelcomePhrase: state.clapWelcomePhrase, clapSongUri: state.clapSongUri, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, clapEnabled:false, elevenlabsKey: state.elevenlabsKey, elevenlabsVoiceId: state.elevenlabsVoiceId, clapWelcomePhrase: state.clapWelcomePhrase, clapSongUri: state.clapSongUri, winAUrl: state.winAUrl, winAMonitor: state.winAMonitor, winBUrl: state.winBUrl, winBMonitor: state.winBMonitor, cursorPath: state.cursorPath, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
   };
   state.links.course = 'https://courses.aajsecode.com/s/courses/663f10c1b48d0c3f23f4ac0b/take'; await saveState(); render();
 });
@@ -5109,11 +5122,12 @@ setInterval(() => {
   const CLAP = { spikeRatio:4.5, cooldownS:0.6, minGapS:0.05, maxGapS:0.45, minRms:0.012, retriggerRatio:0.55, noiseAlpha:0.98 };
   let audioCtx = null, analyser = null, buf = null, pollId = null;
   let noiseFloor = 1e-4, lastDouble = 0, firstClapTime = null, armedSpike = true, welcomeCooldownUntil = 0;
-  let peakSinceLastPaint = 0, lastStatusPaint = 0;
+  let peakSinceLastPaint = 0, lastStatusPaint = 0, listeningPaused = false;
 
   function rms(data){ let sum=0; for(let i=0;i<data.length;i++) sum += data[i]*data[i]; return Math.sqrt(sum/data.length); }
 
   function pollClap(){
+    if(listeningPaused) return; // muted while the welcome sequence plays, so the song's own beats can't re-trigger it
     analyser.getFloatTimeDomainData(buf);
     const level = rms(buf);
     peakSinceLastPaint = Math.max(peakSinceLastPaint, level);
@@ -5126,8 +5140,7 @@ setInterval(() => {
       lastStatusPaint = now;
       statusEl.textContent = `armed — level ${peakSinceLastPaint.toFixed(3)} / threshold ${threshold.toFixed(3)} (clap louder than threshold, twice, fast)`;
       peakSinceLastPaint = 0;
-    }
-    const retriggerLevel = threshold * CLAP.retriggerRatio;
+    }    const retriggerLevel = threshold * CLAP.retriggerRatio;
     if(level < retriggerLevel) armedSpike = true;
     if(armedSpike && level >= threshold && (now - lastDouble) >= CLAP.cooldownS){
       armedSpike = false;
@@ -5193,8 +5206,30 @@ setInterval(() => {
       new Audio(URL.createObjectURL(blob)).play();
     }catch(e){ if(typeof speakText==='function') speakText(text); }
   }
+  async function getWeatherSnippet(){
+    try{
+      const pos = await new Promise((res,rej)=> navigator.geolocation.getCurrentPosition(res,rej,{timeout:4000}));
+      const { latitude, longitude } = pos.coords;
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code`);
+      const data = await r.json();
+      const codes = {0:'clear skies',1:'mostly clear',2:'partly cloudy',3:'overcast',45:'foggy',48:'foggy',51:'light drizzle',53:'drizzle',55:'heavy drizzle',61:'light rain',63:'rain',65:'heavy rain',71:'light snow',73:'snow',75:'heavy snow',80:'rain showers',81:'rain showers',82:'heavy rain showers',95:'thunderstorms'};
+      const temp = Math.round(data.current.temperature_2m);
+      return `${temp}°C and ${codes[data.current.weather_code] || 'mixed conditions'}`;
+    }catch(e){ return null; }
+  }
+  async function buildWelcomeExtra(){
+    const timeStr = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    let extra = `It's ${timeStr}.`;
+    if(typeof computeStreak === 'function') extra += ` ${computeStreak()} day streak`;
+    if(typeof computeTotalHours === 'function') extra += `, ${Math.round(computeTotalHours()*10)/10} hours logged.`;
+    const weather = await getWeatherSnippet();
+    if(weather) extra += ` ${weather} outside.`;
+    return extra;
+  }
   async function triggerClapWelcome(){
     playChime(660, 0.1);
+    listeningPaused = true; // mute detection so the song/speech we're about to play can't be heard as another clap
+    statusEl.textContent = '🔇 muted for ~12s while the welcome plays (avoids the song re-triggering it)';
     const uri = toSpotifyUri(state.clapSongUri);
     if(uri){
       const ok = state.spotifyAccessToken && await spotifyPlayUri(uri);
@@ -5202,7 +5237,15 @@ setInterval(() => {
     } else if(state.clapSongUri){
       window.open(state.clapSongUri, '_blank');
     }
-    setTimeout(()=> elevenLabsSpeak(state.clapWelcomePhrase || 'Welcome back.'), state.clapSongUri ? 1000 : 0);
+    openWorkspaceWindows();
+    setTimeout(async ()=>{
+      const extra = await buildWelcomeExtra();
+      const full = (state.clapWelcomePhrase || 'Welcome back.') + ' ' + extra;
+      elevenLabsSpeak(full);
+      if(typeof showPopup === 'function') showPopup('Welcome', full, true, full);
+    }, state.clapSongUri ? 1000 : 0);
+    setTimeout(openCursor, 1500);
+    setTimeout(()=>{ listeningPaused = false; noiseFloor = 1e-4; armedSpike = true; firstClapTime = null; }, 12000); // resume once the room's quiet again
   }
 
   document.getElementById('clap-phrase-btn').addEventListener('click', ()=>{
@@ -5220,6 +5263,63 @@ setInterval(() => {
   document.getElementById('clap-voice-btn').addEventListener('click', ()=>{
     const v = prompt('ElevenLabs Voice ID:', state.elevenlabsVoiceId || '');
     if(v===null) return; state.elevenlabsVoiceId = v.trim(); saveState();
+  });
+
+  // ---- Multi-monitor window positioning (Chromium Window Management API) + Cursor launch ----
+  const winStatusEl = document.getElementById('win-status');
+  let cachedScreens = null;
+
+  async function grantScreens(){
+    if(!('getScreenDetails' in window)){
+      winStatusEl.textContent = 'multi-monitor positioning isn\'t supported in this browser (Chrome/Edge only).';
+      return null;
+    }
+    try{
+      const details = await window.getScreenDetails();
+      cachedScreens = details.screens;
+      winStatusEl.textContent = `✓ multi-monitor enabled — found ${cachedScreens.length} screen(s).`;
+      return cachedScreens;
+    }catch(e){
+      winStatusEl.textContent = 'permission denied — multi-monitor windows will open unpositioned instead.';
+      return null;
+    }
+  }
+  function openOnMonitor(url, monitorIdx){
+    if(!url) return;
+    const s = cachedScreens && cachedScreens[monitorIdx-1];
+    if(s){
+      window.open(url, '_blank', `left=${s.availLeft},top=${s.availTop},width=${s.availWidth},height=${s.availHeight}`);
+    } else {
+      window.open(url, '_blank'); // no permission granted yet, or that monitor doesn't exist — opens as a normal tab
+    }
+  }
+  async function openWorkspaceWindows(){
+    if(!cachedScreens) await grantScreens();
+    if(state.winAUrl) openOnMonitor(state.winAUrl, Number(state.winAMonitor)||1);
+    if(state.winBUrl) setTimeout(()=> openOnMonitor(state.winBUrl, Number(state.winBMonitor)||2), 400);
+  }
+  function openCursor(){
+    const path = (state.cursorPath||'').trim();
+    const url = path ? `cursor://file/${path.replace(/\\/g,'/')}` : 'cursor://';
+    try{ window.location.href = url; }catch(e){}
+  }
+
+  document.getElementById('win-grant-btn').addEventListener('click', grantScreens);
+  document.getElementById('win-open-btn').addEventListener('click', openWorkspaceWindows);
+  document.getElementById('cursor-open-btn').addEventListener('click', openCursor);
+  document.getElementById('win-a-btn').addEventListener('click', ()=>{
+    const url = prompt('Window A URL:', state.winAUrl||''); if(url===null) return;
+    const mon = prompt('Monitor number for window A (1 = primary):', state.winAMonitor||1); if(mon===null) return;
+    state.winAUrl = url.trim(); state.winAMonitor = Number(mon)||1; saveState();
+  });
+  document.getElementById('win-b-btn').addEventListener('click', ()=>{
+    const url = prompt('Window B URL:', state.winBUrl||''); if(url===null) return;
+    const mon = prompt('Monitor number for window B:', state.winBMonitor||2); if(mon===null) return;
+    state.winBUrl = url.trim(); state.winBMonitor = Number(mon)||2; saveState();
+  });
+  document.getElementById('cursor-path-btn').addEventListener('click', ()=>{
+    const v = prompt('Folder/file path to open in Cursor (blank = just launch Cursor):', state.cursorPath||'');
+    if(v===null) return; state.cursorPath = v.trim(); saveState();
   });
 
   if(state.clapEnabled) enableClap();
