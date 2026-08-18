@@ -523,6 +523,13 @@
   .timer-custom-row input:focus{outline:none; border-color:var(--coral);}
   .timer-alarm-status{font-size:12px; color:var(--green); margin-top:8px; min-height:15px;}
   .timer-orbit-hint{font-size:11.5px; color:var(--text-faint); margin-top:10px; font-style:italic;}
+  .clap-card{background:var(--panel); border:1px solid var(--border-soft); border-radius:12px; padding:16px 18px;}
+  .clap-row{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .clap-status{font-size:12.5px; color:var(--text-faint);}
+  .clap-status.armed{color:var(--green);}
+  #clap-toggle-btn.armed{border-color:var(--green); color:var(--green);}
+  .clap-settings{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+  .clap-hint{font-size:11.5px; color:var(--text-faint); margin-top:10px; font-style:italic;}
 
   /* achievements */
   .badge-strip{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;}
@@ -1101,6 +1108,22 @@
         </div>
         <div class="timer-alarm-status" id="timer-alarm-status"></div>
         <div class="timer-orbit-hint">or just tell ORBIT — type or say "set a timer for 12 minutes" / "set an alarm for 6:30 pm"</div>
+      </div>
+    </section>
+    <section>
+      <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>clap trigger</h2></div></div>
+      <div class="clap-card">
+        <div class="clap-row">
+          <button class="secondary" id="clap-toggle-btn" type="button">🎙️ arm clap detector</button>
+          <span class="clap-status" id="clap-status">disabled — double clap does nothing yet</span>
+        </div>
+        <div class="clap-settings">
+          <button class="lc-edit" id="clap-phrase-btn" type="button">welcome phrase</button>
+          <button class="lc-edit" id="clap-song-btn" type="button">song (spotify)</button>
+          <button class="lc-edit" id="clap-elk-btn" type="button">ElevenLabs key</button>
+          <button class="lc-edit" id="clap-voice-btn" type="button">voice ID</button>
+        </div>
+        <div class="clap-hint">double clap near your mic to play the song and speak the welcome line. no ElevenLabs key set → falls back to your browser's built-in voice.</div>
       </div>
     </section>
     <section>
@@ -1713,7 +1736,7 @@ let state = {
   taskLevel:1, tasksCompleted:0, dailyTask:null,
   course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
   targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, clapEnabled:false, elevenlabsKey:'', elevenlabsVoiceId:'', clapWelcomePhrase:'Welcome back. Ready to lock in?', clapSongUri:'', resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
 };
 let saveTimer = null;
 let pendingAttachment = null; 
@@ -2587,7 +2610,7 @@ async function loadState(){
         selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free',
         noteAttachments:[],
         targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, clapEnabled:false, elevenlabsKey:'', elevenlabsVoiceId:'', clapWelcomePhrase:'Welcome back. Ready to lock in?', clapSongUri:'', resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
       }, loaded);
       if(!state.arcade || typeof state.arcade !== 'object') state.arcade = {xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}};
       if(!state.arcade.answers) state.arcade.answers = {};
@@ -3873,7 +3896,7 @@ document.getElementById('import-file-input').addEventListener('change', async (e
       taskLevel:1, tasksCompleted:0, dailyTask:null,
       course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
       targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, clapEnabled:false, elevenlabsKey:'', elevenlabsVoiceId:'', clapWelcomePhrase:'Welcome back. Ready to lock in?', clapSongUri:'', resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
     }, imported);
     if(!imported.geminiKey) state.geminiKey = keepKey;
     if(!imported.noteAttachments || !imported.noteAttachments.length) state.noteAttachments = keepAttachments;
@@ -4351,7 +4374,7 @@ document.getElementById('reset-btn').addEventListener('click', async ()=>{
     course:{items:[]}, courseLog:[], geminiKey: keepKey, openrouterKey: keepOpenrouterKey, grokKey: keepGrokKey,
     aiProvider: keepProvider, selectedOpenrouterModel: keepOpenrouterModel, selectedGrokModel: keepGrokModel,
     noteAttachments:[], targetDate: state.targetDate, achievements:[], mockInterview:{history:[], currentQuestion:null},
-        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, clapEnabled:false, elevenlabsKey: state.elevenlabsKey, elevenlabsVoiceId: state.elevenlabsVoiceId, clapWelcomePhrase: state.clapWelcomePhrase, clapSongUri: state.clapSongUri, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
   };
   state.links.course = 'https://courses.aajsecode.com/s/courses/663f10c1b48d0c3f23f4ac0b/take'; await saveState(); render();
 });
@@ -5078,6 +5101,114 @@ setInterval(() => {
   });
   canvas.addEventListener('keyup', (e)=>{ if(e.key==='ArrowDown') setDuck(false); });
   resetGame(); draw(); window.refreshRunnerBest = ()=>{ bestEl.textContent = bestScore(); };
+})();
+
+(function initClapTrigger(){
+  const toggleBtn = document.getElementById('clap-toggle-btn'); if(!toggleBtn) return;
+  const statusEl = document.getElementById('clap-status');
+  const CLAP = { spikeRatio:6.0, cooldownS:0.6, minGapS:0.05, maxGapS:0.4, minRms:0.02, retriggerRatio:0.55, noiseAlpha:0.98 };
+  let audioCtx = null, analyser = null, buf = null, pollId = null;
+  let noiseFloor = 1e-4, lastDouble = 0, firstClapTime = null, armedSpike = true, welcomeCooldownUntil = 0;
+
+  function rms(data){ let sum=0; for(let i=0;i<data.length;i++) sum += data[i]*data[i]; return Math.sqrt(sum/data.length); }
+
+  function pollClap(){
+    analyser.getFloatTimeDomainData(buf);
+    const level = rms(buf);
+    const quietGate = noiseFloor * 2.2;
+    if(level < quietGate){ noiseFloor = CLAP.noiseAlpha*noiseFloor + (1-CLAP.noiseAlpha)*level; noiseFloor = Math.max(noiseFloor, 1e-7); }
+    const threshold = Math.max(noiseFloor * CLAP.spikeRatio, CLAP.minRms);
+    const now = performance.now()/1000;
+    const retriggerLevel = threshold * CLAP.retriggerRatio;
+    if(level < retriggerLevel) armedSpike = true;
+    if(armedSpike && level >= threshold && (now - lastDouble) >= CLAP.cooldownS){
+      armedSpike = false;
+      if(firstClapTime === null){ firstClapTime = now; }
+      else{
+        const gap = now - firstClapTime;
+        if(gap < CLAP.minGapS){ /* too fast, ignore */ }
+        else if(gap <= CLAP.maxGapS){
+          firstClapTime = null; lastDouble = now;
+          if(now > welcomeCooldownUntil){ welcomeCooldownUntil = now + 3; triggerClapWelcome(); }
+        } else { firstClapTime = now; }
+      }
+    }
+  }
+
+  async function enableClap(){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser(); analyser.fftSize = 1024;
+      buf = new Float32Array(analyser.fftSize);
+      audioCtx.createMediaStreamSource(stream).connect(analyser);
+      pollId = setInterval(pollClap, 30);
+      state.clapEnabled = true; saveState();
+      toggleBtn.textContent = '🎙️ disarm clap detector'; toggleBtn.classList.add('armed');
+      statusEl.textContent = 'armed — double clap near your mic to trigger the welcome'; statusEl.classList.add('armed');
+    }catch(e){
+      statusEl.textContent = 'mic permission denied or unavailable.'; statusEl.classList.remove('armed');
+    }
+  }
+  function disableClap(){
+    if(pollId) clearInterval(pollId); pollId = null;
+    if(audioCtx){ audioCtx.close(); audioCtx = null; }
+    state.clapEnabled = false; saveState();
+    toggleBtn.textContent = '🎙️ arm clap detector'; toggleBtn.classList.remove('armed');
+    statusEl.textContent = 'disabled — double clap does nothing yet'; statusEl.classList.remove('armed');
+  }
+  toggleBtn.addEventListener('click', ()=> audioCtx ? disableClap() : enableClap());
+
+  function toSpotifyUri(url){
+    if(!url) return null;
+    const m = url.match(/open\.spotify\.com\/track\/([a-zA-Z0-9]+)/);
+    if(m) return 'spotify:track:'+m[1];
+    if(/^spotify:track:/.test(url)) return url;
+    return null;
+  }
+  async function elevenLabsSpeak(text){
+    const key = state.elevenlabsKey, voice = state.elevenlabsVoiceId;
+    if(!key || !voice){ if(typeof speakText==='function') speakText(text); return; }
+    try{
+      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
+        method:'POST', headers:{ 'xi-api-key':key, 'Content-Type':'application/json', 'Accept':'audio/mpeg' },
+        body: JSON.stringify({ text, model_id:'eleven_multilingual_v2' })
+      });
+      if(!res.ok) throw new Error('ElevenLabs error '+res.status);
+      const blob = await res.blob();
+      new Audio(URL.createObjectURL(blob)).play();
+    }catch(e){ if(typeof speakText==='function') speakText(text); }
+  }
+  async function triggerClapWelcome(){
+    playChime(660, 0.1);
+    const uri = toSpotifyUri(state.clapSongUri);
+    if(uri){
+      const ok = state.spotifyAccessToken && await spotifyPlayUri(uri);
+      if(!ok) window.open(state.clapSongUri, '_blank');
+    } else if(state.clapSongUri){
+      window.open(state.clapSongUri, '_blank');
+    }
+    setTimeout(()=> elevenLabsSpeak(state.clapWelcomePhrase || 'Welcome back.'), state.clapSongUri ? 1000 : 0);
+  }
+
+  document.getElementById('clap-phrase-btn').addEventListener('click', ()=>{
+    const v = prompt('Welcome phrase to speak on double clap:', state.clapWelcomePhrase || '');
+    if(v===null) return; state.clapWelcomePhrase = v.trim(); saveState();
+  });
+  document.getElementById('clap-song-btn').addEventListener('click', ()=>{
+    const v = prompt('Song URL to open/play on double clap (Spotify track link or any URL, blank to skip):', state.clapSongUri || '');
+    if(v===null) return; state.clapSongUri = v.trim(); saveState();
+  });
+  document.getElementById('clap-elk-btn').addEventListener('click', ()=>{
+    const v = prompt('ElevenLabs API key (leave blank to use your browser\'s built-in voice instead):', '');
+    if(v===null) return; state.elevenlabsKey = v.trim(); saveState();
+  });
+  document.getElementById('clap-voice-btn').addEventListener('click', ()=>{
+    const v = prompt('ElevenLabs Voice ID:', state.elevenlabsVoiceId || '');
+    if(v===null) return; state.elevenlabsVoiceId = v.trim(); saveState();
+  });
+
+  if(state.clapEnabled) enableClap();
 })();
 
 (function initTyping(){
