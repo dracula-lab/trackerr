@@ -5119,12 +5119,28 @@ setInterval(() => {
 (function initClapTrigger(){
   const toggleBtn = document.getElementById('clap-toggle-btn'); if(!toggleBtn) return;
   const statusEl = document.getElementById('clap-status');
-  const CLAP = { spikeRatio:4.5, cooldownS:0.6, minGapS:0.05, maxGapS:0.45, minRms:0.012, retriggerRatio:0.55, noiseAlpha:0.98 };
+  const CLAP = { spikeRatio:6.0, cooldownS:0.6, minGapS:0.05, maxGapS:0.45, minRms:0.014, retriggerRatio:0.55, noiseAlpha:0.98, maxSustainedPolls:2 };
   let audioCtx = null, analyser = null, buf = null, pollId = null;
   let noiseFloor = 1e-4, lastDouble = 0, firstClapTime = null, armedSpike = true, welcomeCooldownUntil = 0;
   let peakSinceLastPaint = 0, lastStatusPaint = 0, listeningPaused = false;
+  let candidateActive = false, candidateStart = 0, candidateSustained = 0; // tracks how long a spike stays loud — a clap is brief, a voice/word is not
 
   function rms(data){ let sum=0; for(let i=0;i<data.length;i++) sum += data[i]*data[i]; return Math.sqrt(sum/data.length); }
+
+  function registerClap(t){
+    if(firstClapTime === null){ firstClapTime = t; }
+    else{
+      const gap = t - firstClapTime;
+      if(gap < CLAP.minGapS){ /* too fast to be two separate claps, ignore */ }
+      else if(gap <= CLAP.maxGapS){
+        firstClapTime = null; lastDouble = t;
+        if(t > welcomeCooldownUntil){
+          welcomeCooldownUntil = t + 3; triggerClapWelcome();
+          statusEl.textContent = '✓ double clap detected!'; lastStatusPaint = t + 1.2; // hold the message ~1.2s before the meter resumes
+        }
+      } else { firstClapTime = t; }
+    }
+  }
 
   function pollClap(){
     if(listeningPaused) return; // muted while the welcome sequence plays, so the song's own beats can't re-trigger it
@@ -5140,22 +5156,22 @@ setInterval(() => {
       lastStatusPaint = now;
       statusEl.textContent = `armed — level ${peakSinceLastPaint.toFixed(3)} / threshold ${threshold.toFixed(3)} (clap louder than threshold, twice, fast)`;
       peakSinceLastPaint = 0;
-    }    const retriggerLevel = threshold * CLAP.retriggerRatio;
-    if(level < retriggerLevel) armedSpike = true;
-    if(armedSpike && level >= threshold && (now - lastDouble) >= CLAP.cooldownS){
-      armedSpike = false;
-      if(firstClapTime === null){ firstClapTime = now; }
-      else{
-        const gap = now - firstClapTime;
-        if(gap < CLAP.minGapS){ /* too fast, ignore */ }
-        else if(gap <= CLAP.maxGapS){
-          firstClapTime = null; lastDouble = now;
-          if(now > welcomeCooldownUntil){
-            welcomeCooldownUntil = now + 3; triggerClapWelcome();
-            statusEl.textContent = '✓ double clap detected!'; lastStatusPaint = now + 1.2; // hold the message ~1.2s before the meter resumes
-          }
-        } else { firstClapTime = now; }
+    }
+    const retriggerLevel = threshold * CLAP.retriggerRatio;
+
+    // A clap is a short sharp spike that falls back below the retrigger level within ~1-2 polls (~30-60ms).
+    // Voice syllables stay loud much longer, so if a spike is still elevated after maxSustainedPolls,
+    // it's discarded here instead of being counted — that's what stops talking from registering as claps.
+    if(level < retriggerLevel){
+      armedSpike = true;
+      if(candidateActive){
+        candidateActive = false;
+        if(candidateSustained <= CLAP.maxSustainedPolls) registerClap(candidateStart);
       }
+    } else if(candidateActive){
+      candidateSustained++;
+    } else if(armedSpike && level >= threshold && (now - lastDouble) >= CLAP.cooldownS){
+      candidateActive = true; candidateStart = now; candidateSustained = 0; armedSpike = false;
     }
   }
 
@@ -5193,9 +5209,17 @@ setInterval(() => {
     if(/^spotify:track:/.test(url)) return url;
     return null;
   }
+  function speakFallback(text){
+    if(!window.speechSynthesis || !text) return;
+    try{
+      window.speechSynthesis.cancel(); // clear anything queued so this doesn't get stuck behind it
+      const u = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(u);
+    }catch(e){ /* speech synthesis unavailable — nothing more we can do */ }
+  }
   async function elevenLabsSpeak(text){
     const key = state.elevenlabsKey, voice = state.elevenlabsVoiceId;
-    if(!key || !voice){ if(typeof speakText==='function') speakText(text); return; }
+    if(!key || !voice){ speakFallback(text); return; }
     try{
       const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}`, {
         method:'POST', headers:{ 'xi-api-key':key, 'Content-Type':'application/json', 'Accept':'audio/mpeg' },
@@ -5204,7 +5228,7 @@ setInterval(() => {
       if(!res.ok) throw new Error('ElevenLabs error '+res.status);
       const blob = await res.blob();
       new Audio(URL.createObjectURL(blob)).play();
-    }catch(e){ if(typeof speakText==='function') speakText(text); }
+    }catch(e){ speakFallback(text); }
   }
   async function getWeatherSnippet(){
     try{
