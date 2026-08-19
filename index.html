@@ -5297,6 +5297,22 @@ setInterval(() => {
       }
     }
   }
+  // Restarts the mic only once speech has truly, physically stopped — not just when our own
+  // isSpeaking flag says so. utterance.onend can fire slightly before the audio tail actually
+  // finishes playing through the speakers, and if the mic comes back too early it hears its own
+  // response and loops. This polls the browser's real speechSynthesis.speaking state as the
+  // source of truth, with a longer initial buffer for room reverb.
+  function safeStartMic(showListeningPopup){
+    const attempt = () => {
+      if(isSpeaking || window.speechSynthesis.speaking){ setTimeout(attempt, 200); return; }
+      listeningForCommand = true;
+      if(fab) fab.className = 'voice-fab listening';
+      if(statusEl) statusEl.textContent = showListeningPopup ? 'ORBIT Online 🎙️' : 'Voice Assistant';
+      if(showListeningPopup) showPopup('Listening...', `<b>ORBIT Listening...</b> Speak your next instruction out loud 🎙️`, true);
+      startMic();
+    };
+    setTimeout(attempt, 700);
+  }
   function orbitTurnOff(){
     orbitDisabled = true;
     try{ recognition.abort(); }catch(e){}
@@ -5400,16 +5416,8 @@ setInterval(() => {
   }
   let _pendingSentences = 0;
   function speakStreamFinish(){
-    isSpeaking = false; window._ttsActive = false; window._ttsCooldownUntil = Date.now() + 400;
-    setTimeout(() => {
-      if(!isSpeaking){
-        listeningForCommand = true;
-        if(fab) fab.className = 'voice-fab listening';
-        if(statusEl) statusEl.textContent = 'ORBIT Online 🎙️';
-        showPopup('Listening...', `<b>ORBIT Listening...</b> Speak your next instruction out loud 🎙️`, true);
-        startMic();
-      }
-    }, 400);
+    isSpeaking = false; window._ttsActive = false; window._ttsCooldownUntil = Date.now() + 1200;
+    safeStartMic(true);
   }
   function speakStreamSentence(text, isLast){
     if(!text || !text.trim()){ if(isLast && _pendingSentences<=0) speakStreamFinish(); return; }
@@ -5554,24 +5562,9 @@ setInterval(() => {
     const finish = () => {
       isSpeaking = false;
       window._ttsActive = false;
-      // Echo cancellation window: ignore audio for 400ms after speech ends to prevent speaker reverberation
-      window._ttsCooldownUntil = Date.now() + 400;
-      
-      if (popup && popup.classList.contains('show')) {
-        setTimeout(() => {
-          if (!isSpeaking) {
-            listeningForCommand = true;
-            if(fab) fab.className = 'voice-fab listening';
-            if(statusEl) statusEl.textContent = 'ORBIT Online 🎙️';
-            showPopup('Listening...', `<b>ORBIT Listening...</b> Speak your next instruction out loud 🎙️`, true);
-            startMic();
-          }
-        }, 400);
-      } else {
-        if(fab) fab.className = 'voice-fab listening';
-        if(statusEl) statusEl.textContent = 'Voice Assistant';
-        setTimeout(startMic, 400);
-      }
+      // Echo cancellation window: ignore audio for a bit after speech ends to prevent speaker reverberation
+      window._ttsCooldownUntil = Date.now() + 1200;
+      safeStartMic(!!(popup && popup.classList.contains('show')));
       if(onEndCallback) onEndCallback();
     };
     utterance.onend = finish;
