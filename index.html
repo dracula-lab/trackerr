@@ -213,6 +213,7 @@
   .tab[data-tab="resume"].active{border-color:var(--pink);}
   .tab[data-tab="arcade"].active{border-color:var(--purple);}
   .tab[data-tab="movies"].active{border-color:var(--gold);}
+  .tab[data-tab="live"].active{border-color:var(--blue);}
   .tab[data-tab="watch"].active{border-color:var(--ytred);}
   .tab[data-tab="spotify"].active{border-color:var(--spotify);}
   
@@ -302,6 +303,7 @@
   .spm-seek::-moz-range-thumb, .spm-vol::-moz-range-thumb{ width:12px; height:12px; border-radius:50%; background:var(--spotify); border:none; box-shadow:0 0 8px rgba(30,215,96,.6); cursor:pointer; }
   .sq.c-solve{background:var(--amber);} .sq.c-notes{background:var(--purple);} .sq.c-interview{background:var(--rose);} .sq.c-coderun{background:var(--lime);} .sq.c-resume{background:var(--pink);}
   .sq.c-movies{background:var(--gold);}
+  .sq.c-live{background:var(--blue);}
 
   .panel-view{display:none; animation:fadeIn .2s ease;}
   .panel-view.active{display:block;}
@@ -573,6 +575,33 @@
   .movie-star{background:none; border:none; cursor:pointer; font-size:16px; color:var(--border); padding:1px; line-height:1;}
   .movie-star.filled{color:var(--gold);}
   .movie-stars.readonly .movie-star{cursor:default;}
+  .live-dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 0 0 rgba(63,185,80,.6); animation:liveDotPulse 1.8s ease-in-out infinite; margin-right:6px;}
+  @keyframes liveDotPulse{0%{box-shadow:0 0 0 0 rgba(63,185,80,.55);} 70%{box-shadow:0 0 0 7px rgba(63,185,80,0);} 100%{box-shadow:0 0 0 0 rgba(63,185,80,0);}}
+  .live-updated{font-size:11px; color:var(--text-faint); margin-left:auto;}
+  .live-row{display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:10px 14px; margin-bottom:8px;}
+  .live-row-main{min-width:0; flex:1;}
+  .live-row-title{font-weight:600; color:var(--text); font-size:14px;}
+  .live-row-sub{font-size:12px; color:var(--text-faint); margin-top:2px;}
+  .live-row-score{font-weight:700; color:var(--text); font-size:14.5px; white-space:nowrap;}
+  .live-status{font-size:11px; padding:2px 7px; border-radius:20px; font-weight:600;}
+  .live-status.inplay{background:var(--green-bg); color:var(--green);}
+  .live-status.finished{background:rgba(255,255,255,.06); color:var(--text-faint);}
+  .live-status.upcoming{background:var(--blue-bg); color:var(--blue);}
+  .live-crypto-strip{display:flex; flex-wrap:wrap; gap:10px;}
+  .live-crypto-chip{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:9px 14px; min-width:120px;}
+  .live-crypto-sym{font-size:12px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em;}
+  .live-crypto-price{font-weight:700; font-size:15px; color:var(--text); margin-top:2px;}
+  .live-crypto-chg{font-size:12px; margin-top:2px;}
+  .live-crypto-chg.up{color:var(--green);} .live-crypto-chg.down{color:var(--coral);}
+  .live-news-item{padding:9px 0; border-bottom:1px solid var(--border-soft);}
+  .live-news-item:last-child{border-bottom:none;}
+  .live-news-title{color:var(--text); font-size:13.5px; line-height:1.4; text-decoration:none;}
+  .live-news-title:hover{color:var(--blue);}
+  .live-news-src{font-size:11px; color:var(--text-faint); margin-top:3px;}
+  .live-weather-row{display:flex; align-items:center; gap:16px; background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:14px;}
+  .live-weather-temp{font-size:28px; font-weight:700; color:var(--text);}
+  .live-weather-desc{font-size:13px; color:var(--text-dim);}
+  .live-refresh-btn{font-size:12px; padding:5px 10px;}
   .bar-list{display:grid; gap:9px;}
   .bar-row{display:grid; grid-template-columns:96px 1fr 42px; gap:8px; align-items:center; font-size:13.5px; color:var(--text-dim);}
   .bar-track{height:8px; background:var(--bg); border-radius:9px; overflow:hidden; border:1px solid var(--border-soft);}
@@ -919,6 +948,7 @@
     <div class="tab" data-tab="watch"><span class="sq c-watch"></span>youtube</div>
     <div class="tab" data-tab="spotify"><span class="sq c-spotify"></span>spotify.fm</div>
     <div class="tab" data-tab="movies"><span class="sq c-movies"></span>movie.night</div>
+    <div class="tab" data-tab="live"><span class="sq c-live"></span>live.feed</div>
   </div>
 
   <!-- TODAY'S TASK -->
@@ -1588,6 +1618,70 @@
   </section>
 </div>
 
+<!-- LIVE FEED -->
+<div class="panel-view" id="view-live">
+  <section>
+    <div class="sec-head">
+      <div class="sec-head-left"><span class="live-dot"></span><h2>weather</h2></div>
+      <span class="live-updated" id="live-weather-updated"></span>
+    </div>
+    <div id="live-weather-box"><div class="empty">fetching current conditions…</div></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="sec-head-left"><span class="live-dot"></span><h2>crypto</h2></div>
+      <span class="live-updated" id="live-crypto-updated"></span>
+    </div>
+    <div class="live-crypto-strip" id="live-crypto-box"><div class="empty">fetching prices…</div></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="sec-head-left"><span class="live-dot"></span><h2>football — today</h2></div>
+      <span class="live-updated" id="live-football-updated"></span>
+    </div>
+    <div id="live-football-box"><div class="empty">fetching fixtures…</div></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="sec-head-left"><span class="live-dot"></span><h2>cricket</h2></div>
+      <span class="live-updated" id="live-cricket-updated"></span>
+    </div>
+    <div id="live-cricket-box"><div class="empty">fetching matches…</div></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <div class="sec-head-left"><span class="live-dot"></span><h2>headlines</h2></div>
+      <span class="live-updated" id="live-news-updated"></span>
+    </div>
+    <div class="add-row" style="margin-bottom:10px;">
+      <select id="live-news-category-select">
+        <option value="general">general</option>
+        <option value="technology">technology</option>
+        <option value="business">business</option>
+        <option value="sports">sports</option>
+        <option value="science">science</option>
+        <option value="health">health</option>
+        <option value="entertainment">entertainment</option>
+      </select>
+      <button class="lc-edit live-refresh-btn" id="live-refresh-all-btn" type="button">↻ refresh all</button>
+    </div>
+    <div id="live-news-box"><div class="empty">fetching headlines…</div></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>settings</h2></div></div>
+    <div class="live-row-sub" style="margin-bottom:8px;">weather, crypto, football, and headlines need no key. Live cricket scores need a free CricAPI key (100 free requests/day) — get one at <a href="https://cricapi.com/" target="_blank" rel="noopener" style="color:var(--blue);">cricapi.com</a> and paste it below.</div>
+    <div class="add-row">
+      <input id="live-cricket-key-input" type="text" placeholder="CricAPI key (optional)">
+      <button class="lc-edit" id="live-cricket-key-save-btn" type="button">save</button>
+    </div>
+  </section>
+</div>
+
 <!-- Voice Assistant Elements -->
 <button class="voice-fab listening" id="voice-fab" title="ORBIT Voice Assistant (Click, say ORBIT, or press Ctrl+Space — Ctrl+Alt to turn off)"><canvas id="voice-orb" width="120" height="120"></canvas></button>
 <div class="voice-popup" id="voice-popup">
@@ -1713,7 +1807,7 @@ let state = {
   taskLevel:1, tasksCompleted:0, dailyTask:null,
   course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
   targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
 };
 let saveTimer = null;
 let pendingAttachment = null; 
@@ -2609,7 +2703,7 @@ async function loadState(){
         selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free',
         noteAttachments:[],
         targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
       }, loaded);
       if(!state.arcade || typeof state.arcade !== 'object') state.arcade = {xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}};
       if(!state.arcade.answers) state.arcade.answers = {};
@@ -2653,6 +2747,7 @@ function activateTab(tab){
   const view=document.getElementById('view-'+tab.dataset.tab);
   if(view) view.classList.add('active');
   if(tab.dataset.tab !== 'watch') document.body.classList.remove('theater-active');
+  if(tab.dataset.tab === 'live') startLiveFeedAutoRefresh(); else stopLiveFeedAutoRefresh();
   tab.scrollIntoView({block:'nearest', inline:'center'});
   if(!wasActive) playChime(520, 0.06);
 }
@@ -3895,7 +3990,7 @@ document.getElementById('import-file-input').addEventListener('change', async (e
       taskLevel:1, tasksCompleted:0, dailyTask:null,
       course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
       targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
     }, imported);
     if(!imported.geminiKey) state.geminiKey = keepKey;
     if(!imported.noteAttachments || !imported.noteAttachments.length) state.noteAttachments = keepAttachments;
@@ -4373,7 +4468,7 @@ document.getElementById('reset-btn').addEventListener('click', async ()=>{
     course:{items:[]}, courseLog:[], geminiKey: keepKey, openrouterKey: keepOpenrouterKey, grokKey: keepGrokKey,
     aiProvider: keepProvider, selectedOpenrouterModel: keepOpenrouterModel, selectedGrokModel: keepGrokModel,
     noteAttachments:[], targetDate: state.targetDate, achievements:[], mockInterview:{history:[], currentQuestion:null},
-        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
   };
   state.links.course = 'https://courses.aajsecode.com/s/courses/663f10c1b48d0c3f23f4ac0b/take'; await saveState(); render();
 });
@@ -4563,6 +4658,160 @@ document.getElementById('movie-add-btn').addEventListener('click', ()=>{
   input.value=''; saveState(); renderMovies();
 });
 document.getElementById('movie-title-input').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('movie-add-btn').click(); });
+
+// ===== LIVE FEED: weather / crypto / football / cricket / news — no querying required, auto-refreshes =====
+let liveCache = { weather:null, crypto:null, football:null, cricket:null, news:null };
+let liveRefreshTimer = null;
+function liveTimeAgo(ts){
+  if(!ts) return '';
+  const s = Math.max(0, Math.round((Date.now()-ts)/1000));
+  if(s < 5) return 'just now';
+  if(s < 60) return s+'s ago';
+  const m = Math.round(s/60);
+  if(m < 60) return m+'m ago';
+  return Math.round(m/60)+'h ago';
+}
+function stampUpdated(elId, ts){ const el=document.getElementById(elId); if(el) el.textContent = ts ? 'updated '+liveTimeAgo(ts) : ''; }
+
+async function fetchLiveWeather(){
+  const el = document.getElementById('live-weather-box'); if(!el) return;
+  try{
+    const pos = await new Promise((res, rej)=>{
+      if(!navigator.geolocation) return rej(new Error('no geolocation'));
+      navigator.geolocation.getCurrentPosition(res, rej, {timeout:8000});
+    });
+    const { latitude, longitude } = pos.coords;
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_speed_10m`);
+    const data = await r.json();
+    const codes = {0:'Clear sky',1:'Mostly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',80:'Rain showers',81:'Rain showers',82:'Violent showers',95:'Thunderstorm'};
+    const desc = codes[data.current.weather_code] || 'Mixed conditions';
+    liveCache.weather = { temp: Math.round(data.current.temperature_2m), desc, wind: Math.round(data.current.wind_speed_10m), ts: Date.now() };
+    el.innerHTML = `<div class="live-weather-row"><div class="live-weather-temp">${liveCache.weather.temp}°C</div><div><div class="live-weather-desc">${escapeHtml(desc)}</div><div class="live-weather-desc">wind ${liveCache.weather.wind} km/h</div></div></div>`;
+    stampUpdated('live-weather-updated', liveCache.weather.ts);
+  }catch(e){
+    el.innerHTML = '<div class="empty">couldn\'t get your location/weather — check location permission.</div>';
+  }
+}
+
+async function fetchCryptoPrices(){
+  const el = document.getElementById('live-crypto-box'); if(!el) return;
+  try{
+    const ids = 'bitcoin,ethereum,solana,dogecoin,ripple';
+    const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd,inr&include_24hr_change=true`);
+    const data = await r.json();
+    const labels = { bitcoin:'BTC', ethereum:'ETH', solana:'SOL', dogecoin:'DOGE', ripple:'XRP' };
+    liveCache.crypto = { data, ts: Date.now() };
+    el.innerHTML = Object.keys(labels).filter(k=>data[k]).map(k=>{
+      const d = data[k]; const chg = d.usd_24h_change;
+      const chgCls = chg>=0 ? 'up' : 'down';
+      const chgStr = (chg>=0?'+':'')+chg.toFixed(2)+'%';
+      return `<div class="live-crypto-chip"><div class="live-crypto-sym">${labels[k]}</div><div class="live-crypto-price">₹${Math.round(d.inr).toLocaleString('en-IN')}</div><div class="live-crypto-chg ${chgCls}">${chgStr} 24h</div></div>`;
+    }).join('');
+    stampUpdated('live-crypto-updated', liveCache.crypto.ts);
+  }catch(e){
+    el.innerHTML = '<div class="empty">couldn\'t reach crypto prices right now.</div>';
+  }
+}
+
+async function fetchFootballScores(){
+  const el = document.getElementById('live-football-box'); if(!el) return;
+  try{
+    const d = new Date(); const dateStr = d.toISOString().slice(0,10);
+    const r = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${dateStr}&s=Soccer`);
+    const data = await r.json();
+    const events = (data && data.events) ? data.events.slice(0,10) : [];
+    liveCache.football = { events, ts: Date.now() };
+    if(!events.length){ el.innerHTML = '<div class="empty">no major fixtures found for today.</div>'; }
+    else {
+      el.innerHTML = events.map(ev=>{
+        const finished = ev.strStatus === 'Match Finished' || ev.strStatus === 'FT';
+        const inplay = ev.strStatus && !finished && ev.strStatus !== 'Not Started' && ev.strStatus !== 'NS';
+        const statusCls = finished ? 'finished' : (inplay ? 'inplay' : 'upcoming');
+        const statusLabel = finished ? 'FT' : (inplay ? (ev.strStatus||'LIVE') : (ev.strTime ? ev.strTime.slice(0,5) : 'upcoming'));
+        const score = (ev.intHomeScore!=null && ev.intAwayScore!=null) ? `${ev.intHomeScore} - ${ev.intAwayScore}` : 'vs';
+        return `<div class="live-row"><div class="live-row-main"><div class="live-row-title">${escapeHtml(ev.strHomeTeam)} <span class="live-row-score">${score}</span> ${escapeHtml(ev.strAwayTeam)}</div><div class="live-row-sub">${escapeHtml(ev.strLeague||'')}</div></div><span class="live-status ${statusCls}">${escapeHtml(statusLabel)}</span></div>`;
+      }).join('');
+    }
+    stampUpdated('live-football-updated', liveCache.football.ts);
+  }catch(e){
+    el.innerHTML = '<div class="empty">couldn\'t reach football scores right now.</div>';
+  }
+}
+
+async function fetchCricketScores(){
+  const el = document.getElementById('live-cricket-box'); if(!el) return;
+  const key = state.cricketApiKey;
+  if(!key){ el.innerHTML = '<div class="empty">add a free CricAPI key below to see live cricket scores.</div>'; return; }
+  try{
+    const r = await fetch(`https://api.cricapi.com/v1/currentMatches?apikey=${encodeURIComponent(key)}&offset=0`);
+    const data = await r.json();
+    const matches = (data && data.data) ? data.data.slice(0,8) : [];
+    liveCache.cricket = { matches, ts: Date.now() };
+    if(!matches.length){ el.innerHTML = '<div class="empty">no live or recent matches right now.</div>'; }
+    else {
+      el.innerHTML = matches.map(m=>{
+        const finished = /won|drawn|no result/i.test(m.status||'');
+        const statusCls = finished ? 'finished' : (m.matchStarted ? 'inplay' : 'upcoming');
+        const scoreLine = (m.score && m.score.length) ? m.score.map(s=>`${s.inning}: ${s.r}/${s.w} (${s.o} ov)`).join(' · ') : (m.status||'');
+        return `<div class="live-row"><div class="live-row-main"><div class="live-row-title">${escapeHtml(m.name||'')}</div><div class="live-row-sub">${escapeHtml(scoreLine)}</div></div><span class="live-status ${statusCls}">${finished?'done':(m.matchStarted?'live':'upcoming')}</span></div>`;
+      }).join('');
+    }
+    stampUpdated('live-cricket-updated', liveCache.cricket.ts);
+  }catch(e){
+    el.innerHTML = '<div class="empty">couldn\'t reach cricket scores — check your CricAPI key.</div>';
+  }
+}
+
+async function fetchNewsHeadlines(){
+  const el = document.getElementById('live-news-box'); if(!el) return;
+  const cat = state.newsCategory || 'general';
+  try{
+    const r = await fetch(`https://saurav.tech/NewsAPI/top-headlines/category/${encodeURIComponent(cat)}/in.json`);
+    const data = await r.json();
+    const articles = (data && data.articles) ? data.articles.slice(0,8) : [];
+    liveCache.news = { articles, ts: Date.now() };
+    el.innerHTML = articles.length ? articles.map(a=>`
+      <div class="live-news-item"><a class="live-news-title" href="${a.url}" target="_blank" rel="noopener">${escapeHtml(a.title||'')}</a>
+      <div class="live-news-src">${escapeHtml((a.source&&a.source.name)||'')}</div></div>
+    `).join('') : '<div class="empty">no headlines available right now.</div>';
+    stampUpdated('live-news-updated', liveCache.news.ts);
+  }catch(e){
+    el.innerHTML = '<div class="empty">couldn\'t reach news headlines right now.</div>';
+  }
+}
+
+function refreshLiveFeed(){
+  fetchLiveWeather();
+  fetchCryptoPrices();
+  fetchFootballScores();
+  fetchCricketScores();
+  fetchNewsHeadlines();
+}
+function startLiveFeedAutoRefresh(){
+  refreshLiveFeed();
+  if(liveRefreshTimer) clearInterval(liveRefreshTimer);
+  liveRefreshTimer = setInterval(refreshLiveFeed, 5*60*1000); // every 5 min — respects free-tier rate limits
+}
+function stopLiveFeedAutoRefresh(){
+  if(liveRefreshTimer){ clearInterval(liveRefreshTimer); liveRefreshTimer = null; }
+}
+const liveNewsCategorySelect = document.getElementById('live-news-category-select');
+if(liveNewsCategorySelect){
+  liveNewsCategorySelect.value = state.newsCategory || 'general';
+  liveNewsCategorySelect.addEventListener('change', ()=>{
+    state.newsCategory = liveNewsCategorySelect.value;
+    saveState(); fetchNewsHeadlines();
+  });
+}
+const liveRefreshAllBtn = document.getElementById('live-refresh-all-btn');
+if(liveRefreshAllBtn) liveRefreshAllBtn.addEventListener('click', refreshLiveFeed);
+const liveCricketKeyInput = document.getElementById('live-cricket-key-input');
+const liveCricketKeySaveBtn = document.getElementById('live-cricket-key-save-btn');
+if(liveCricketKeyInput) liveCricketKeyInput.value = state.cricketApiKey || '';
+if(liveCricketKeySaveBtn) liveCricketKeySaveBtn.addEventListener('click', ()=>{
+  state.cricketApiKey = liveCricketKeyInput.value.trim();
+  saveState(); fetchCricketScores();
+});
 
 function renderReminders(){
   const el=document.getElementById('reminder-list'); if(!el) return;
@@ -5697,6 +5946,49 @@ setInterval(() => {
       return { intent: 'youtube_play', spoken: `Playing ${query} on YouTube.`, display: `Playing <b>${escapeHtml(query)}</b> on YouTube.` };
     }
 
+    // 1b. Movie watchlist add / reminder & goal actions — checked before generic navigation,
+    // so "add X to my watchlist" doesn't get swallowed by the "watch" tab keyword, and
+    // "mark reminder X done" doesn't get swallowed by the "reminder" tab keyword.
+    const watchlistMatch = norm.match(/(?:add|put)\s+(.+?)\s+(?:to|on|in)\s+(?:my\s+)?(?:watchlist|watch list|movie list)/) || norm.match(/watch\s+(.+?)\s+later/);
+    if (watchlistMatch && watchlistMatch[1] && watchlistMatch[1].trim()) {
+      const title = watchlistMatch[1].trim();
+      ensureMovies().toWatch.push({ id: id(), title, type: 'movie', addedDate: todayStr() });
+      saveState(); renderMovies();
+      return { intent: 'watchlist_add', spoken: `Added ${title} to your watchlist.`, display: `Added <b>${escapeHtml(title)}</b> to your watchlist.` };
+    }
+    const reminderDoneMatch = norm.match(/(?:mark|complete|finish)\s+(?:the\s+)?reminder\s+(?:about\s+|for\s+)?(.+?)\s*(?:as\s+done|done)?$/);
+    if (reminderDoneMatch && reminderDoneMatch[1] && reminderDoneMatch[1].trim() && (state.reminders || []).length) {
+      const q = reminderDoneMatch[1].trim();
+      const found = state.reminders.find(r => !r.done && r.title.toLowerCase().includes(q));
+      if (found) {
+        found.done = true; saveState(); renderReminders(); renderAnalytics();
+        return { intent: 'reminder_done', spoken: `Marked ${found.title} as done, sir.`, display: `Marked reminder <b>${escapeHtml(found.title)}</b> as done.` };
+      }
+      return { intent: 'reminder_done', spoken: `I couldn't find a matching reminder for ${q}, sir.`, display: `No open reminder matching "${escapeHtml(q)}".` };
+    }
+    const reminderDeleteMatch = norm.match(/(?:delete|remove|cancel)\s+(?:the\s+)?reminder\s+(?:about\s+|for\s+)?(.+)/);
+    if (reminderDeleteMatch && reminderDeleteMatch[1] && reminderDeleteMatch[1].trim() && (state.reminders || []).length) {
+      const q = reminderDeleteMatch[1].trim();
+      const found = state.reminders.find(r => r.title.toLowerCase().includes(q));
+      if (found) {
+        state.reminders = state.reminders.filter(r => r.id !== found.id);
+        saveState(); renderReminders(); renderAnalytics();
+        return { intent: 'reminder_delete', spoken: `Removed the reminder ${found.title}.`, display: `Removed reminder <b>${escapeHtml(found.title)}</b>.` };
+      }
+      return { intent: 'reminder_delete', spoken: `I couldn't find a matching reminder for ${q}, sir.`, display: `No reminder matching "${escapeHtml(q)}".` };
+    }
+    const goalDoneMatch = norm.match(/(?:mark|complete|finish)\s+(?:the\s+)?goal\s+(?:of\s+|to\s+)?(.+?)\s*(?:as\s+done|done)?$/);
+    if (goalDoneMatch && goalDoneMatch[1] && goalDoneMatch[1].trim() && (state.goals || []).length) {
+      const q = goalDoneMatch[1].trim();
+      const found = state.goals.find(g => g.title.toLowerCase().includes(q));
+      if (found) {
+        found.current = Math.max(1, Number(found.target) || 1);
+        saveState(); renderGoals(); renderAnalytics();
+        return { intent: 'goal_done', spoken: `Marked the goal ${found.title} as complete, sir.`, display: `Goal <b>${escapeHtml(found.title)}</b> marked complete.` };
+      }
+      return { intent: 'goal_done', spoken: `I couldn't find a matching goal for ${q}, sir.`, display: `No goal matching "${escapeHtml(q)}".` };
+    }
+
     // 2. Navigation intents
     const tabMap = {
       'today': 'today', 'task': 'today', 'daily': 'today',
@@ -5712,7 +6004,8 @@ setInterval(() => {
       'note': 'notes', 'notes': 'notes', 'notepad': 'notes',
       'arcade': 'arcade', 'game': 'arcade', 'snake': 'arcade', 'quiz': 'arcade',
       'watch': 'watch', 'youtube': 'watch', 'video': 'watch', 'videos': 'watch',
-      'spotify': 'spotify', 'music': 'spotify'
+      'spotify': 'spotify', 'music': 'spotify',
+      'live': 'live', 'scores': 'live', 'cricket': 'live', 'football': 'live', 'crypto': 'live', 'headlines': 'live'
     };
 
     // Check if the user mentioned any tab name (even without "open")
