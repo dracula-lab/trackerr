@@ -5980,11 +5980,11 @@ setInterval(() => {
     if (!commandText || commandText.trim().length < 2) return;
     if (!orbitFirstCommandGreeted) {
       orbitFirstCommandGreeted = true;
-      try {
-        const greeting = await buildOrbitFirstCommandGreeting();
+      buildOrbitFirstCommandGreeting().then(greeting => {
         showPopup('ORBIT', `<b>${escapeHtml(greeting)}</b>`, true, greeting);
-        await new Promise(resolve => speakText(greeting, resolve));
-      } catch(e) { /* greeting is a nice-to-have — never block the actual command on it */ }
+        speakText(greeting);
+        setTimeout(()=>{ if(!isListening && !isSpeaking) startMic(); }, 6000); // safety net: force the mic back on if this speech's end event never fires
+      }).catch(()=>{}); // fire-and-forget — never let the greeting block or hang the real command
     }
     return processVoiceCommandInner(commandText);
   }
