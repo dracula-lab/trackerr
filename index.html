@@ -4787,6 +4787,66 @@ function refreshLiveFeed(){
   fetchCricketScores();
   fetchNewsHeadlines();
 }
+
+// Answers direct questions ("what's the weather", "any cricket score", "bitcoin price",
+// "any news") instantly from the live cache — fetches fresh first if the cache is stale
+// or empty (e.g. the live.feed tab was never opened this session).
+async function tryLiveInfoQuery(text){
+  const raw = text.toLowerCase();
+  const STALE_MS = 10*60*1000;
+
+  if(/\b(weather|temperature|how (hot|cold)|is it raining|rain today)\b/.test(raw)){
+    if(!liveCache.weather || Date.now()-liveCache.weather.ts > STALE_MS) await fetchLiveWeather();
+    if(liveCache.weather){
+      const w = liveCache.weather;
+      return { spoken:`It's ${w.temp} degrees and ${w.desc.toLowerCase()} right now, sir.`, display:`🌤️ ${w.temp}°C, ${escapeHtml(w.desc)}, wind ${w.wind} km/h` };
+    }
+    return { spoken:"I couldn't get the weather just now, sir — your browser may be blocking location access.", display:"Couldn't fetch weather (check location permission)." };
+  }
+
+  if(/\bcricket\b/.test(raw)){
+    if(!state.cricketApiKey) return { spoken:"You'll need to add a free CricAPI key in the live feed tab first, sir — there's a link there.", display:"No CricAPI key set yet — add one in the live.feed tab." };
+    if(!liveCache.cricket || Date.now()-liveCache.cricket.ts > STALE_MS) await fetchCricketScores();
+    if(liveCache.cricket && liveCache.cricket.matches && liveCache.cricket.matches.length){
+      const m = liveCache.cricket.matches[0];
+      const scoreLine = (m.score && m.score.length) ? m.score.map(s=>`${s.inning}: ${s.r} for ${s.w} in ${s.o} overs`).join(', ') : (m.status||'');
+      return { spoken:`${m.name}. ${scoreLine||m.status||''}.`, display:`🏏 <b>${escapeHtml(m.name||'')}</b><br>${escapeHtml(scoreLine||m.status||'')}` };
+    }
+    return { spoken:"No live or recent cricket matches right now, sir.", display:"No cricket matches found right now." };
+  }
+
+  if(/\b(football|soccer)\b/.test(raw)){
+    if(!liveCache.football || Date.now()-liveCache.football.ts > STALE_MS) await fetchFootballScores();
+    if(liveCache.football && liveCache.football.events && liveCache.football.events.length){
+      const ev = liveCache.football.events[0];
+      const score = (ev.intHomeScore!=null && ev.intAwayScore!=null) ? `${ev.intHomeScore} to ${ev.intAwayScore}` : "hasn't started yet";
+      return { spoken:`${ev.strHomeTeam} versus ${ev.strAwayTeam}: ${score}.`, display:`⚽ <b>${escapeHtml(ev.strHomeTeam)}</b> ${escapeHtml(score)} <b>${escapeHtml(ev.strAwayTeam)}</b>` };
+    }
+    return { spoken:"No football fixtures found for today, sir.", display:"No football fixtures found for today." };
+  }
+
+  if(/\b(bitcoin|crypto|ethereum|btc|eth price|solana|dogecoin)\b/.test(raw)){
+    if(!liveCache.crypto || Date.now()-liveCache.crypto.ts > STALE_MS) await fetchCryptoPrices();
+    if(liveCache.crypto && liveCache.crypto.data && liveCache.crypto.data.bitcoin){
+      const btc = liveCache.crypto.data.bitcoin;
+      const chg = btc.usd_24h_change || 0;
+      return { spoken:`Bitcoin is at ${Math.round(btc.inr).toLocaleString('en-IN')} rupees, ${chg>=0?'up':'down'} ${Math.abs(chg).toFixed(1)} percent today, sir.`, display:`₿ Bitcoin: ₹${Math.round(btc.inr).toLocaleString('en-IN')} (${chg>=0?'+':''}${chg.toFixed(2)}% 24h)` };
+    }
+    return { spoken:"Couldn't fetch crypto prices right now, sir.", display:"Couldn't fetch crypto prices right now." };
+  }
+
+  if(/\b(news|headline|headlines|top stories|what.?s happening)\b/.test(raw)){
+    if(!liveCache.news || Date.now()-liveCache.news.ts > STALE_MS) await fetchNewsHeadlines();
+    if(liveCache.news && liveCache.news.articles && liveCache.news.articles.length){
+      const top = liveCache.news.articles.slice(0,3);
+      return { spoken:`Here are today's top headlines, sir: ${top.map(a=>a.title).join('. ')}.`, display: top.map(a=>`📰 ${escapeHtml(a.title)}`).join('<br>') };
+    }
+    return { spoken:"Couldn't fetch news headlines right now, sir.", display:"Couldn't fetch news headlines right now." };
+  }
+
+  return null;
+}
+
 function startLiveFeedAutoRefresh(){
   refreshLiveFeed();
   if(liveRefreshTimer) clearInterval(liveRefreshTimer);
@@ -6289,13 +6349,37 @@ setInterval(() => {
     }
 
     // 1. Try instant local command first! (0 API calls, 0 quota)
-    const localResult = tryLocalCommand(commandText);
+    let localResult = null;
+    try {
+      localResult = tryLocalCommand(commandText);
+    } catch (cmdErr) {
+      // A bug in a local command must never silently kill the whole response —
+      // fall through to the AI/offline paths below instead of going dark.
+      console.error('tryLocalCommand error:', cmdErr);
+    }
     if (localResult) {
       playChime(660, 0.1);
       popup.classList.remove('listening-mode');
       popup.classList.add('speaking-mode');
       showPopup('Action Executed', `<b>You:</b> ${escapeHtml(commandText)}<br><br><b>Assistant:</b> ${localResult.display}`, true, localResult.spoken);
       speakText(localResult.spoken);
+      return;
+    }
+
+    // 1b. Live real-world info queries (weather / crypto / football / cricket / news) —
+    // answered instantly from the live.feed cache, no AI call needed.
+    let liveResult = null;
+    try {
+      liveResult = await tryLiveInfoQuery(commandText);
+    } catch (liveErr) {
+      console.error('tryLiveInfoQuery error:', liveErr);
+    }
+    if (liveResult) {
+      playChime(660, 0.1);
+      popup.classList.remove('listening-mode');
+      popup.classList.add('speaking-mode');
+      showPopup('Live Info', `<b>You:</b> ${escapeHtml(commandText)}<br><br><b>Assistant:</b> ${liveResult.display}`, true, liveResult.spoken);
+      speakText(liveResult.spoken);
       return;
     }
 
