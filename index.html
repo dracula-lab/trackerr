@@ -775,6 +775,8 @@
   .voice-fab.off { opacity:.4; filter:grayscale(.8); animation:none; box-shadow:0 6px 20px rgba(0,0,0,.55); }
   .voice-fab.off::before { display:none; }
   .voice-fab.off:hover { opacity:.65; }
+  .voice-fab.mic-error { border-color: rgba(255,110,110,.85); box-shadow: 0 0 26px rgba(255,110,110,.5), 0 6px 20px rgba(0,0,0,.55); animation:none; }
+  .voice-fab.mic-error::before { display:none; }
 
   .voice-popup { position: fixed; top: 24px; bottom: 94px; right: 24px; width: 460px; background: linear-gradient(165deg, rgba(24,28,36,.86) 0%, rgba(15,18,23,.86) 100%); backdrop-filter: blur(22px) saturate(1.4); -webkit-backdrop-filter: blur(22px) saturate(1.4); border: 1px solid var(--border); border-radius: 18px; padding: 18px 20px; box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 24px 70px -10px rgba(0,0,0,.65); z-index: 999; display: none; flex-direction: column; opacity: 0; transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); overflow:hidden; }
   .voice-popup.show { display: flex; opacity: 1; transform: translateY(0) scale(1); }
@@ -5590,9 +5592,11 @@ setInterval(() => {
   let currentTranscript = "";
   let silenceTimer = null;
   let lastAssistantResponse = "";
+  let micPermissionBlocked = false;
 
   function startMic() {
     if(orbitDisabled) return;
+    if(micPermissionBlocked) return; // don't hammer a mic the browser has actively denied — wait for the user to click the fab to retry
     if(!isListening && !isSpeaking) {
       try {
         recognition.start();
@@ -5942,6 +5946,7 @@ setInterval(() => {
   if(fab) {
     fab.addEventListener('click', () => {
       if(orbitDisabled){ orbitTurnOn(); return; }
+      if(micPermissionBlocked){ micPermissionBlocked = false; } // manual retry after fixing browser mic permission
       if(isSpeaking) {
         stopAll();
         showPopup('Stopped', 'Speech interrupted.');
@@ -6521,6 +6526,16 @@ setInterval(() => {
 
   recognition.onerror = (e) => {
     isListening = false;
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      // Browser has actively denied mic access — retrying on a loop is pointless and was previously
+      // silent (console.warn only), which is exactly what made this look like "ORBIT just isn't
+      // listening" with zero explanation. Stop retrying, make it visible, and wait for a manual retry.
+      micPermissionBlocked = true;
+      if (fab) fab.className = 'voice-fab mic-error';
+      if (statusEl) statusEl.textContent = 'Mic blocked';
+      showPopup('Microphone Blocked', `ORBIT can't hear you, sir — your browser is blocking microphone access for this site.<br><br>Click the 🔒 or camera/mic icon in your address bar and allow microphone access, then click the ORBIT button to retry.`, true);
+      return;
+    }
     if (e.error !== 'no-speech' && e.error !== 'aborted') {
       console.warn('Microphone status: ' + e.error);
       // Don't just log and stall — actively retry, in case onend doesn't reliably follow this error.
