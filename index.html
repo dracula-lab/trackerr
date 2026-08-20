@@ -3395,6 +3395,138 @@ function orbitSystem(){
     : 'Cover the real shape of the question — the direct answer plus the angle or tradeoff they\'d actually want to know, not a padded essay and not a clipped one-liner. If there are genuinely a few valid approaches, say so briefly instead of picking one silently. Length should match what the question needs, not a fixed target.';
   return `${ORBIT_CORE_SYSTEM}\n\n${mode.instruction}\n\n${deepInstruction}\n\nUse simple, plain, everyday words — avoid fancy or obscure vocabulary.\n\n${orbitContext()}`;
 }
+
+// ===== AGENTIC PLANNING: ORBIT can actually rewrite goals/reminders/logs/watchlist/notes, =====
+// ===== not just talk about them — triggered by planning-style requests, capped and validated. =====
+const AGENT_TRIGGER_RE = /\b(fix my plan|plan my week|plan out my week|reorgani[sz]e my (plan|goals|week|schedule)|catch me up|i(?:'ve| have)? fell?en? behind|i am behind|update my (plan|goals|schedule) based on|help me (get back on track|catch up)|adjust my (plan|goals|schedule)|reshuffle my (plan|goals|week)|take action on|agent mode)\b/i;
+
+function buildAgentSnapshot(){
+  const goalsList = (state.goals||[]).map(g=>`- "${g.title}" (${g.current||0}/${g.target||0})`).join('\n') || 'none';
+  const remindersList = (state.reminders||[]).filter(r=>!r.done).map(r=>`- "${r.title}"${r.date?` due ${r.date}`:''}`).join('\n') || 'none';
+  const companiesList = (state.companies||[]).map(c=>`- "${c.name}" (${c.status})`).join('\n') || 'none';
+  return `Current open goals (exact titles, quoted):\n${goalsList}\n\nCurrent open reminders (exact titles, quoted):\n${remindersList}\n\nTarget companies:\n${companiesList}`;
+}
+
+function agentSystemPrompt(){
+  return `You are ORBIT's planning agent. The student has asked you to actually update their tracker, not just talk about it.
+
+${orbitContext()}
+
+${buildAgentSnapshot()}
+
+Respond with ONLY a single JSON object — no prose before or after it, no markdown code fences. Shape:
+{"summary": "one or two plain sentences explaining what you changed and why, in second person, addressed to the student", "actions": [ ...up to 6 action objects... ]}
+
+Each action must be exactly one of these shapes:
+{"type":"add_goal","title":"...","target":number,"unit":"..."}
+{"type":"update_goal_progress","match":"...","current":number}
+{"type":"mark_goal_done","match":"..."}
+{"type":"add_reminder","title":"...","date":"YYYY-MM-DD or empty string"}
+{"type":"mark_reminder_done","match":"..."}
+{"type":"add_watchlist","title":"..."}
+{"type":"add_note","text":"..."}
+{"type":"log_hours","hours":number,"category":"...","message":"..."}
+{"type":"add_target_company","name":"...","role":"..."}
+
+Rules: every "match" value must be a substring of an EXISTING title shown above — never invent a match for something that isn't listed, use an add_* action instead if it doesn't exist yet. Never propose more than 6 actions. Only propose actions that genuinely help with what the student actually asked — don't pad the list to look busy. If nothing concrete should change, return {"summary":"...", "actions":[]}. Never delete anything — there is no delete action, only add/update/complete.`;
+}
+
+function executeAgentAction(action){
+  try{
+    switch(action.type){
+      case 'add_goal': {
+        const title=(action.title||'').trim(); const target=Math.max(1, Number(action.target)||1);
+        if(!title) return null;
+        state.goals.push({id:id(), title, target, current:0, createdAt:new Date().toISOString()});
+        renderGoals();
+        return `Added goal "${title}" (target ${target}${action.unit?' '+action.unit:''}).`;
+      }
+      case 'update_goal_progress': {
+        const q=(action.match||'').toLowerCase().trim(); if(!q) return null;
+        const g=(state.goals||[]).find(x=>x.title.toLowerCase().includes(q));
+        if(!g) return `Couldn't find a goal matching "${action.match}" — skipped.`;
+        g.current = Math.max(0, Number(action.current)||0);
+        renderGoals();
+        return `Updated "${g.title}" to ${g.current}/${g.target}.`;
+      }
+      case 'mark_goal_done': {
+        const q=(action.match||'').toLowerCase().trim(); if(!q) return null;
+        const g=(state.goals||[]).find(x=>x.title.toLowerCase().includes(q));
+        if(!g) return `Couldn't find a goal matching "${action.match}" — skipped.`;
+        g.current = Math.max(1, Number(g.target)||1);
+        renderGoals();
+        return `Marked "${g.title}" complete.`;
+      }
+      case 'add_reminder': {
+        const title=(action.title||'').trim(); if(!title) return null;
+        ensureNotifyPermission();
+        state.reminders.push({id:id(), title, date:action.date||'', done:false, notified:false, createdAt:new Date().toISOString()});
+        renderReminders();
+        return `Added reminder "${title}"${action.date?` for ${action.date}`:''}.`;
+      }
+      case 'mark_reminder_done': {
+        const q=(action.match||'').toLowerCase().trim(); if(!q) return null;
+        const r=(state.reminders||[]).find(x=>!x.done && x.title.toLowerCase().includes(q));
+        if(!r) return `Couldn't find an open reminder matching "${action.match}" — skipped.`;
+        r.done=true; renderReminders();
+        return `Marked reminder "${r.title}" done.`;
+      }
+      case 'add_watchlist': {
+        const title=(action.title||'').trim(); if(!title) return null;
+        ensureMovies().toWatch.push({id:id(), title, type:'movie', addedDate:todayStr()});
+        renderMovies();
+        return `Added "${title}" to your watchlist.`;
+      }
+      case 'add_note': {
+        const text=(action.text||'').trim(); if(!text) return null;
+        state.notes = (state.notes||'') + (state.notes ? '\n\n' : '') + `[ORBIT ${todayStr()}] ${text}`;
+        if(notesArea) notesArea.value = state.notes;
+        return `Added a note.`;
+      }
+      case 'log_hours': {
+        const hours=Number(action.hours)||0; const message=(action.message||'catch-up session').trim();
+        state.logs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), date:todayStr(), ts:new Date().toISOString(), message, category:action.category||'General', hours});
+        return `Logged ${hours}h — "${message}".`;
+      }
+      case 'add_target_company': {
+        const name=(action.name||'').trim(); if(!name) return null;
+        if(!state.companies) state.companies=[];
+        state.companies.push({id:id(), name, role:action.role||'', status:'researching', notes:'', addedAt:new Date().toISOString()});
+        renderCompanies();
+        return `Added target company "${name}".`;
+      }
+      default: return null;
+    }
+  }catch(e){
+    return `Something went wrong applying one change — skipped it.`;
+  }
+}
+
+// Runs the agent loop: asks the AI for a structured plan against real current state, executes
+// each action for real, and reports exactly what happened — never trusts the AI's own claim of
+// what it did, only what executeAgentAction actually confirms happened.
+async function runAgentPlan(userText){
+  const raw = await callAI([{role:'user', content:userText}], agentSystemPrompt());
+  let parsed = null;
+  try{ parsed = JSON.parse(raw.trim()); }
+  catch(e){
+    const m = raw.match(/\{[\s\S]*\}/);
+    if(m){ try{ parsed = JSON.parse(m[0]); }catch(e2){ parsed = null; } }
+  }
+  if(!parsed || typeof parsed !== 'object'){
+    // Couldn't parse structured output — degrade to a normal answer instead of failing silently.
+    return { summary: raw, log: [], degraded: true };
+  }
+  const actions = Array.isArray(parsed.actions) ? parsed.actions.slice(0,6) : [];
+  const log = [];
+  actions.forEach(a=>{
+    if(!a || typeof a !== 'object' || !a.type) return;
+    const result = executeAgentAction(a);
+    if(result) log.push(result);
+  });
+  if(log.length){ saveState(); renderAnalytics(); }
+  return { summary: parsed.summary || (log.length ? 'Done.' : "I didn't find anything concrete to change."), log, degraded: false };
+}
 function renderAssistantModes(){
   const status=document.getElementById('assistant-mode-status'); const wrap=document.getElementById('assistant-modes'); const webToggle=document.getElementById('assistant-web-toggle'); const actionWrap=document.getElementById('assistant-actions');
   if(!status || !wrap) return;
@@ -3467,6 +3599,33 @@ async function askSolver(){
       input.value=''; renderChat(); saveState();
       return;
     }
+  }
+
+  // Agentic planning trigger — "fix my plan", "catch me up", etc. actually rewrites your
+  // goals/reminders/logs instead of just describing what you should do.
+  if(!pendingAttachment && AGENT_TRIGGER_RE.test(q)){
+    state.chat.push({role:'user', content:q});
+    input.value=''; renderChat(); saveState();
+    btn.disabled = true; btn.textContent = 'running…';
+    const el0 = document.getElementById('chat-thread');
+    const thinkingRow0 = document.createElement('div'); thinkingRow0.className = 'msg assistant';
+    thinkingRow0.innerHTML = '<div class="who">orbit · agent mode</div><div class="thinking"><div class="skeleton-line" style="width:78%"></div><div class="skeleton-line" style="width:52%"></div></div>';
+    el0.appendChild(thinkingRow0); el0.scrollTop = el0.scrollHeight;
+    try{
+      const result = await runAgentPlan(q);
+      thinkingRow0.remove();
+      const body = result.degraded
+        ? result.summary
+        : `🤖 ${result.summary}` + (result.log.length ? `\n\n${result.log.map(l=>'✓ '+l).join('\n')}` : '');
+      state.chat.push({role:'assistant', content: body});
+    }catch(e){
+      thinkingRow0.remove();
+      state.chat.push({role:'error', content: e.message || 'agent run failed — try again.'});
+    }
+    if(state.chat.length > 40){ state.chat = state.chat.slice(-40); }
+    btn.disabled = false; btn.textContent = 'run →';
+    renderChat(); saveState();
+    return;
   }
 
   const attachmentForThisMsg = pendingAttachment;
@@ -5585,6 +5744,7 @@ setInterval(() => {
 
   let isListening = false;
   let isSpeaking = false;
+  let _speakingSinceTs = 0;
   let orbitDisabled = false;
   let orbitConvHistory = []; // session-scoped conversation memory (resets on page reload) so ORBIT has context across turns
   let wakeWord = "orbit";
@@ -5710,7 +5870,7 @@ setInterval(() => {
 
   function speakStreamStart(){
     try { recognition.abort(); } catch(e){}
-    isListening = false; isSpeaking = true; window._ttsActive = true;
+    isListening = false; isSpeaking = true; window._ttsActive = true; _speakingSinceTs = Date.now();
     if(fab) fab.className = 'voice-fab speaking';
     if(popup){ popup.classList.remove('listening-mode','thinking-mode'); popup.classList.add('speaking-mode'); }
     window.speechSynthesis.cancel();
@@ -5820,6 +5980,7 @@ setInterval(() => {
     isListening = false;
     isSpeaking = true;
     window._ttsActive = true;
+    _speakingSinceTs = Date.now();
     if(fab) fab.className = 'voice-fab speaking';
     if(popup) { popup.classList.remove('listening-mode'); popup.classList.add('speaking-mode'); }
     
@@ -6388,6 +6549,31 @@ setInterval(() => {
       return;
     }
 
+    // 1c. Agentic planning trigger — "fix my plan", "catch me up", etc. actually rewrites
+    // your goals/reminders/logs instead of just describing what you should do.
+    if (AGENT_TRIGGER_RE.test(commandText)) {
+      if (fab) fab.className = 'voice-fab thinking';
+      popup.classList.remove('listening-mode');
+      showPopup('ORBIT · Agent Mode', `<b>You:</b> ${escapeHtml(commandText)}<br><br><i>Reworking your plan…</i>`, true);
+      try {
+        const result = await runAgentPlan(commandText);
+        const spoken = result.degraded ? result.summary : (result.summary + (result.log.length ? ` I made ${result.log.length} change${result.log.length>1?'s':''}.` : ''));
+        const displayBody = result.degraded
+          ? escapeHtml(result.summary)
+          : `${escapeHtml(result.summary)}` + (result.log.length ? `<br><br>` + result.log.map(l=>'✓ '+escapeHtml(l)).join('<br>') : '');
+        popup.classList.add('speaking-mode');
+        showPopup('ORBIT · Agent Mode', `<b>You:</b> ${escapeHtml(commandText)}<br><br><b>Assistant:</b> ${displayBody}`, true, spoken);
+        speakText(spoken);
+      } catch (agentErr) {
+        console.error('runAgentPlan error:', agentErr);
+        popup.classList.add('speaking-mode');
+        const msg = "I couldn't rework your plan just now, sir — try again in a moment.";
+        showPopup('ORBIT · Agent Mode', `<b>Assistant:</b> ${msg}`, true, msg);
+        speakText(msg);
+      }
+      return;
+    }
+
     // 2. Check offline CS knowledge base first
     const offlineAns = getOfflineCSAnswer(commandText);
     if (offlineAns) {
@@ -6544,6 +6730,36 @@ setInterval(() => {
   };
 
   window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+
+  // Self-healing watchdog: Chrome's speechSynthesis can silently fail to fire onend/onerror on an
+  // utterance (a known browser flakiness). When that happens, isSpeaking/_ttsActive get stuck true
+  // forever, which permanently blocks the mic from restarting — ORBIT looks "not listening" even
+  // though the mic has permission, because the anti-echo guard in onresult never releases.
+  // Poll the browser's real speechSynthesis.speaking state as ground truth and self-heal if our
+  // flag disagrees with it for a sustained stretch (not just a brief gap between streamed sentences).
+  let _quietChecks = 0;
+  setInterval(() => {
+    if (isSpeaking) {
+      const stuckTooLong = _speakingSinceTs && (Date.now() - _speakingSinceTs > 20000); // absolute backstop — covers the browser-side bug where speechSynthesis.speaking itself gets stuck reporting true
+      if (!window.speechSynthesis.speaking) {
+        _quietChecks++;
+      } else {
+        _quietChecks = 0;
+      }
+      if (_quietChecks >= 2 || stuckTooLong) { // ~5s of the browser reporting silence, OR 20s hard cap regardless of what it reports
+        _quietChecks = 0;
+        isSpeaking = false;
+        window._ttsActive = false;
+        _pendingSentences = 0;
+        window._ttsCooldownUntil = Date.now() + 800;
+        try { window.speechSynthesis.cancel(); } catch(e){}
+        if (fab && fab.className !== 'voice-fab off' && fab.className !== 'voice-fab mic-error') fab.className = 'voice-fab';
+        safeStartMic(false);
+      }
+    } else {
+      _quietChecks = 0;
+    }
+  }, 2500);
 })();
 
 loadState();
