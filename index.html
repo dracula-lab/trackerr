@@ -6234,9 +6234,16 @@ setInterval(() => {
       'live': 'live', 'scores': 'live', 'cricket': 'live', 'football': 'live', 'crypto': 'live', 'headlines': 'live'
     };
 
-    // Check if the user mentioned any tab name (even without "open")
+    // Check if the user actually meant to switch tabs — not just mentioned a tab-ish word in
+    // passing. Previously this fired on ANY message containing a tab keyword anywhere (so "what
+    // are we doing today?" hijacked on the word "today" and just opened the tab instead of
+    // answering). Now it only fires when there's an explicit navigation verb ("open X", "show me
+    // X", "go to X"...) or the whole message is just the bare tab name itself (≤3 words).
+    const NAV_VERB_RE = /\b(open|go to|goto|show me|switch to|navigate to|pull up|take me to|jump to|bring up)\b/;
+    const hasNavVerb = NAV_VERB_RE.test(norm);
+    const isBareShortCommand = norm.split(' ').filter(Boolean).length <= 3;
     for (const [key, tabId] of Object.entries(tabMap)) {
-      if (norm.includes(key)) {
+      if (norm.includes(key) && (hasNavVerb || isBareShortCommand)) {
         const target = document.querySelector(`.tab[data-tab="${tabId}"]`);
         if (target) {
           activateTab(target);
