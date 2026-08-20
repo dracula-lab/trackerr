@@ -214,6 +214,7 @@
   .tab[data-tab="arcade"].active{border-color:var(--purple);}
   .tab[data-tab="movies"].active{border-color:var(--gold);}
   .tab[data-tab="live"].active{border-color:var(--blue);}
+  .tab[data-tab="projects"].active{border-color:var(--purple);}
   .tab[data-tab="watch"].active{border-color:var(--ytred);}
   .tab[data-tab="spotify"].active{border-color:var(--spotify);}
   
@@ -304,6 +305,7 @@
   .sq.c-solve{background:var(--amber);} .sq.c-notes{background:var(--purple);} .sq.c-interview{background:var(--rose);} .sq.c-coderun{background:var(--lime);} .sq.c-resume{background:var(--pink);}
   .sq.c-movies{background:var(--gold);}
   .sq.c-live{background:var(--blue);}
+  .sq.c-projects{background:var(--purple);}
 
   .panel-view{display:none; animation:fadeIn .2s ease;}
   .panel-view.active{display:block;}
@@ -602,6 +604,23 @@
   .live-weather-temp{font-size:28px; font-weight:700; color:var(--text);}
   .live-weather-desc{font-size:13px; color:var(--text-dim);}
   .live-refresh-btn{font-size:12px; padding:5px 10px;}
+  .proj-tier-head{display:flex; align-items:center; gap:8px; margin:22px 0 12px;}
+  .proj-tier-head:first-child{margin-top:0;}
+  .proj-tier-badge{font-size:11px; padding:2px 9px; border-radius:20px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;}
+  .proj-tier-badge.beginner{background:var(--green-bg); color:var(--green);}
+  .proj-tier-badge.intermediate{background:var(--blue-bg); color:var(--blue);}
+  .proj-tier-badge.advanced{background:var(--amber-bg); color:var(--amber);}
+  .proj-tier-badge.expert{background:var(--pink-bg); color:var(--pink);}
+  .proj-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:12px;}
+  .proj-card{background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:8px;}
+  .proj-card.done{opacity:.6;}
+  .proj-card-title{font-weight:600; font-size:14.5px; color:var(--text);}
+  .proj-card-desc{font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+  .proj-tags{display:flex; flex-wrap:wrap; gap:5px;}
+  .proj-tag{font-size:10.5px; padding:2px 7px; border-radius:6px; background:var(--panel-2); color:var(--text-faint); border:1px solid var(--border-soft);}
+  .proj-status-btn{margin-top:auto; align-self:flex-start; font-size:12px; padding:5px 12px; border-radius:20px; font-weight:600; cursor:pointer; border:1px solid var(--border-soft); background:var(--panel-2); color:var(--text-dim); transition:all .15s ease;}
+  .proj-status-btn.inprogress{background:var(--blue-bg); color:var(--blue); border-color:transparent;}
+  .proj-status-btn.done{background:var(--green-bg); color:var(--green); border-color:transparent;}
   .bar-list{display:grid; gap:9px;}
   .bar-row{display:grid; grid-template-columns:96px 1fr 42px; gap:8px; align-items:center; font-size:13.5px; color:var(--text-dim);}
   .bar-track{height:8px; background:var(--bg); border-radius:9px; overflow:hidden; border:1px solid var(--border-soft);}
@@ -951,6 +970,7 @@
     <div class="tab" data-tab="spotify"><span class="sq c-spotify"></span>spotify.fm</div>
     <div class="tab" data-tab="movies"><span class="sq c-movies"></span>movie.night</div>
     <div class="tab" data-tab="live"><span class="sq c-live"></span>live.feed</div>
+    <div class="tab" data-tab="projects"><span class="sq c-projects"></span>projects.blueprint</div>
   </div>
 
   <!-- TODAY'S TASK -->
@@ -1684,6 +1704,15 @@
   </section>
 </div>
 
+<!-- PROJECTS BLUEPRINT -->
+<div class="panel-view" id="view-projects">
+  <section>
+    <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>project blueprint</h2></div></div>
+    <div class="live-row-sub" style="margin-bottom:14px;">a curated ladder of projects, beginner to expert. click the status pill to cycle: not started → in progress → done.</div>
+    <div id="projects-list"></div>
+  </section>
+</div>
+
 <!-- Voice Assistant Elements -->
 <button class="voice-fab listening" id="voice-fab" title="ORBIT Voice Assistant (Click, say ORBIT, or press Ctrl+Space — Ctrl+Alt to turn off)"><canvas id="voice-orb" width="120" height="120"></canvas></button>
 <div class="voice-popup" id="voice-popup">
@@ -1809,7 +1838,7 @@ let state = {
   taskLevel:1, tasksCompleted:0, dailyTask:null,
   course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
   targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', projects:{}, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
 };
 let saveTimer = null;
 let pendingAttachment = null; 
@@ -2203,6 +2232,7 @@ function renderYtSubscriptions(){
 }
 
 // ---- Spotify: PKCE auth (client-side only, no server/secret needed) ----
+const SPOTIFY_EXPECTED_ORIGIN = 'https://dracula-lab.github.io';
 function spotifyRedirectUri(){ return window.location.origin + window.location.pathname; }
 function spotifyRandomString(len){
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -2218,6 +2248,16 @@ async function spotifyConnect(){
   const idInput = document.getElementById('spotify-client-id-input');
   const clientId = ((idInput && idInput.value) || state.spotifyClientId || '').trim();
   if(!clientId){ alert('Add your Spotify Client ID first (from your app at developer.spotify.com/dashboard).'); return; }
+  // The redirect URI Spotify checks is whatever origin you're actually on right now — if that
+  // doesn't match the URL registered in your Spotify app dashboard, Spotify rejects the request
+  // on ITS OWN page (before ever coming back to us), which looks like "nothing happens" with no
+  // useful error. This is the #1 cause after a cleared cache/PWA reset — you land back on a
+  // different URL than the one registered. Catch it here instead of letting Spotify's cryptic
+  // page be the only signal.
+  if(window.location.origin !== SPOTIFY_EXPECTED_ORIGIN){
+    const proceed = confirm(`Heads up: you're connecting from ${window.location.origin}, but this app's Spotify redirect URI is registered as ${SPOTIFY_EXPECTED_ORIGIN}/trackerr/.\n\nIf they don't match exactly, Spotify will reject the connection. Open the app from ${SPOTIFY_EXPECTED_ORIGIN}/trackerr/ instead, or update the redirect URI in your Spotify app dashboard to match this URL.\n\nContinue anyway?`);
+    if(!proceed) return;
+  }
   state.spotifyClientId = clientId; saveState();
   const verifier = spotifyRandomString(64);
   sessionStorage.setItem('spotify_pkce_verifier', verifier);
@@ -2236,9 +2276,16 @@ async function spotifyHandleCallback(){
   if(!code && !err) return;
   if(params.get('state') === 'ytauth') return; // this redirect is YouTube's OAuth callback, not ours — let ytHandleCallback handle (and strip) it
   history.replaceState({}, document.title, window.location.pathname); // strip ?code=... from the URL
-  if(err) return;
+  if(err){
+    // Previously swallowed silently — a real failure looked identical to nothing happening.
+    alert('Spotify connection failed: ' + err + (err==='access_denied' ? ' (you declined the permission prompt)' : '. Check that your redirect URI in the Spotify dashboard matches ' + spotifyRedirectUri() + ' exactly.'));
+    return;
+  }
   const verifier = sessionStorage.getItem('spotify_pkce_verifier');
-  if(!verifier || !state.spotifyClientId) return;
+  if(!verifier || !state.spotifyClientId){
+    alert("Spotify connection failed: the PKCE verifier was lost (sessionStorage doesn't survive if you were redirected in a different tab or the session was cleared mid-flow). Click connect again.");
+    return;
+  }
   try{
     const body = new URLSearchParams({
       grant_type:'authorization_code', code, redirect_uri: spotifyRedirectUri(),
@@ -2251,7 +2298,7 @@ async function spotifyHandleCallback(){
     state.spotifyRefreshToken = data.refresh_token || state.spotifyRefreshToken;
     state.spotifyTokenExpiry = Date.now() + (data.expires_in*1000) - 60000;
     saveState(); renderSpotify();
-  }catch(e){ /* network hiccup — user can just try connecting again */ }
+  }catch(e){ alert('Spotify connection failed: network error during token exchange. Try connecting again.'); }
 }
 async function spotifyEnsureToken(){
   if(!state.spotifyAccessToken) return null;
@@ -2705,7 +2752,7 @@ async function loadState(){
         selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free',
         noteAttachments:[],
         targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', projects:{}, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
       }, loaded);
       if(!state.arcade || typeof state.arcade !== 'object') state.arcade = {xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}};
       if(!state.arcade.answers) state.arcade.answers = {};
@@ -3524,7 +3571,7 @@ async function runAgentPlan(userText){
     const result = executeAgentAction(a);
     if(result) log.push(result);
   });
-  if(log.length){ saveState(); renderAnalytics(); }
+  if(log.length){ saveState(); renderAnalytics(); if(window.orbitPulse) window.orbitPulse('176,131,247', 2200); }
   return { summary: parsed.summary || (log.length ? 'Done.' : "I didn't find anything concrete to change."), log, degraded: false };
 }
 function renderAssistantModes(){
@@ -3844,6 +3891,7 @@ function markTaskDone(){
   if(autoLevel > (state.taskLevel||1)) state.taskLevel = autoLevel;
   bumpMastery(state.dailyTask.categoryId, state.dailyTask.showSolution ? -3 : +5);
   saveState(); renderDailyTask(); checkAchievements(); celebrate();
+  if(window.orbitPulse) window.orbitPulse('63,185,80', 1800);
 }
 function giveFeedback(kind){
   if(!state.dailyTask || state.dailyTask.feedbackGiven) return;
@@ -3949,7 +3997,7 @@ function checkAchievements(){
   ACHIEVEMENTS.forEach(a=>{
     if(!state.achievements.includes(a.id) && a.check(state)){ state.achievements.push(a.id); unlockedNew = true; showToast('Achievement unlocked', a.label); }
   });
-  if(unlockedNew){ saveState(); celebrate(); } renderAchievements();
+  if(unlockedNew){ saveState(); celebrate(); if(window.orbitPulse) window.orbitPulse('244,201,93', 2400); } renderAchievements();
 }
 function renderAchievements(){
   const el = document.getElementById('badge-strip'); if(!el) return;
@@ -4151,7 +4199,7 @@ document.getElementById('import-file-input').addEventListener('change', async (e
       taskLevel:1, tasksCompleted:0, dailyTask:null,
       course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
       targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', projects:{}, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
     }, imported);
     if(!imported.geminiKey) state.geminiKey = keepKey;
     if(!imported.noteAttachments || !imported.noteAttachments.length) state.noteAttachments = keepAttachments;
@@ -4629,7 +4677,7 @@ document.getElementById('reset-btn').addEventListener('click', async ()=>{
     course:{items:[]}, courseLog:[], geminiKey: keepKey, openrouterKey: keepOpenrouterKey, grokKey: keepGrokKey,
     aiProvider: keepProvider, selectedOpenrouterModel: keepOpenrouterModel, selectedGrokModel: keepGrokModel,
     noteAttachments:[], targetDate: state.targetDate, achievements:[], mockInterview:{history:[], currentQuestion:null},
-        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', projects:{}, spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
   };
   state.links.course = 'https://courses.aajsecode.com/s/courses/663f10c1b48d0c3f23f4ac0b/take'; await saveState(); render();
 });
@@ -4926,15 +4974,21 @@ async function fetchCricketScores(){
 async function fetchNewsHeadlines(){
   const el = document.getElementById('live-news-box'); if(!el) return;
   const cat = state.newsCategory || 'general';
+  // Reddit's public .json endpoints are genuinely live and need no key — the previous
+  // saurav.tech mirror was a dead static snapshot, which is why headlines looked years old.
+  const SUBREDDIT_MAP = { general:'worldnews', technology:'technology', business:'business', sports:'sports', science:'science', health:'health', entertainment:'entertainment' };
+  const sub = SUBREDDIT_MAP[cat] || 'worldnews';
   try{
-    const r = await fetch(`https://saurav.tech/NewsAPI/top-headlines/category/${encodeURIComponent(cat)}/in.json`);
+    const r = await fetch(`https://www.reddit.com/r/${sub}/hot.json?limit=8`);
     const data = await r.json();
-    const articles = (data && data.articles) ? data.articles.slice(0,8) : [];
-    liveCache.news = { articles, ts: Date.now() };
-    el.innerHTML = articles.length ? articles.map(a=>`
-      <div class="live-news-item"><a class="live-news-title" href="${a.url}" target="_blank" rel="noopener">${escapeHtml(a.title||'')}</a>
-      <div class="live-news-src">${escapeHtml((a.source&&a.source.name)||'')}</div></div>
-    `).join('') : '<div class="empty">no headlines available right now.</div>';
+    const posts = (data && data.data && data.data.children) ? data.data.children.map(c=>c.data).filter(p=>p && !p.stickied).slice(0,8) : [];
+    liveCache.news = { articles: posts, ts: Date.now() };
+    el.innerHTML = posts.length ? posts.map(p=>{
+      const url = p.url && !p.is_self ? p.url : `https://reddit.com${p.permalink}`;
+      const age = liveTimeAgo(p.created_utc*1000);
+      return `<div class="live-news-item"><a class="live-news-title" href="${url}" target="_blank" rel="noopener">${escapeHtml(p.title||'')}</a>
+      <div class="live-news-src">r/${escapeHtml(p.subreddit||sub)} · ${age}</div></div>`;
+    }).join('') : '<div class="empty">no headlines available right now.</div>';
     stampUpdated('live-news-updated', liveCache.news.ts);
   }catch(e){
     el.innerHTML = '<div class="empty">couldn\'t reach news headlines right now.</div>';
@@ -5033,6 +5087,54 @@ if(liveCricketKeySaveBtn) liveCricketKeySaveBtn.addEventListener('click', ()=>{
   state.cricketApiKey = liveCricketKeyInput.value.trim();
   saveState(); fetchCricketScores();
 });
+
+// ===== PROJECTS BLUEPRINT: a curated beginner-to-expert project ladder =====
+const PROJECT_BLUEPRINT = [
+  { id:'p1', tier:'beginner', title:'To-Do List App', desc:'CRUD list with localStorage persistence — the standard first project.', tags:['HTML','CSS','JS'] },
+  { id:'p2', tier:'beginner', title:'Number Guessing Game', desc:'Loops, conditionals, and basic I/O in a small console game.', tags:['Python'] },
+  { id:'p3', tier:'beginner', title:'Calculator', desc:'DOM manipulation and event handling for a working calculator UI.', tags:['JS','DOM'] },
+  { id:'p4', tier:'beginner', title:'Contact Book', desc:'File I/O and simple data structures to store and search contacts.', tags:['Python','File I/O'] },
+  { id:'p5', tier:'intermediate', title:'Weather Dashboard', desc:'Fetch and display live data from a public API with error handling.', tags:['JS','API','Fetch'] },
+  { id:'p6', tier:'intermediate', title:'Blog / CMS with Auth', desc:'Full CRUD backend with user accounts and session-based auth.', tags:['Node','Express','DB'] },
+  { id:'p7', tier:'intermediate', title:'Library Management System', desc:'Relational schema design plus a working app on top of it.', tags:['Python','SQLite'] },
+  { id:'p8', tier:'intermediate', title:'Real-Time Chat App', desc:'Bidirectional live messaging between multiple clients.', tags:['WebSockets','Node'] },
+  { id:'p9', tier:'advanced', title:'E-commerce Platform', desc:'Full stack: catalog, cart, checkout, and a payment integration.', tags:['Full-stack','Payments'] },
+  { id:'p10', tier:'advanced', title:'URL Shortener at Scale', desc:'System design exercise — caching, indexing, collision handling.', tags:['System Design','DB'] },
+  { id:'p11', tier:'advanced', title:'Recommendation Engine', desc:'Collaborative filtering or content-based recs on a real dataset.', tags:['ML','Python'] },
+  { id:'p12', tier:'advanced', title:'Distributed Task Queue', desc:'Background workers pulling jobs off a message broker.', tags:['Redis','Workers'] },
+  { id:'p13', tier:'expert', title:'Mini Interpreter / Compiler', desc:'Tokenizer → parser → AST → code generation, end to end.', tags:['Compilers'] },
+  { id:'p14', tier:'expert', title:'Scalable Chat System', desc:'Design like WhatsApp — sharding, pub/sub, presence at scale.', tags:['System Design','Distributed'] },
+  { id:'p15', tier:'expert', title:'ML Deployment Pipeline', desc:'Train, version, and serve a model with a real CI/CD loop.', tags:['MLOps'] },
+  { id:'p16', tier:'expert', title:'Distributed Key-Value Store', desc:'Raft consensus and replication — build storage from scratch.', tags:['Distributed Systems'] },
+];
+const PROJECT_TIERS = ['beginner','intermediate','advanced','expert'];
+function nextProjectStatus(s){ return s==='todo' ? 'inprogress' : s==='inprogress' ? 'done' : 'todo'; }
+function projectStatusLabel(s){ return s==='inprogress' ? 'in progress' : s==='done' ? 'done' : 'not started'; }
+function renderProjects(){
+  const el = document.getElementById('projects-list'); if(!el) return;
+  el.innerHTML = PROJECT_TIERS.map(tier=>{
+    const items = PROJECT_BLUEPRINT.filter(p=>p.tier===tier);
+    const cards = items.map(p=>{
+      const status = (state.projects && state.projects[p.id]) || 'todo';
+      return `<div class="proj-card ${status==='done'?'done':''}">
+        <div class="proj-card-title">${escapeHtml(p.title)}</div>
+        <div class="proj-card-desc">${escapeHtml(p.desc)}</div>
+        <div class="proj-tags">${p.tags.map(t=>`<span class="proj-tag">${escapeHtml(t)}</span>`).join('')}</div>
+        <button class="proj-status-btn ${status}" data-proj-id="${p.id}" type="button">${projectStatusLabel(status)}</button>
+      </div>`;
+    }).join('');
+    return `<div class="proj-tier-head"><span class="proj-tier-badge ${tier}">${tier}</span></div><div class="proj-grid">${cards}</div>`;
+  }).join('');
+  el.querySelectorAll('.proj-status-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.projId;
+      if(!state.projects) state.projects = {};
+      state.projects[id] = nextProjectStatus(state.projects[id] || 'todo');
+      saveState(); renderProjects();
+    });
+  });
+}
+renderProjects();
 
 function renderReminders(){
   const el=document.getElementById('reminder-list'); if(!el) return;
@@ -5672,6 +5774,16 @@ setInterval(() => {
     return 'idle';
   }
 
+  // ---- ambient event pulses: the orb briefly reacts to real app events (achievement unlocked,
+  // agent finished acting, task marked done) — not just its own conversation state — so it reads
+  // as something alive in the corner of the screen, not only active while you're mid-conversation.
+  let pulseUntil = 0, pulseColor = '176,131,247', pulseDuration = 1;
+  window.orbitPulse = function(color, ms){
+    pulseColor = color || '176,131,247';
+    pulseDuration = ms || 1800;
+    pulseUntil = Date.now() + pulseDuration;
+  };
+
   function drawOrb(){
     if(orbCtx){
       const w = orbCanvas.width, h = orbCanvas.height, cx = w/2, cy = h/2;
@@ -5693,10 +5805,19 @@ setInterval(() => {
       }
       // smooth toward target level so it never looks jumpy/robotic
       orbLevelSmoothed += (Math.max(0.06, Math.min(1, level)) - orbLevelSmoothed) * 0.22;
-      const lvl = orbLevelSmoothed;
+      let lvl = orbLevelSmoothed;
 
       const colors = { listening:'176,131,247', speaking:'63,185,80', thinking:'255,138,101', idle:'176,131,247' };
-      const rgb = colors[mode];
+      let rgb = colors[mode];
+
+      // an ambient event pulse (idle-only, so it never fights an active conversation state)
+      // overrides the color and briefly boosts the level, decaying smoothly to nothing.
+      const pulseRemaining = pulseUntil - Date.now();
+      if(mode === 'idle' && pulseRemaining > 0){
+        const frac = pulseRemaining / pulseDuration; // 1 -> 0 over the pulse's life
+        rgb = pulseColor;
+        lvl = Math.max(lvl, frac * 0.55);
+      }
 
       orbCtx.clearRect(0,0,w,h);
 
@@ -6231,7 +6352,8 @@ setInterval(() => {
       'arcade': 'arcade', 'game': 'arcade', 'snake': 'arcade', 'quiz': 'arcade',
       'watch': 'watch', 'youtube': 'watch', 'video': 'watch', 'videos': 'watch',
       'spotify': 'spotify', 'music': 'spotify',
-      'live': 'live', 'scores': 'live', 'cricket': 'live', 'football': 'live', 'crypto': 'live', 'headlines': 'live'
+      'live': 'live', 'scores': 'live', 'cricket': 'live', 'football': 'live', 'crypto': 'live', 'headlines': 'live',
+      'projects': 'projects', 'blueprint': 'projects'
     };
 
     // Check if the user actually meant to switch tabs — not just mentioned a tab-ish word in
