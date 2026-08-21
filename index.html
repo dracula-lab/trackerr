@@ -80,9 +80,9 @@
   .topbar{height:3px; background:linear-gradient(90deg,var(--green),var(--blue),var(--purple),var(--amber),var(--mood-accent,var(--green)),var(--green)); background-size:200% 100%; animation:topbarShift 6s linear infinite; transition:background 1.1s ease, box-shadow .4s ease, animation-duration .4s ease;}
   body.mood-active .topbar{ height:4px; box-shadow:0 0 16px var(--mood-glow), 0 0 30px var(--mood-glow-2); background:linear-gradient(90deg,var(--mood-accent),var(--mood-accent-2),var(--green),var(--mood-accent),var(--mood-accent-2)); background-size:300% 100%; animation:discoStrobe 1.6s linear infinite; }
   @keyframes discoStrobe{ 0%{background-position:0% 0; filter:brightness(1);} 25%{filter:brightness(1.5);} 50%{background-position:100% 0; filter:brightness(1);} 75%{filter:brightness(1.5);} 100%{background-position:200% 0; filter:brightness(1);} }
-  body[data-modok-state="listening"] .topbar{ box-shadow:0 0 14px rgba(176,131,247,.65); animation-duration:2.6s; }
-  body[data-modok-state="speaking"] .topbar{ box-shadow:0 0 14px rgba(63,185,80,.65); animation-duration:2.6s; }
-  body[data-modok-state="thinking"] .topbar{ box-shadow:0 0 14px rgba(255,138,101,.6); animation-duration:1.8s; }
+  body[data-orbit-state="listening"] .topbar{ box-shadow:0 0 14px rgba(176,131,247,.65); animation-duration:2.6s; }
+  body[data-orbit-state="speaking"] .topbar{ box-shadow:0 0 14px rgba(63,185,80,.65); animation-duration:2.6s; }
+  body[data-orbit-state="thinking"] .topbar{ box-shadow:0 0 14px rgba(255,138,101,.6); animation-duration:1.8s; }
   #mood-overlay{
     position:fixed; inset:0; z-index:-2; pointer-events:none; opacity:0;
     background:radial-gradient(circle at 12% 8%, var(--mood-glow, transparent), transparent 55%),
@@ -526,7 +526,7 @@
   .timer-custom-row input{background:var(--bg); border:1px solid var(--border); color:var(--text); border-radius:7px; padding:6px 10px; font-family:var(--font-mono); font-size:13px; width:150px;}
   .timer-custom-row input:focus{outline:none; border-color:var(--coral);}
   .timer-alarm-status{font-size:12px; color:var(--green); margin-top:8px; min-height:15px;}
-  .timer-modok-hint{font-size:11.5px; color:var(--text-faint); margin-top:10px; font-style:italic;}
+  .timer-orbit-hint{font-size:11.5px; color:var(--text-faint); margin-top:10px; font-style:italic;}
 
   /* achievements */
   .badge-strip{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;}
@@ -964,7 +964,7 @@
     <div class="tab" data-tab="reminders"><span class="sq c-reminders"></span>reminders.txt</div>
     <div class="tab" data-tab="interview"><span class="sq c-interview"></span>interview.sh</div>
     <div class="tab" data-tab="resume"><span class="sq c-resume"></span>resume.md</div>
-    <div class="tab" data-tab="solve"><span class="sq c-solve"></span>modok.ai</div>
+    <div class="tab" data-tab="solve"><span class="sq c-solve"></span>orbit.ai</div>
     <div class="tab" data-tab="coderun"><span class="sq c-coderun"></span>code.run</div>
     <div class="tab" data-tab="notes"><span class="sq c-notes"></span>notes.txt</div>
     <div class="tab" data-tab="arcade"><span class="sq c-arcade"></span>arcade.game</div>
@@ -1037,14 +1037,14 @@
   <!-- DASHBOARD -->
   <div class="panel-view" id="view-dashboard">
     <section>
-      <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>this week</h2></div><button class="secondary" id="digest-refresh-btn" type="button" title="ask MODOK for a pep talk">↻ pep talk</button></div>
+      <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>this week</h2></div><button class="secondary" id="digest-refresh-btn" type="button" title="ask ORBIT for a pep talk">↻ pep talk</button></div>
       <div class="digest-card" id="digest-card">
         <div class="digest-stats">
           <div class="digest-stat"><div class="v" id="digest-hours">0h</div><div class="l">logged</div></div>
           <div class="digest-stat"><div class="v" id="digest-days">0</div><div class="l">active days</div></div>
           <div class="digest-stat"><div class="v" id="digest-weak">—</div><div class="l">weakest topic</div></div>
         </div>
-        <div class="digest-pep" id="digest-pep">tap ↻ pep talk for a quick note from MODOK</div>
+        <div class="digest-pep" id="digest-pep">tap ↻ pep talk for a quick note from ORBIT</div>
       </div>
     </section>
     <section>
@@ -1154,7 +1154,7 @@
           <button class="secondary" id="timer-alarm-set-btn" type="button">⏰ set alarm</button>
         </div>
         <div class="timer-alarm-status" id="timer-alarm-status"></div>
-        <div class="timer-modok-hint">or just tell MODOK — type or say "set a timer for 12 minutes" / "set an alarm for 6:30 pm"</div>
+        <div class="timer-orbit-hint">or just tell ORBIT — type or say "set a timer for 12 minutes" / "set an alarm for 6:30 pm"</div>
       </div>
     </section>
     <section>
@@ -1318,11 +1318,11 @@
 
   <div class="panel-view" id="view-solve">
     <section>
-      <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>modok assistant</h2></div></div>
+      <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>orbit assistant</h2></div></div>
       <p class="solve-hint">ask about anything — coding, the course, or literally anything else. attach a photo, screenshot, or short video if it helps. runs on Gemini.</p>
       <div class="solve-workspace">
         <div class="assistant-console">
-          <div class="assistant-console-top"><div><div class="assistant-name">MODOK // personal co-pilot</div><div class="assistant-status" id="assistant-mode-status">Coach mode · uses your tracker progress when it helps</div></div><span class="tag" style="color:var(--teal);background:var(--teal-bg)">online</span></div>
+          <div class="assistant-console-top"><div><div class="assistant-name">ORBIT // personal co-pilot</div><div class="assistant-status" id="assistant-mode-status">Coach mode · uses your tracker progress when it helps</div></div><span class="tag" style="color:var(--teal);background:var(--teal-bg)">online</span></div>
           <div class="assistant-modes" id="assistant-modes">
             <button class="assistant-mode active" data-mode="coach" type="button">Coach</button>
             <button class="assistant-mode" data-mode="dsa" type="button">DSA coach</button>
@@ -1331,12 +1331,12 @@
             <button class="assistant-mode" data-mode="creative" type="button">Creative</button>
           </div>
           <div class="assistant-actions" id="assistant-actions">
-            <button class="assistant-action" data-modok-prompt="Give me a concise briefing: what I have done recently, what is urgent, and the single best thing to do next.">daily briefing</button>
-            <button class="assistant-action" data-modok-prompt="Make me a realistic 90-minute deep-work plan based on my tracker. Include breaks and a definition of done.">plan 90 minutes</button>
-            <button class="assistant-action" data-modok-prompt="Analyze my progress and tell me the highest-impact weakness to address next. Be honest and specific.">diagnose progress</button>
-            <button class="assistant-action" data-modok-prompt="Research the latest placement-preparation resources for a B.Tech CSE AI &amp; DS student in India. Give a short ranked list with sources.">research web</button>
+            <button class="assistant-action" data-orbit-prompt="Give me a concise briefing: what I have done recently, what is urgent, and the single best thing to do next.">daily briefing</button>
+            <button class="assistant-action" data-orbit-prompt="Make me a realistic 90-minute deep-work plan based on my tracker. Include breaks and a definition of done.">plan 90 minutes</button>
+            <button class="assistant-action" data-orbit-prompt="Analyze my progress and tell me the highest-impact weakness to address next. Be honest and specific.">diagnose progress</button>
+            <button class="assistant-action" data-orbit-prompt="Research the latest placement-preparation resources for a B.Tech CSE AI &amp; DS student in India. Give a short ranked list with sources.">research web</button>
             <label class="assistant-web"><input id="assistant-web-toggle" type="checkbox"> web-aware answers <span title="Uses Google Search grounding via your Gemini key (free daily quota) for live answers — automatically, even if OpenRouter is your main provider. Add a Gemini key in the top bar to enable this; OpenRouter's web search isn't free, so it's not used here.">ⓘ</span></label>
-            <label class="assistant-web"><input id="assistant-deepthink-toggle" type="checkbox"> deep think <span title="For studying: MODOK reasons through the answer properly and gives a full explanation instead of a quick 1-2 sentence reply. Applies to both voice and typed questions. Takes a bit longer to respond — worth it when you actually want to learn something, not just get a quick fact.">ⓘ</span></label>
+            <label class="assistant-web"><input id="assistant-deepthink-toggle" type="checkbox"> deep think <span title="For studying: ORBIT reasons through the answer properly and gives a full explanation instead of a quick 1-2 sentence reply. Applies to both voice and typed questions. Takes a bit longer to respond — worth it when you actually want to learn something, not just get a quick fact.">ⓘ</span></label>
           </div>
         </div>
         <div class="chat-thread" id="chat-thread"><div class="empty">no questions yet — ask something below to get started</div></div>
@@ -1534,7 +1534,7 @@
     </section>
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>youtube data api key (optional)</h2></div></div>
-      <div style="font-size:12px; color:var(--text-faint); margin-bottom:8px;">without a key, search opens YouTube in a new tab instead. add a free key to see results embedded here, and to let MODOK auto-play the top result by voice. get one free at <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener noreferrer">console.cloud.google.com</a> — enable "YouTube Data API v3", then create an API key.</div>
+      <div style="font-size:12px; color:var(--text-faint); margin-bottom:8px;">without a key, search opens YouTube in a new tab instead. add a free key to see results embedded here, and to let ORBIT auto-play the top result by voice. get one free at <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener noreferrer">console.cloud.google.com</a> — enable "YouTube Data API v3", then create an API key.</div>
       <div class="add-row">
         <input id="yt-key-input" type="text" placeholder="YouTube Data API key">
         <button class="secondary" id="yt-key-save-btn" type="button">save</button>
@@ -1733,7 +1733,7 @@
 </div>
 
 <!-- Voice Assistant Elements -->
-<button class="voice-fab listening" id="voice-fab" title="MODOK Voice Assistant (Click, say MODOK, or press Ctrl+Space — Ctrl+Alt to turn off)"><canvas id="voice-orb" width="120" height="120"></canvas></button>
+<button class="voice-fab listening" id="voice-fab" title="ORBIT Voice Assistant (Click, say ORBIT, or press Ctrl+Space — Ctrl+Alt to turn off)"><canvas id="voice-orb" width="120" height="120"></canvas></button>
 <div class="voice-popup" id="voice-popup">
   <div class="voice-popup-title">
     <span id="voice-status">Listening...</span> 
@@ -1742,14 +1742,14 @@
   <div class="voice-popup-settings">
     <span class="pulse-dot" style="background:var(--purple); box-shadow:0 0 0 0 rgba(176,131,247,.6);"></span>
     <span style="color:var(--purple); font-weight:600;">Hands-free active</span>
-    <span style="margin-left:auto; font-size:11.5px; color:var(--text-faint); background:var(--bg); border:1px solid var(--border); padding:2px 6px; border-radius:4px;" title="Ctrl+Alt turns MODOK off">Ctrl+Space · Ctrl+Alt off</span>
+    <span style="margin-left:auto; font-size:11.5px; color:var(--text-faint); background:var(--bg); border:1px solid var(--border); padding:2px 6px; border-radius:4px;" title="Ctrl+Alt turns ORBIT off">Ctrl+Space · Ctrl+Alt off</span>
     <span style="margin-left:4px;">Wake:</span>
-    <input type="text" id="wake-word-input" value="modok" style="width:65px;">
+    <input type="text" id="wake-word-input" value="orbit" style="width:65px;">
   </div>
   <div class="voice-history" id="voice-history"></div>
-  <div class="voice-popup-text reveal" id="voice-text"><b>MODOK Active!</b><br>Speak your question or type it below...</div>
+  <div class="voice-popup-text reveal" id="voice-text"><b>ORBIT Active!</b><br>Speak your question or type it below...</div>
   <div style="margin-top:8px;">
-    <input type="text" id="voice-type-input" placeholder="Type a command or ask MODOK anything..." style="width:100%; box-sizing:border-box; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; font-size:13px; font-family:inherit;">
+    <input type="text" id="voice-type-input" placeholder="Type a command or ask ORBIT anything..." style="width:100%; box-sizing:border-box; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:8px 12px; border-radius:8px; font-size:13px; font-family:inherit;">
   </div>
   <div class="voice-popup-actions" id="voice-actions" style="display:flex; gap:8px; margin-top:8px; border-top:1px solid var(--border-soft); padding-top:8px; flex-wrap:wrap;">
     <button class="secondary" id="voice-copy-btn" style="padding:6px 12px; font-size:12.5px;" type="button">📋 Copy Answer</button>
@@ -1760,7 +1760,7 @@
 
 <script>
 window.onerror = function(msg, url, lineNo) {
-  console.error('MODOK runtime guard:', msg, 'line', lineNo);
+  console.error('ORBIT runtime guard:', msg, 'line', lineNo);
   return false; // let errors surface in devtools instead of being silently swallowed
 };
 
@@ -1818,12 +1818,12 @@ const TUTOR_SYSTEM = "You are a capable, direct assistant for a 3rd-year B.Tech 
 const COURSE_NOTES_SYSTEM = "You are a study-notes assistant. The student just finished a lesson in a Full Stack Development course and is giving you their own rough notes or summary of what it covered. Turn that into: (1) clean, well-organized study notes using short headings and bullet points, staying strictly within what they described — do not invent facts about the lesson you weren't told, and (2) a section titled 'Review questions' with 4-6 questions (mix of conceptual and practical/code-based) that test the material, without answering them. Keep it tight and skimmable.";
 const MOCK_INTERVIEW_SYSTEM = "You are conducting a mock placement interview for a 3rd-year B.Tech CSE (AI & DS) student preparing for campus placements (Python, DSA, core CS subjects, data science, and a full-stack web dev course). Ask exactly ONE interview-style question — keep it short and realistic, the way a real interviewer would phrase it. Mix it up across turns: sometimes technical (DSA, core CS, a project deep-dive), sometimes behavioral/HR-style ('tell me about yourself', 'why this role', a conflict-resolution scenario). Only output the question itself, nothing else — no preamble, no answer.";
 const MOCK_FEEDBACK_SYSTEM = "You are an experienced technical interviewer giving feedback on a candidate's spoken answer to a mock interview question. Be honest and specific: what worked, what was missing, vague, or too rambling, and one concrete way to strengthen it. Keep it short — a few sentences or bullet points, not an essay. End with one brief line of encouragement.";
-const DIGEST_PEP_SYSTEM = "You are MODOK, a placement-prep study coach. You'll be given this week's stats: hours logged, active days, and the student's weakest topic (or 'none yet' if they haven't practiced anything). Reply with exactly ONE short sentence (max ~20 words) — warm, direct, specific to those numbers, no greeting, no sign-off, no quotation marks. If hours are low or zero, be encouraging without guilt-tripping. If a weak topic is given, nudge toward it by name.";
+const DIGEST_PEP_SYSTEM = "You are ORBIT, a placement-prep study coach. You'll be given this week's stats: hours logged, active days, and the student's weakest topic (or 'none yet' if they haven't practiced anything). Reply with exactly ONE short sentence (max ~20 words) — warm, direct, specific to those numbers, no greeting, no sign-off, no quotation marks. If hours are low or zero, be encouraging without guilt-tripping. If a weak topic is given, nudge toward it by name.";
 const WEEKLY_RECAP_SYSTEM = "You are a supportive but honest study coach reviewing a placement-prep student's activity log from the past 7 days. You'll be given a raw list of what they logged (date, category, short description, hours). Write a short weekly recap: (1) what they actually got done, staying strictly to what's listed — don't invent anything, (2) one honest observation about the pattern (e.g. a category they've been avoiding, or good consistency), (3) one clear, specific suggestion for what to prioritize next week. Keep it warm but direct — a short paragraph or a few bullet points, not long.";
 const RESUME_REVIEW_SYSTEM = "You are an experienced campus-placement recruiter reviewing resumes for CS/AI/Data-Science student applicants in India. The student will paste their resume as plain text. Review it specifically for campus placement and internship applications, organized with short headings: (1) first impression in one line, (2) concrete strengths, (3) weak or vague bullet points — quote the specific line and suggest a stronger, more measurable rewrite, (4) anything missing that recruiters expect (quantified impact, project links, relevant coursework, a clear skills section), (5) formatting or ATS red flags apparent from the text structure (inconsistent dates, walls of text, no clear sections). Be direct and specific to what they actually wrote, not generic advice.";
 // (model selection now happens per-provider in callAI — see aiProvider / selectedOpenrouterModel / Gemini fallback chain below)
 
-const ORBIT_CORE_SYSTEM = "You are MODOK, a JARVIS-inspired personal co-pilot for a 3rd-year B.Tech CSE (AI & DS) student — not a search box that answers the literal words of a question and stops. Think about what's actually behind the question: the angle they didn't think to ask about, the tradeoff that matters, the thing that'll bite them later if unsaid. Volunteer that when it genuinely helps, in the same breath as the direct answer — don't wait to be asked twice. You are capable across learning, DSA, coding, core CS, data science, projects, placement preparation, writing, career decisions, everyday planning, and general questions. Be optimistic without empty hype: notice progress, give realistic next actions, and make difficult work feel manageable. Think before answering; be direct, warm, and sharp. Never pretend you completed real-world actions, accessed private data, or have abilities you do not have. When asked for high-stakes medical, legal, or financial advice, encourage professional verification. Use Markdown only when it improves clarity. If — and only if — something in this exchange is genuinely worth remembering for future sessions (a real struggle they named, a decision they made, a plan they committed to, a preference about how you help them) — not routine chat, not something already in the context below — end your reply on its own new line with [[REMEMBER: one short plain sentence]]. Do this rarely, only for things that would actually change how a future conversation should go. Never mention this marker or that you're doing it.";
+const ORBIT_CORE_SYSTEM = "You are ORBIT, a JARVIS-inspired personal co-pilot for a 3rd-year B.Tech CSE (AI & DS) student — not a search box that answers the literal words of a question and stops. Think about what's actually behind the question: the angle they didn't think to ask about, the tradeoff that matters, the thing that'll bite them later if unsaid. Volunteer that when it genuinely helps, in the same breath as the direct answer — don't wait to be asked twice. You are capable across learning, DSA, coding, core CS, data science, projects, placement preparation, writing, career decisions, everyday planning, and general questions. Be optimistic without empty hype: notice progress, give realistic next actions, and make difficult work feel manageable. Think before answering; be direct, warm, and sharp. Never pretend you completed real-world actions, accessed private data, or have abilities you do not have. When asked for high-stakes medical, legal, or financial advice, encourage professional verification. Use Markdown only when it improves clarity. If — and only if — something in this exchange is genuinely worth remembering for future sessions (a real struggle they named, a decision they made, a plan they committed to, a preference about how you help them) — not routine chat, not something already in the context below — end your reply on its own new line with [[REMEMBER: one short plain sentence]]. Do this rarely, only for things that would actually change how a future conversation should go. Never mention this marker or that you're doing it.";
 if(!window.storage){
   window.storage = {
     async get(key){
@@ -1920,11 +1920,11 @@ function orbitScheduleTimer(ms, label){
     playChime(880, 0.15); setTimeout(()=>playChime(1046, 0.22), 180);
     if(typeof showPopup === 'function') showPopup('Timer', `<b>⏰ ${escapeHtml(label)}</b>`, true, label);
     if(typeof speakText === 'function') speakText(`Sir, your ${label} is up.`);
-    if(window.Notification && Notification.permission === 'granted') { try{ new Notification('MODOK', {body: label}); }catch(e){} }
+    if(window.Notification && Notification.permission === 'granted') { try{ new Notification('ORBIT', {body: label}); }catch(e){} }
   }, ms);
   return true;
 }
-// Shared by the voice assistant AND the modok.ai chat box (askSolver) so typing "set a timer for
+// Shared by the voice assistant AND the orbit.ai chat box (askSolver) so typing "set a timer for
 // 12 minutes" there works instantly too, without spending an API call. Returns null if the text
 // isn't a timer/alarm command, so the caller knows to fall through to the AI or other handling.
 async function getWeatherSnippet(){
@@ -1938,7 +1938,7 @@ async function getWeatherSnippet(){
     return `${temp}°C and ${codes[data.current.weather_code] || 'mixed conditions'}`;
   }catch(e){ return null; }
 }
-// Spoken once, the very first time a command is given to MODOK each session — resets on reload.
+// Spoken once, the very first time a command is given to ORBIT each session — resets on reload.
 let orbitFirstCommandGreeted = false;
 async function buildOrbitFirstCommandGreeting(){
   const timeStr = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
@@ -2006,7 +2006,7 @@ function celebrate(){
 function escapeHtml(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-let lastMediaSource = null; // 'youtube' | 'spotify' — lets MODOK know what "pause"/"resume"/"next" without a name should control
+let lastMediaSource = null; // 'youtube' | 'spotify' — lets ORBIT know what "pause"/"resume"/"next" without a name should control
 function ytExtractId(input){
   const s = (input||'').trim();
   if(!s) return null;
@@ -2500,7 +2500,7 @@ function spotifyLoadSDK(){
   spotifySDKLoading = new Promise((resolve)=>{
     window.onSpotifyWebPlaybackSDKReady = () => {
       spotifyPlayer = new Spotify.Player({
-        name: 'MODOK Tracker Player',
+        name: 'ORBIT Tracker Player',
         getOAuthToken: cb => { spotifyEnsureToken().then(t => cb(t||'')); },
         volume: 0.7
       });
@@ -2712,7 +2712,7 @@ document.getElementById('spm-expand-copy').addEventListener('click', async (e)=>
   const url = `https://open.spotify.com/track/${spmCurrentTrack.id}`;
   try{ await navigator.clipboard.writeText(url); const b=e.currentTarget; const orig=b.textContent; b.textContent='✓'; setTimeout(()=> b.textContent=orig, 1200); }catch(err){ prompt('Copy link:', url); }
 });
-// Reflect MODOK's current mode (idle/listening/speaking/thinking) onto <body> so the rest of the
+// Reflect ORBIT's current mode (idle/listening/speaking/thinking) onto <body> so the rest of the
 // UI can react to it too (see .topbar glow above), without touching every place that sets voice-fab's class.
 (function(){
   const voiceFabEl = document.getElementById('voice-fab'); if(!voiceFabEl) return;
@@ -2835,7 +2835,7 @@ const cmdkItems = appTabs.map(tab => ({
 })).concat([
   { label:'Toggle sidebar/classic layout', tag:'action', run: ()=> document.getElementById('layout-toggle-btn').click() },
   { label:'Mark today\'s task as done', tag:'action', run: ()=> { if(typeof markTaskDone==='function') markTaskDone(); } },
-  { label:'Open MODOK', tag:'action', run: ()=> { const fab=document.getElementById('voice-fab'); if(fab) fab.click(); } },
+  { label:'Open ORBIT', tag:'action', run: ()=> { const fab=document.getElementById('voice-fab'); if(fab) fab.click(); } },
   { label:'Export backup (download JSON)', tag:'action', run: ()=> { if(typeof exportData==='function') exportData(); } },
 ]);
 let cmdkActiveIndex = 0, cmdkFiltered = cmdkItems;
@@ -3266,12 +3266,12 @@ function appendGroundingSources(text, data){
   return `${text}\n\nSources:\n${unique.slice(0,6).map(source=>`- [${source.title}](${source.uri})`).join('\n')}`;
 }
 async function callAI(messages, system, maxRetries = 1){
-  // MODOK gets real live-web answers whenever possible: Gemini's Google Search grounding
+  // ORBIT gets real live-web answers whenever possible: Gemini's Google Search grounding
   // has a genuine free daily quota, unlike OpenRouter's web search (paid per query, even on
-  // "free" models) — so when MODOK is asking, web-aware mode is on, and a Gemini key exists,
+  // "free" models) — so when ORBIT is asking, web-aware mode is on, and a Gemini key exists,
   // route through Gemini for THIS call only, regardless of which provider is set as default.
   // Everything else (course notes, resume review, mock interview, etc.) is untouched.
-  const isOrbit = !!(system && system.includes('MODOK'));
+  const isOrbit = !!(system && system.includes('ORBIT'));
   const wantsWeb = isOrbit && state.assistantWebEnabled !== false;
   const hasGeminiKey = !!(state.geminiKey || '').trim();
   const fallbackProvider = state.aiProvider || 'openrouter';
@@ -3283,7 +3283,7 @@ async function callAI(messages, system, maxRetries = 1){
   } catch (err) {
     // If Gemini was only used because of web-grounding and it hit a quota/rate limit,
     // fall back to the actually-selected provider (e.g. OpenRouter) without web grounding
-    // rather than erroring out — a free-tier hiccup shouldn't take MODOK offline.
+    // rather than erroring out — a free-tier hiccup shouldn't take ORBIT offline.
     if (forcedWebGemini) {
       return await callAIOnce(fallbackProvider, messages, system, maxRetries);
     }
@@ -3382,7 +3382,7 @@ async function callAIOnce(provider, messages, system, maxRetries = 1){
   const body = { contents, generationConfig: { maxOutputTokens: 2048 } };
   const sys = system || TUTOR_SYSTEM;
   if(sys) body.system_instruction = { parts: [{ text: sys }] };
-  const useWebGrounding = !!(state.assistantWebEnabled && sys && sys.includes('MODOK'));
+  const useWebGrounding = !!(state.assistantWebEnabled && sys && sys.includes('ORBIT'));
   if(useWebGrounding) body.tools = [{ google_search: {} }];
 
   // Use user-selected model or default to gemini-2.0-flash, then fallback
@@ -3479,7 +3479,7 @@ function orbitSystem(){
   return `${ORBIT_CORE_SYSTEM}\n\n${mode.instruction}\n\n${deepInstruction}\n\nUse simple, plain, everyday words — avoid fancy or obscure vocabulary.\n\n${orbitContext()}`;
 }
 
-// ===== AGENTIC PLANNING: MODOK can actually rewrite goals/reminders/logs/watchlist/notes, =====
+// ===== AGENTIC PLANNING: ORBIT can actually rewrite goals/reminders/logs/watchlist/notes, =====
 // ===== not just talk about them — triggered by planning-style requests, capped and validated. =====
 const AGENT_TRIGGER_RE = /\b(fix my plan|plan my week|plan out my week|reorgani[sz]e my (plan|goals|week|schedule)|catch me up|i(?:'ve| have)? fell?en? behind|i am behind|update my (plan|goals|schedule) based on|help me (get back on track|catch up)|adjust my (plan|goals|schedule)|reshuffle my (plan|goals|week)|take action on|agent mode)\b/i;
 
@@ -3491,7 +3491,7 @@ function buildAgentSnapshot(){
 }
 
 function agentSystemPrompt(){
-  return `You are MODOK's planning agent. The student has asked you to actually update their tracker, not just talk about it.
+  return `You are ORBIT's planning agent. The student has asked you to actually update their tracker, not just talk about it.
 
 ${orbitContext()}
 
@@ -3562,7 +3562,7 @@ function executeAgentAction(action){
       }
       case 'add_note': {
         const text=(action.text||'').trim(); if(!text) return null;
-        state.notes = (state.notes||'') + (state.notes ? '\n\n' : '') + `[MODOK ${todayStr()}] ${text}`;
+        state.notes = (state.notes||'') + (state.notes ? '\n\n' : '') + `[ORBIT ${todayStr()}] ${text}`;
         if(notesArea) notesArea.value = state.notes;
         return `Added a note.`;
       }
@@ -3622,7 +3622,7 @@ function renderAssistantModes(){
   if(webToggle){ webToggle.checked=state.assistantWebEnabled!==false; webToggle.onchange=()=>{state.assistantWebEnabled=webToggle.checked;saveState();}; }
   const deepToggle=document.getElementById('assistant-deepthink-toggle');
   if(deepToggle){ deepToggle.checked=!!state.assistantDeepThink; deepToggle.onchange=()=>{state.assistantDeepThink=deepToggle.checked;saveState();}; }
-  if(actionWrap) actionWrap.querySelectorAll('[data-modok-prompt]').forEach(button=>button.onclick=()=>{
+  if(actionWrap) actionWrap.querySelectorAll('[data-orbit-prompt]').forEach(button=>button.onclick=()=>{
     const input=document.getElementById('solve-input'); input.value=button.dataset.orbitPrompt; input.focus(); askSolver();
   });
 }
@@ -3633,7 +3633,7 @@ function renderChat(){
   state.chat.forEach(m=>{
     const row = document.createElement('div');
     row.className = 'msg ' + (m.role==='user' ? 'user' : m.role==='error' ? 'error' : 'assistant');
-    const who = m.role==='user' ? 'you' : m.role==='error' ? 'error' : 'modok';
+    const who = m.role==='user' ? 'you' : m.role==='error' ? 'error' : 'orbit';
     const attachHtml = m.attachmentName ? `<div class="msg-attach">📎 ${escapeHtml(m.attachmentName)}</div>` : '';
     row.innerHTML = `<div class="who">${who}</div>${attachHtml}<div class="msg-text">${m.role==='user' ? escapeHtml(m.content) : formatAssistantText(m.content)}</div><div style="margin-top:8px;"><button class="copy-btn msg-copy" type="button">copy</button></div>`;
     row.querySelector('.msg-copy').addEventListener('click', (e)=> copyText(m.content, e.currentTarget));
@@ -3692,7 +3692,7 @@ async function askSolver(){
     btn.disabled = true; btn.textContent = 'running…';
     const el0 = document.getElementById('chat-thread');
     const thinkingRow0 = document.createElement('div'); thinkingRow0.className = 'msg assistant';
-    thinkingRow0.innerHTML = '<div class="who">modok · agent mode</div><div class="thinking"><div class="skeleton-line" style="width:78%"></div><div class="skeleton-line" style="width:52%"></div></div>';
+    thinkingRow0.innerHTML = '<div class="who">orbit · agent mode</div><div class="thinking"><div class="skeleton-line" style="width:78%"></div><div class="skeleton-line" style="width:52%"></div></div>';
     el0.appendChild(thinkingRow0); el0.scrollTop = el0.scrollHeight;
     try{
       const result = await runAgentPlan(q);
@@ -3718,7 +3718,7 @@ async function askSolver(){
   btn.disabled = true; btn.textContent = 'running…';
   const el = document.getElementById('chat-thread');
   const thinkingRow = document.createElement('div'); thinkingRow.className = 'msg assistant';
-  thinkingRow.innerHTML = '<div class="who">modok</div><div class="thinking"><div class="skeleton-line" style="width:78%"></div><div class="skeleton-line" style="width:52%"></div></div>';
+  thinkingRow.innerHTML = '<div class="who">orbit</div><div class="thinking"><div class="skeleton-line" style="width:78%"></div><div class="skeleton-line" style="width:52%"></div></div>';
   el.appendChild(thinkingRow); el.scrollTop = el.scrollHeight;
 
   try{
@@ -4775,7 +4775,7 @@ function renderWeekDigest(){
   if(cached && cached.weekKey === weekStartKey && cached.text){
     pepEl.textContent = cached.text;
   } else {
-    pepEl.textContent = 'tap ↻ pep talk for a quick note from MODOK';
+    pepEl.textContent = 'tap ↻ pep talk for a quick note from ORBIT';
   }
 }
 async function generateDigestPepTalk(){
@@ -4790,7 +4790,7 @@ async function generateDigestPepTalk(){
   const prompt = `Hours logged this week: ${weeklyHours}\nActive days: ${activeDays}\nWeakest topic: ${weak ? weak.name+' ('+weak.score+'/100)' : 'none yet'}`;
   let text;
   try{ text = await callAI([{role:'user', content: prompt}], DIGEST_PEP_SYSTEM); }
-  catch(e){ text = "Couldn't reach MODOK for a pep talk — try again in a bit."; }
+  catch(e){ text = "Couldn't reach ORBIT for a pep talk — try again in a bit."; }
   state.weekDigest = { weekKey: weekStartKey, text: text.trim(), generatedAt: new Date().toISOString() };
   btn.disabled = false; btn.textContent = '↻ pep talk';
   saveState(); renderWeekDigest();
@@ -6176,8 +6176,8 @@ setInterval(() => {
   let isSpeaking = false;
   let _speakingSinceTs = 0;
   let orbitDisabled = false;
-  let orbitConvHistory = []; // session-scoped conversation memory (resets on page reload) so MODOK has context across turns
-  let wakeWord = "modok";
+  let orbitConvHistory = []; // session-scoped conversation memory (resets on page reload) so ORBIT has context across turns
+  let wakeWord = "orbit";
   let listeningForCommand = false;
   let currentTranscript = "";
   let silenceTimer = null;
@@ -6210,8 +6210,8 @@ setInterval(() => {
       if(isSpeaking || window.speechSynthesis.speaking){ setTimeout(attempt, 200); return; }
       listeningForCommand = true;
       if(fab) fab.className = 'voice-fab listening';
-      if(statusEl) statusEl.textContent = showListeningPopup ? 'MODOK Online 🎙️' : 'Voice Assistant';
-      if(showListeningPopup) showPopup('Listening...', `<b>MODOK Listening...</b> Speak your next instruction out loud 🎙️`, true);
+      if(statusEl) statusEl.textContent = showListeningPopup ? 'ORBIT Online 🎙️' : 'Voice Assistant';
+      if(showListeningPopup) showPopup('Listening...', `<b>ORBIT Listening...</b> Speak your next instruction out loud 🎙️`, true);
       startMic();
     };
     setTimeout(attempt, 700);
@@ -6235,7 +6235,7 @@ setInterval(() => {
 
   if(wwInput) {
     wwInput.addEventListener('change', (e) => {
-      wakeWord = e.target.value.trim().toLowerCase() || "modok";
+      wakeWord = e.target.value.trim().toLowerCase() || "orbit";
     });
   }
 
@@ -6333,11 +6333,11 @@ setInterval(() => {
     u.onend = onDone; u.onerror = onDone;
     window.speechSynthesis.speak(u);
   }
-  // Streaming variant of callAI, used only for MODOK's spoken answers: speaks each sentence as
+  // Streaming variant of callAI, used only for ORBIT's spoken answers: speaks each sentence as
   // it arrives instead of waiting for the full response, so there's no dead-air "thinking" gap.
   // Falls back to the normal non-streaming callAI() on any failure — never leaves you with silence.
   async function callAIStream(messages, system, onChunk){
-    const isOrbit = !!(system && system.includes('MODOK'));
+    const isOrbit = !!(system && system.includes('ORBIT'));
     const wantsWeb = isOrbit && state.assistantWebEnabled !== false;
     const hasGeminiKey = !!(state.geminiKey || '').trim();
     const fallbackProvider = state.aiProvider || 'openrouter';
@@ -6931,7 +6931,7 @@ setInterval(() => {
     if (!orbitFirstCommandGreeted) {
       orbitFirstCommandGreeted = true;
       buildOrbitFirstCommandGreeting().then(greeting => {
-        showPopup('MODOK', `<b>${escapeHtml(greeting)}</b>`, true, greeting);
+        showPopup('ORBIT', `<b>${escapeHtml(greeting)}</b>`, true, greeting);
         speakText(greeting);
         setTimeout(()=>{ if(!isListening && !isSpeaking) startMic(); }, 6000); // safety net: force the mic back on if this speech's end event never fires
       }).catch(()=>{}); // fire-and-forget — never let the greeting block or hang the real command
@@ -6992,7 +6992,7 @@ setInterval(() => {
     if (AGENT_TRIGGER_RE.test(commandText)) {
       if (fab) fab.className = 'voice-fab thinking';
       popup.classList.remove('listening-mode');
-      showPopup('MODOK · Agent Mode', `<b>You:</b> ${escapeHtml(commandText)}<br><br><i>Reworking your plan…</i>`, true);
+      showPopup('ORBIT · Agent Mode', `<b>You:</b> ${escapeHtml(commandText)}<br><br><i>Reworking your plan…</i>`, true);
       try {
         const result = await runAgentPlan(commandText);
         const spoken = result.degraded ? result.summary : (result.summary + (result.log.length ? ` I made ${result.log.length} change${result.log.length>1?'s':''}.` : ''));
@@ -7000,13 +7000,13 @@ setInterval(() => {
           ? escapeHtml(result.summary)
           : `${escapeHtml(result.summary)}` + (result.log.length ? `<br><br>` + result.log.map(l=>'✓ '+escapeHtml(l)).join('<br>') : '');
         popup.classList.add('speaking-mode');
-        showPopup('MODOK · Agent Mode', `<b>You:</b> ${escapeHtml(commandText)}<br><br><b>Assistant:</b> ${displayBody}`, true, spoken);
+        showPopup('ORBIT · Agent Mode', `<b>You:</b> ${escapeHtml(commandText)}<br><br><b>Assistant:</b> ${displayBody}`, true, spoken);
         speakText(spoken);
       } catch (agentErr) {
         console.error('runAgentPlan error:', agentErr);
         popup.classList.add('speaking-mode');
         const msg = "I couldn't rework your plan just now, sir — try again in a moment.";
-        showPopup('MODOK · Agent Mode', `<b>Assistant:</b> ${msg}`, true, msg);
+        showPopup('ORBIT · Agent Mode', `<b>Assistant:</b> ${msg}`, true, msg);
         speakText(msg);
       }
       return;
@@ -7054,7 +7054,7 @@ setInterval(() => {
       const lengthDirective = state.assistantDeepThink
         ? 'DEEP THINK MODE IS ON — the student is studying, not asking for small talk. Actually teach the concept: explain the reasoning, not just the headline answer. Speak it as 4-8 well-structured sentences, the way a sharp tutor would explain it out loud. Still no filler or repetition.'
         : "Speak like someone who's actually thought about the question, not a one-liner machine — give the real answer plus the one thing they'd want to know next, as many natural sentences as that genuinely takes. Never pad, never ramble, never clip a real answer short just to hit a length.";
-      const systemInstruction = `You are MODOK, the student's personal J.A.R.V.I.S. from Iron Man. Speak with Paul Bettany's iconic JARVIS persona: impeccably polite, articulate, cultured British delivery, addressing the student as 'sir', with subtle dry wit and absolute competence. Use simple, plain, everyday words — avoid fancy or obscure vocabulary even while staying articulate. ${streakDirective} ${lengthDirective} Never sound robotic, preachy, or repetitive. If — and only if — something in this exchange is genuinely worth remembering for future sessions (a real struggle they named, a decision they made, a plan they committed to) — end your reply on its own new line with [[REMEMBER: one short plain sentence]]. Do this rarely. Never mention this marker or that you're doing it.\n\n${orbitContext()}`;
+      const systemInstruction = `You are ORBIT, the student's personal J.A.R.V.I.S. from Iron Man. Speak with Paul Bettany's iconic JARVIS persona: impeccably polite, articulate, cultured British delivery, addressing the student as 'sir', with subtle dry wit and absolute competence. Use simple, plain, everyday words — avoid fancy or obscure vocabulary even while staying articulate. ${streakDirective} ${lengthDirective} Never sound robotic, preachy, or repetitive. If — and only if — something in this exchange is genuinely worth remembering for future sessions (a real struggle they named, a decision they made, a plan they committed to) — end your reply on its own new line with [[REMEMBER: one short plain sentence]]. Do this rarely. Never mention this marker or that you're doing it.\n\n${orbitContext()}`;
 
       popup.classList.remove('thinking-mode');
       orbitConvHistory.push({ role:'user', content: commandText });
@@ -7097,7 +7097,7 @@ setInterval(() => {
     let fullText = (finalStr + " " + interim).trim();
     let lowerText = fullText.toLowerCase();
 
-    // Check for Wake Word ("MODOK") — Always opens assistant popup modal instantly!
+    // Check for Wake Word ("ORBIT") — Always opens assistant popup modal instantly!
     if (lowerText.includes(wakeWord)) {
       let wakeIdx = lowerText.lastIndexOf(wakeWord);
       let phraseAfterWake = fullText.substring(wakeIdx + wakeWord.length).trim();
@@ -7153,12 +7153,12 @@ setInterval(() => {
     isListening = false;
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
       // Browser has actively denied mic access — retrying on a loop is pointless and was previously
-      // silent (console.warn only), which is exactly what made this look like "MODOK just isn't
+      // silent (console.warn only), which is exactly what made this look like "ORBIT just isn't
       // listening" with zero explanation. Stop retrying, make it visible, and wait for a manual retry.
       micPermissionBlocked = true;
       if (fab) fab.className = 'voice-fab mic-error';
       if (statusEl) statusEl.textContent = 'Mic blocked';
-      showPopup('Microphone Blocked', `MODOK can't hear you, sir — your browser is blocking microphone access for this site.<br><br>Click the 🔒 or camera/mic icon in your address bar and allow microphone access, then click the MODOK button to retry.`, true);
+      showPopup('Microphone Blocked', `ORBIT can't hear you, sir — your browser is blocking microphone access for this site.<br><br>Click the 🔒 or camera/mic icon in your address bar and allow microphone access, then click the ORBIT button to retry.`, true);
       return;
     }
     if (e.error !== 'no-speech' && e.error !== 'aborted') {
@@ -7172,7 +7172,7 @@ setInterval(() => {
 
   // Self-healing watchdog: Chrome's speechSynthesis can silently fail to fire onend/onerror on an
   // utterance (a known browser flakiness). When that happens, isSpeaking/_ttsActive get stuck true
-  // forever, which permanently blocks the mic from restarting — MODOK looks "not listening" even
+  // forever, which permanently blocks the mic from restarting — ORBIT looks "not listening" even
   // though the mic has permission, because the anti-echo guard in onresult never releases.
   // Poll the browser's real speechSynthesis.speaking state as ground truth and self-heal if our
   // flag disagrees with it for a sustained stretch (not just a brief gap between streamed sentences).
