@@ -108,7 +108,8 @@
   .dot.r{background:#ff5f56;} .dot.a{background:#ffbd2e;} .dot.g{background:#27c93f;}
   .titlebar .path{color:var(--text-faint); font-size:14.5px;}
   h1{font-family:var(--font-display); font-size:30px; font-weight:700; margin:15px 0 3px; color:var(--text); letter-spacing:-.01em; text-shadow:0 0 24px rgba(63,185,80,.25);}
-  h1 .accent{background:linear-gradient(120deg, var(--green) 0%, var(--mood-accent-2, var(--blue)) 50%, var(--purple) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 1px 10px rgba(0,0,0,.4); transition:background 1.1s ease;}
+  h1 .accent{background:linear-gradient(120deg, var(--green) 0%, var(--blue) 50%, var(--purple) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 1px 10px rgba(0,0,0,.4); transition:background 1.1s ease;}
+  body.mood-active h1 .accent{background:linear-gradient(120deg, var(--green) 0%, var(--mood-accent-2) 50%, var(--purple) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;}
   .hud-corners{position:relative;}
   .hud-corners::before,.hud-corners::after{
     content:''; position:absolute; width:10px; height:10px; border-color:var(--hud-color,var(--green)); opacity:.7; pointer-events:none;
@@ -217,6 +218,17 @@
   .tab[data-tab="projects"].active{border-color:var(--purple);}
   .tab[data-tab="watch"].active{border-color:var(--ytred);}
   .tab[data-tab="spotify"].active{border-color:var(--spotify);}
+
+  /* each tab carries its own accent into every section card inside it — see section{} below */
+  #view-today{--accent:var(--coral);} #view-course{--accent:var(--cyan);}
+  #view-dashboard{--accent:var(--green);} #view-roadmap{--accent:var(--blue);}
+  #view-targets{--accent:var(--teal);} #view-reminders{--accent:var(--amber);}
+  #view-solve{--accent:var(--amber);} #view-coderun{--accent:var(--lime);}
+  #view-notes{--accent:var(--purple);} #view-interview{--accent:var(--rose);}
+  #view-resume{--accent:var(--pink);} #view-arcade{--accent:var(--purple);}
+  #view-movies{--accent:var(--gold);} #view-live{--accent:var(--blue);}
+  #view-projects{--accent:var(--purple);} #view-watch{--accent:var(--ytred);}
+  #view-spotify{--accent:var(--spotify);}
   
   .sq.c-today{background:var(--coral);} .sq.c-course{background:var(--cyan);}
   .sq.c-dash{background:var(--green);} .sq.c-road{background:var(--blue);} .sq.c-targets{background:var(--teal);}
@@ -302,6 +314,14 @@
   .spm-seek{flex:1;} .spm-vol{width:72px; flex-shrink:0;}
   .spm-seek::-webkit-slider-thumb, .spm-vol::-webkit-slider-thumb{ -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:var(--spotify); box-shadow:0 0 8px rgba(30,215,96,.6); cursor:pointer; }
   .spm-seek::-moz-range-thumb, .spm-vol::-moz-range-thumb{ width:12px; height:12px; border-radius:50%; background:var(--spotify); border:none; box-shadow:0 0 8px rgba(30,215,96,.6); cursor:pointer; }
+  .spm-source{font-size:10.5px; font-weight:600; color:var(--spotify); background:rgba(30,215,96,.1); border:1px solid rgba(30,215,96,.35); border-radius:20px; padding:3px 10px; align-items:center; gap:5px; margin-bottom:9px; width:fit-content; letter-spacing:.01em;}
+  .spm-upnext{margin-top:20px; width:100%; max-width:380px; text-align:left;}
+  .spm-upnext-label{font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--text-faint); margin-bottom:8px;}
+  .spm-upnext-row{display:flex; align-items:center; gap:10px; padding:7px 0; border-top:1px solid var(--border-soft);}
+  .spm-upnext-row:first-of-type{border-top:none;}
+  .spm-upnext-art{width:36px; height:36px; border-radius:7px; object-fit:cover; background:var(--bg); flex-shrink:0;}
+  .spm-upnext-title{font-size:12.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .spm-upnext-artist{font-size:11px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .sq.c-solve{background:var(--amber);} .sq.c-notes{background:var(--purple);} .sq.c-interview{background:var(--rose);} .sq.c-coderun{background:var(--lime);} .sq.c-resume{background:var(--pink);}
   .sq.c-movies{background:var(--gold);}
   .sq.c-live{background:var(--blue);}
@@ -316,15 +336,24 @@
 
   section{
     margin-bottom:22px; background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
-    border:1px solid var(--border-soft); border-radius:16px; padding:20px 22px;
+    border:1px solid var(--border-soft); border-radius:16px; padding:22px 22px 20px;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.035), 0 14px 34px -22px rgba(0,0,0,.65);
-    position:relative; transition:border-color .3s ease, box-shadow .3s ease;
+    position:relative; overflow:hidden;
+    transition:border-color .3s ease, box-shadow .3s ease, transform .25s cubic-bezier(.16,1,.3,1);
   }
-  section:hover{ border-color:var(--border); }
+  section::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--accent, var(--green)) 0%, transparent 130%);
+    opacity:.9;
+  }
+  section:hover{
+    border-color:var(--accent, var(--border)); transform:translateY(-2px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035), 0 20px 44px -20px rgba(0,0,0,.7), 0 0 26px -14px var(--accent, transparent);
+  }
   .sec-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;}
   .sec-head-left{display:flex; align-items:center; gap:8px;}
-  .sec-head .dollar{color:var(--green);}
-  .sec-head h2{font-family:var(--font-display); font-size:16px; font-weight:600; margin:0; color:var(--text-dim); letter-spacing:.01em;}
+  .sec-head .dollar{color:var(--accent, var(--green)); text-shadow:0 0 12px var(--accent, transparent);}
+  .sec-head h2{font-family:var(--font-display); font-size:16px; font-weight:600; margin:0; color:var(--text); letter-spacing:.01em;}
 
   .heatmap{display:grid; grid-template-columns:repeat(26,1fr); gap:3px; background:var(--panel); border:1px solid var(--border-soft); border-radius:10px; padding:12px;}
   .cell{aspect-ratio:1; border-radius:2px; background:var(--border-soft);}
@@ -849,7 +878,7 @@
   <div id="cmdk-box">
     <div id="cmdk-input-row">
       <span id="cmdk-icon">⌘</span>
-      <input type="text" id="cmdk-input" placeholder="Jump to a tab or run an action…" autocomplete="off">
+      <input type="text" id="cmdk-input" placeholder="Jump to a tab, run an action, or search your logs, notes, code…" autocomplete="off">
       <span id="cmdk-hint">esc</span>
     </div>
     <div id="cmdk-list"></div>
@@ -857,7 +886,7 @@
 </div>
 <div class="wrap">
   <button id="layout-toggle-btn" class="secondary" type="button">⇄ sidebar layout</button>
-  <span id="cmdk-open-hint" style="cursor:pointer; font-size:11.5px; color:var(--text-faint); background:var(--panel-2); border:1px solid var(--border); padding:5px 10px; border-radius:7px; margin-left:8px;" title="Quick jump to any tab">⌘K quick jump</span>
+  <span id="cmdk-open-hint" style="cursor:pointer; font-size:11.5px; color:var(--text-faint); background:var(--panel-2); border:1px solid var(--border); padding:5px 10px; border-radius:7px; margin-left:8px;" title="Quick jump — search any tab, log, note, or code">⌘K quick jump</span>
   <div class="titlebar">
     <div class="dots"><span class="dot r"></span><span class="dot a"></span><span class="dot g"></span></div>
     <span class="path">~/coding-journey — tracker</span>
@@ -1339,6 +1368,19 @@
             <label class="assistant-web"><input id="assistant-deepthink-toggle" type="checkbox"> deep think <span title="For studying: ORBIT reasons through the answer properly and gives a full explanation instead of a quick 1-2 sentence reply. Applies to both voice and typed questions. Takes a bit longer to respond — worth it when you actually want to learn something, not just get a quick fact.">ⓘ</span></label>
           </div>
         </div>
+        <div class="orbit-memory-panel" style="border:1px solid var(--border); border-radius:8px; margin-top:10px; overflow:hidden;">
+          <div id="orbit-memory-toggle" style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; cursor:pointer; background:var(--panel);">
+            <span style="font-size:12.5px; color:var(--text-dim); font-weight:600;">🧠 what ORBIT remembers (<span id="orbit-memory-count">0</span>)</span>
+            <span id="orbit-memory-caret" style="color:var(--text-faint); font-size:12px;">▾</span>
+          </div>
+          <div id="orbit-memory-body" style="display:none; padding:10px 12px; border-top:1px solid var(--border);">
+            <div id="orbit-memory-list"><div class="empty">nothing remembered yet — ORBIT saves things on its own, or tell it to remember something below.</div></div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <input type="text" id="orbit-memory-input" placeholder="tell ORBIT something to remember..." style="flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:7px 10px; border-radius:6px; font-size:12.5px;">
+              <button class="secondary" id="orbit-memory-add-btn" type="button">+ remember</button>
+            </div>
+          </div>
+        </div>
         <div class="chat-thread" id="chat-thread"><div class="empty">no questions yet — ask something below to get started</div></div>
         <div class="solveform">
           <div class="solveform-inner">
@@ -1558,6 +1600,7 @@
       </div>
       <div id="spotify-connected-block" style="display:none;">
         <div id="spotify-mini-player" class="spm-card" style="display:none;">
+          <div id="spm-source" class="spm-source" style="display:none;"></div>
           <div class="spm-row">
             <div class="spm-art-wrap">
               <svg class="spm-art-ring-svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" pathLength="100" class="spm-art-ring-track"/><circle id="spm-art-ring" cx="32" cy="32" r="30" pathLength="100" class="spm-art-ring"/></svg>
@@ -1597,6 +1640,7 @@
               <button class="secondary spm-btn" id="spm-expand-heart" type="button" title="Save to Liked Songs">♡</button>
               <button class="secondary spm-btn" id="spm-expand-copy" type="button" title="Copy Spotify link">🔗</button>
             </div>
+            <div id="spm-upnext" class="spm-upnext" style="display:none;"></div>
           </div>
         </div>
         <div class="add-row">
@@ -2387,7 +2431,7 @@ async function spotifyLoadLibrary(resetPaging){
     spotifyApi(`/me/tracks?limit=${LIKED_PAGE_SIZE}&offset=0`),
     spotifyApi('/me/playlists?limit=50')
   ]);
-  let html = '<div class="spotify-section-label">liked songs</div><div class="spotify-track-list" id="spotify-liked-list"></div><div id="spotify-liked-more"></div>';
+  let html = '<div class="spotify-section-label" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;"><span>liked songs</span><button class="primary" id="spotify-shuffle-all-btn" type="button">🔀 shuffle play all</button></div><div id="spotify-shuffle-all-status" class="empty" style="display:none; margin:-4px 0 8px;"></div><div class="spotify-track-list" id="spotify-liked-list"></div><div id="spotify-liked-more"></div>';
   html += '<div class="spotify-section-label">your playlists</div><div class="spotify-playlist-grid">';
   if(playlistsResult.status === 'fulfilled'){
     const playlists = playlistsResult.value;
@@ -2404,6 +2448,8 @@ async function spotifyLoadLibrary(resetPaging){
   wrap.innerHTML = html;
   renderLikedSongsPage(likedResult, wrap);
   wrap.querySelectorAll('.spotify-playlist-card').forEach(card=> card.onclick = ()=> spotifyLoadPlaylistTracks(card.dataset.pid, card.dataset.curated === '1'));
+  const shuffleAllBtn = document.getElementById('spotify-shuffle-all-btn');
+  if(shuffleAllBtn) shuffleAllBtn.onclick = ()=> spotifyShuffleAllLiked(shuffleAllBtn);
 }
 let likedSongsUris = [];
 function renderLikedSongsPage(likedResult, wrap){
@@ -2419,9 +2465,10 @@ function renderLikedSongsPage(likedResult, wrap){
   if(!items.length){ listEl.innerHTML = '<div class="empty">no liked songs found.</div>'; return; }
   likedSongsUris = items.map(it=>it.track && it.track.uri).filter(Boolean);
   listEl.innerHTML = items.map((it,i)=>spotifyTrackRow(it.track, i)).join('');
-  spotifyWireTrackButtons(listEl, {uris: likedSongsUris});
+  spotifyWireTrackButtons(listEl, {uris: likedSongsUris, isLiked: true});
   likedSongsOffset = items.length;
   const total = liked && liked.total || 0;
+  spmLikedTotal = total;
   if(moreEl){
     moreEl.innerHTML = likedSongsOffset < total
       ? `<button class="secondary" id="spotify-liked-more-btn" type="button">load more liked songs (${likedSongsOffset}/${total})</button>`
@@ -2439,9 +2486,10 @@ async function spotifyLoadMoreLiked(){
     const startIdx = likedSongsUris.length;
     likedSongsUris = likedSongsUris.concat(items.map(it=>it.track && it.track.uri).filter(Boolean));
     listEl.insertAdjacentHTML('beforeend', items.map((it,i)=>spotifyTrackRow(it.track, startIdx+i)).join(''));
-    spotifyWireTrackButtons(listEl, {uris: likedSongsUris});
+    spotifyWireTrackButtons(listEl, {uris: likedSongsUris, isLiked: true});
     likedSongsOffset += items.length;
     const total = data && data.total || 0;
+    spmLikedTotal = total;
     if(moreEl){
       moreEl.innerHTML = likedSongsOffset < total
         ? `<button class="secondary" id="spotify-liked-more-btn" type="button">load more liked songs (${likedSongsOffset}/${total})</button>`
@@ -2450,6 +2498,94 @@ async function spotifyLoadMoreLiked(){
       if(moreBtn) moreBtn.onclick = spotifyLoadMoreLiked;
     }
   }catch(e){ if(moreEl) moreEl.innerHTML = `<div class="empty">Could not load more: ${escapeHtml(e.message)}</div>`; }
+}
+
+// ---- Shuffle-play ALL liked songs, not just the page currently loaded on screen ----
+// Spotify's playback API has no context_uri for the Liked Songs collection (it's not a real
+// playlist), so playing/shuffling it always means handing over an explicit list of track uris.
+// Previously that list was whatever page happened to be loaded (50, or more if "load more" was
+// clicked) — so native shuffle only ever shuffled within that small slice. This fetches the
+// WHOLE liked library, shuffles it client-side, starts playback with the first batch, then
+// queues the rest in the background.
+let spmPlaybackSource = null; // {label, total, sending} — set when the current queue came from a source we can re-shuffle fully (e.g. Liked Songs)
+let spmUpcoming = []; // remaining shuffled tracks not yet sent to Spotify — also drives the mini player's "up next" panel
+let spmLikedTotal = 0; // total liked-songs count, refreshed whenever the liked list loads
+const SPM_SHUFFLE_QUEUE_CAP = 300; // total tracks actually sent to Spotify per shuffle-all run — keeps request volume sane for huge libraries
+const SPM_INITIAL_PLAY_BATCH = 100; // Spotify's practical per-request cap for /player/play uris
+function spmShuffleArray(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+async function spotifyFetchAllLiked(statusCb){
+  const all = []; let offset = 0, total = Infinity;
+  const HARD_CAP = 2000; // safety net so an enormous library can't hang the browser
+  while(offset < total && all.length < HARD_CAP){
+    const data = await spotifyApi(`/me/tracks?limit=50&offset=${offset}`);
+    total = (data && data.total) || 0;
+    const items = (data && data.items) || [];
+    if(!items.length) break;
+    items.forEach(it=>{
+      if(it.track && it.track.uri) all.push({
+        uri: it.track.uri, name: it.track.name,
+        artist: (it.track.artists||[]).map(a=>a.name).join(', '),
+        art: (it.track.album && it.track.album.images && it.track.album.images[2] && it.track.album.images[2].url) || (it.track.album && it.track.album.images && it.track.album.images[0] && it.track.album.images[0].url) || ''
+      });
+    });
+    offset += items.length;
+    if(statusCb) statusCb(Math.min(offset, total), total);
+  }
+  spmLikedTotal = total;
+  return all;
+}
+async function spotifyShuffleAllLiked(btn){
+  const statusEl = document.getElementById('spotify-shuffle-all-status');
+  const setStatus = (msg)=>{ if(statusEl){ statusEl.style.display = msg ? 'block' : 'none'; statusEl.textContent = msg || ''; } };
+  if(btn) btn.disabled = true;
+  try{
+    setStatus('gathering your liked songs…');
+    const all = await spotifyFetchAllLiked((loaded,total)=> setStatus(`gathering your liked songs… (${loaded}/${total})`));
+    if(!all.length){ setStatus('no liked songs found.'); setTimeout(()=>setStatus(''),2000); return; }
+    const shuffled = spmShuffleArray(all);
+    const toSend = shuffled.slice(0, SPM_SHUFFLE_QUEUE_CAP);
+    const playBatch = toSend.slice(0, SPM_INITIAL_PLAY_BATCH).map(t=>t.uri);
+    setStatus('starting playback…');
+    const ok = await spotifyPlayUri(playBatch[0], { uris: playBatch, index: 0, isLiked: true });
+    if(!ok){ setStatus('could not start playback — open Spotify once on this device first, then try again.'); setTimeout(()=>setStatus(''),4000); return; }
+    spmPlaybackSource = { label: 'Liked Songs', total: spmLikedTotal, sending: Math.min(spmLikedTotal, SPM_SHUFFLE_QUEUE_CAP) };
+    spotifyUpdateSourceLabel();
+    spmUpcoming = toSend.slice(SPM_INITIAL_PLAY_BATCH);
+    spotifyRenderUpNext();
+    if(spmUpcoming.length){
+      for(let i=0;i<spmUpcoming.length;i++){
+        setStatus(`queuing the rest… (${i+1}/${spmUpcoming.length})`);
+        await spotifyAddToQueue(spmUpcoming[i].uri);
+        await new Promise(r=> setTimeout(r, 180));
+      }
+    }
+    setStatus(spmLikedTotal > SPM_SHUFFLE_QUEUE_CAP
+      ? `shuffled and queued ${SPM_SHUFFLE_QUEUE_CAP} of your ${spmLikedTotal} liked songs — hit shuffle again anytime for a fresh random set.`
+      : `shuffled and queued all ${spmLikedTotal} of your liked songs.`);
+    setTimeout(()=> setStatus(''), 6000);
+  }catch(e){
+    setStatus('something went wrong — try again.'); setTimeout(()=> setStatus(''), 3000);
+  }finally{
+    if(btn) btn.disabled = false;
+  }
+}
+function spotifyUpdateSourceLabel(){
+  const el = document.getElementById('spm-source'); if(!el) return;
+  if(!spmPlaybackSource){ el.style.display='none'; el.innerHTML=''; return; }
+  el.style.display = 'inline-flex';
+  el.innerHTML = `🔀 ${escapeHtml(spmPlaybackSource.label)} · shuffled ${spmPlaybackSource.sending} of ${spmPlaybackSource.total}`;
+}
+function spotifyRenderUpNext(){
+  const el = document.getElementById('spm-upnext'); if(!el) return;
+  if(!spmUpcoming || !spmUpcoming.length){ el.style.display='none'; el.innerHTML=''; return; }
+  const next = spmUpcoming.slice(0,5);
+  el.style.display = 'block';
+  el.innerHTML = '<div class="spm-upnext-label">up next · shuffled from liked songs</div>' +
+    next.map(t=> `<div class="spm-upnext-row"><img class="spm-upnext-art" src="${t.art||''}" alt=""><div style="min-width:0;"><div class="spm-upnext-title">${escapeHtml(t.name||'')}</div><div class="spm-upnext-artist">${escapeHtml(t.artist||'')}</div></div></div>`).join('');
 }
 async function spotifyCreatePlaylist(){
   const name = prompt('Name your new Spotify playlist:'); if(!name || !name.trim()) return;
@@ -2525,6 +2661,7 @@ function spotifyLoadSDK(){
 async function spotifyPlayUri(uri, opts){
   if(!uri) return false;
   opts = opts || {};
+  if(!opts.isLiked){ spmPlaybackSource = null; spmUpcoming = []; spotifyUpdateSourceLabel(); spotifyRenderUpNext(); }
   try{
     await spotifyLoadSDK();
     for(let i=0; i<10 && !spotifyDeviceId; i++) await new Promise(r=> setTimeout(r, 300)); // give the player a moment to register as a device
@@ -2629,7 +2766,7 @@ function spotifyUpdateMiniPlayer(playerState){
   bar.style.setProperty('--spm-backdrop', artUrl ? `url("${artUrl}")` : 'none');
   spotifyUpdateMood(artUrl, playerState.paused);
   document.getElementById('spm-toggle').textContent = playerState.paused ? '▶' : '⏸';
-  document.getElementById('spm-shuffle').style.opacity = playerState.shuffle ? '1' : '.45';
+  document.getElementById('spm-shuffle').style.opacity = (playerState.shuffle || !!spmPlaybackSource) ? '1' : '.45';
   document.getElementById('spm-repeat').style.opacity = playerState.repeat_mode ? '1' : '.45';
   document.getElementById('spm-repeat').textContent = playerState.repeat_mode === 2 ? '🔂' : '🔁';
   spmBaseline = { position: playerState.position, duration: playerState.duration || 1, paused: playerState.paused, capturedAt: Date.now() };
@@ -2642,7 +2779,15 @@ function spotifyUpdateMiniPlayer(playerState){
   }
   const isNewTrack = !spmCurrentTrack || spmCurrentTrack.id !== track.id;
   spmCurrentTrack = { id: track.id, uri: track.uri, name: track.name, artist: (track.artists||[]).map(a=>a.name).join(', '), artUrl };
-  if(isNewTrack) spotifyRefreshLikedState();
+  if(isNewTrack){
+    spotifyRefreshLikedState();
+    if(spmUpcoming.length && spmUpcoming[0].uri === track.uri){
+      spmUpcoming.shift();
+      spotifyRenderUpNext();
+      if(spmPlaybackSource) spmPlaybackSource.sending = Math.max(0, spmPlaybackSource.sending - 1);
+      spotifyUpdateSourceLabel();
+    }
+  }
   if(document.getElementById('spm-expand-overlay').classList.contains('show')) spotifySyncExpandOverlay(playerState.paused);
 }
 async function spotifyRefreshLikedState(){
@@ -2683,7 +2828,11 @@ setInterval(()=>{
 document.getElementById('spm-toggle').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.togglePlay());
 document.getElementById('spm-next').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.nextTrack());
 document.getElementById('spm-prev').addEventListener('click', ()=> spotifyPlayer && spotifyPlayer.previousTrack());
-document.getElementById('spm-shuffle').addEventListener('click', async ()=>{
+document.getElementById('spm-shuffle').addEventListener('click', async (e)=>{
+  if(spmPlaybackSource && spmPlaybackSource.label === 'Liked Songs'){
+    spotifyShuffleAllLiked(e.currentTarget);
+    return;
+  }
   const state = await spotifyPlayer?.getCurrentState(); const next = !(state && state.shuffle);
   const token = await spotifyEnsureToken(); if(!token) return;
   fetch(`https://api.spotify.com/v1/me/player/shuffle?state=${next}&device_id=${spotifyDeviceId}`, { method:'PUT', headers:{'Authorization':'Bearer '+token} });
@@ -2701,6 +2850,7 @@ document.getElementById('spm-art').addEventListener('click', ()=>{
   if(!spmCurrentTrack) return;
   document.getElementById('spm-expand-overlay').classList.add('show');
   spotifySyncExpandOverlay(document.getElementById('spm-toggle').textContent === '▶');
+  spotifyRenderUpNext();
 });
 document.getElementById('spm-expand-close').addEventListener('click', ()=> document.getElementById('spm-expand-overlay').classList.remove('show'));
 document.getElementById('spm-expand-overlay').addEventListener('click', (e)=>{ if(e.target.id === 'spm-expand-overlay') e.currentTarget.classList.remove('show'); });
@@ -2842,9 +2992,48 @@ let cmdkActiveIndex = 0, cmdkFiltered = cmdkItems;
 const cmdkOverlay = document.getElementById('cmdk-overlay');
 const cmdkInput = document.getElementById('cmdk-input');
 const cmdkListEl = document.getElementById('cmdk-list');
+// ---- Universal content search: beyond tabs/actions, ⌘K also searches everything the student
+// has actually stored — commit logs, scratch notes, goals, reminders, job applications, course
+// notes, resume reviews, weekly recaps, mock interview answers, ORBIT's memory, and whatever
+// code is currently sitting in code.run — each result jumps straight to the tab it lives on.
+function cmdkTrim(text, n){ text = (text||'').replace(/\s+/g,' ').trim(); return text.length > n ? text.slice(0,n)+'…' : text; }
+function cmdkGoTo(tabName){ const tab = document.querySelector(`.tab[data-tab="${tabName}"]`); if(tab) activateTab(tab); }
+function cmdkContentSearch(q){
+  const results = [];
+  const push = (label, tag, tabName) => results.push({ label: cmdkTrim(label, 72), tag, sqClass:'', run: ()=> cmdkGoTo(tabName) });
+  (state.logs||[]).forEach(l=>{ if((l.message||'').toLowerCase().includes(q)) push(l.message, 'log · '+(l.date||''), 'dashboard'); });
+  (state.goals||[]).forEach(g=>{ if((g.title||'').toLowerCase().includes(q)) push(g.title, 'goal', 'dashboard'); });
+  (state.reminders||[]).forEach(r=>{ if((r.title||'').toLowerCase().includes(q)) push(r.title, 'reminder'+(r.date?' · '+r.date:''), 'reminders'); });
+  (state.companies||[]).forEach(c=>{
+    const hay = ((c.name||'')+' '+(c.role||'')+' '+(c.notes||'')).toLowerCase();
+    if(hay.includes(q)) push(c.name + (c.role?' — '+c.role:''), 'application', 'targets');
+  });
+  (state.courseLog||[]).forEach(c=>{
+    const hay = ((c.lessonName||'')+' '+(c.notes||'')).toLowerCase();
+    if(hay.includes(q)) push(c.lessonName || c.notes, 'course note', 'course');
+  });
+  (state.resumeReviews||[]).forEach(r=>{ if((r.text||'').toLowerCase().includes(q)) push(r.text, 'resume review'+(r.date?' · '+r.date:''), 'resume'); });
+  (state.weeklyRecaps||[]).forEach(r=>{ if((r.text||'').toLowerCase().includes(q)) push(r.text, 'weekly recap', 'dashboard'); });
+  ((state.mockInterview && state.mockInterview.history) || []).forEach(h=>{
+    const hay = ((h.question||'')+' '+(h.answer||'')+' '+(h.feedback||'')).toLowerCase();
+    if(hay.includes(q)) push(h.question || h.answer, 'interview Q&A'+(h.date?' · '+h.date:''), 'interview');
+  });
+  (state.modokMemory||[]).forEach(m=>{ if((m.text||'').toLowerCase().includes(q)) push(m.text, 'ORBIT memory', 'solve'); });
+  if((state.notes||'').toLowerCase().includes(q)){
+    const idx = state.notes.toLowerCase().indexOf(q);
+    push('…' + state.notes.slice(Math.max(0, idx-30), idx+50), 'scratch notes', 'notes');
+  }
+  if(typeof codeDrafts !== 'undefined'){
+    Object.keys(codeDrafts).forEach(lang=>{
+      const code = codeDrafts[lang] || '';
+      if(code.toLowerCase().includes(q)) push(code, 'code · '+lang, 'coderun');
+    });
+  }
+  return results.slice(0, 40);
+}
 function cmdkRender(){
   const q = cmdkInput.value.trim().toLowerCase();
-  cmdkFiltered = q ? cmdkItems.filter(it => it.label.toLowerCase().includes(q)) : cmdkItems;
+  cmdkFiltered = q ? cmdkItems.filter(it => it.label.toLowerCase().includes(q)).concat(cmdkContentSearch(q)) : cmdkItems;
   cmdkActiveIndex = 0;
   cmdkListEl.innerHTML = cmdkFiltered.length ? cmdkFiltered.map((it,i)=>
     `<div class="cmdk-item${i===0?' active':''}" data-idx="${i}">${it.sqClass?`<span class="${it.sqClass}"></span>`:''}<span class="cmdk-item-label">${escapeHtml(it.label)}</span><span class="cmdk-item-tag">${it.tag}</span></div>`
@@ -3462,13 +3651,7 @@ function orbitContext(){
 function extractModokMemory(rawText){
   const m = rawText.match(/\[\[REMEMBER:\s*([^\]]+)\]\]\s*$/i);
   if(!m) return rawText;
-  const note = m[1].trim();
-  if(note){
-    if(!Array.isArray(state.modokMemory)) state.modokMemory = [];
-    state.modokMemory.push({ id: id(), text: note, ts: Date.now() });
-    if(state.modokMemory.length > 30) state.modokMemory = state.modokMemory.slice(-30); // hard cap so it never bloats
-    saveState();
-  }
+  addOrbitMemory(m[1].trim());
   return rawText.slice(0, m.index).trim();
 }
 function orbitSystem(){
@@ -5444,6 +5627,46 @@ if (reminderAddBtn) {
   });
 }
 
+// ---- ORBIT memory panel: lets the student see/add/delete what ORBIT remembers about them,
+// on top of the automatic [[REMEMBER: ...]] capture from AI replies ----
+function renderOrbitMemory(){
+  const el = document.getElementById('orbit-memory-list'); if(!el) return;
+  const countEl = document.getElementById('orbit-memory-count');
+  const items = [...(state.modokMemory||[])].sort((a,b)=> b.ts - a.ts);
+  if(countEl) countEl.textContent = items.length;
+  el.innerHTML = items.length ? items.map(m=>
+    `<div class="reminder"><div><div class="reminder-title">${escapeHtml(m.text)}</div><div class="reminder-date">${new Date(m.ts).toLocaleDateString()}</div></div><div class="company-actions"><button class="del-btn orbit-memory-delete" data-id="${m.id}" title="forget this">×</button></div></div>`
+  ).join('') : '<div class="empty">nothing remembered yet — ORBIT saves things on its own, or tell it to remember something below.</div>';
+  el.querySelectorAll('.orbit-memory-delete').forEach(b=> b.addEventListener('click', ()=>{
+    state.modokMemory = (state.modokMemory||[]).filter(m=>m.id!==b.dataset.id);
+    saveState(); renderOrbitMemory();
+  }));
+}
+function addOrbitMemory(text){
+  const note = (text||'').trim(); if(!note) return;
+  if(!Array.isArray(state.modokMemory)) state.modokMemory = [];
+  state.modokMemory.push({ id: id(), text: note, ts: Date.now() });
+  if(state.modokMemory.length > 30) state.modokMemory = state.modokMemory.slice(-30); // hard cap so it never bloats
+  saveState(); renderOrbitMemory();
+}
+const orbitMemoryToggle = document.getElementById('orbit-memory-toggle');
+if(orbitMemoryToggle){
+  orbitMemoryToggle.addEventListener('click', ()=>{
+    const body = document.getElementById('orbit-memory-body');
+    const caret = document.getElementById('orbit-memory-caret');
+    if(!body) return;
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    if(caret) caret.textContent = open ? '▾' : '▴';
+  });
+}
+const orbitMemoryAddBtn = document.getElementById('orbit-memory-add-btn');
+const orbitMemoryInput = document.getElementById('orbit-memory-input');
+if(orbitMemoryAddBtn && orbitMemoryInput){
+  orbitMemoryAddBtn.addEventListener('click', ()=>{ addOrbitMemory(orbitMemoryInput.value); orbitMemoryInput.value=''; });
+  orbitMemoryInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ addOrbitMemory(orbitMemoryInput.value); orbitMemoryInput.value=''; } });
+}
+
 // ---- Wellness daily check-in ----
 function renderWellness(){
   const today = todayStr();
@@ -5562,7 +5785,7 @@ function render(){
   renderDailyTask(); renderCourseTab(); renderNoteAttachments(); renderAchievements();
   renderTimer(); renderInterview(); renderCompanies(); renderWeeklyRecaps(); renderResumeReviews();
   applyLayout(); renderWeekDigest(); renderAnalytics(); renderMastery(); renderSpotify(); renderYtSubscriptions(); renderCalendar(); renderGoals(); renderReminders(); renderActivityResults(); renderArcade(); renderMovies();
-  renderStreakBanner();
+  renderStreakBanner(); renderOrbitMemory();
   if(window.refreshSnakeBest) window.refreshSnakeBest();
   if(window.refreshRunnerBest) window.refreshRunnerBest();
   if(window.refreshTypingBest) window.refreshTypingBest();
@@ -6643,6 +6866,23 @@ setInterval(() => {
         return { intent: 'goal_done', spoken: `Marked the goal ${found.title} as complete, sir.`, display: `Goal <b>${escapeHtml(found.title)}</b> marked complete.` };
       }
       return { intent: 'goal_done', spoken: `I couldn't find a matching goal for ${q}, sir.`, display: `No goal matching "${escapeHtml(q)}".` };
+    }
+    const rememberMatch = norm.match(/^remember\s+(?:that\s+)?(.+)/);
+    if (rememberMatch && rememberMatch[1] && rememberMatch[1].trim()) {
+      const noteText = text.replace(/^remember\s+(?:that\s+)?/i, '').trim();
+      addOrbitMemory(noteText);
+      return { intent: 'memory_add', spoken: `Noted, sir. I'll remember that.`, display: `Remembered: <b>${escapeHtml(noteText)}</b>` };
+    }
+    const forgetMatch = norm.match(/^forget\s+(?:that\s+)?(.+)/);
+    if (forgetMatch && forgetMatch[1] && forgetMatch[1].trim() && (state.modokMemory || []).length) {
+      const q = forgetMatch[1].trim();
+      const found = state.modokMemory.find(m => m.text.toLowerCase().includes(q));
+      if (found) {
+        state.modokMemory = state.modokMemory.filter(m => m.id !== found.id);
+        saveState(); renderOrbitMemory();
+        return { intent: 'memory_forget', spoken: `Forgotten, sir.`, display: `Forgot: <b>${escapeHtml(found.text)}</b>` };
+      }
+      return { intent: 'memory_forget', spoken: `I couldn't find a matching memory for ${q}, sir.`, display: `No stored memory matching "${escapeHtml(q)}".` };
     }
 
     // 2. Navigation intents
