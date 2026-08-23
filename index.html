@@ -5258,7 +5258,7 @@ document.getElementById('movie-add-btn').addEventListener('click', ()=>{
 document.getElementById('movie-title-input').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('movie-add-btn').click(); });
 
 // ===== LIVE FEED: weather / crypto / football / cricket / news — no querying required, auto-refreshes =====
-let liveCache = { weather:null, crypto:null, football:null, cricket:null, news:null };
+let liveCache = { weather:null, crypto:null, football:null, footballDay:null, cricket:null, news:null };
 let liveRefreshTimer = null;
 function liveTimeAgo(ts){
   if(!ts) return '';
@@ -5393,12 +5393,31 @@ async function fetchFootballScores(){
   const key = (state.footballApiKey || '').trim();
   if(key){
     try{
-      const r = await fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all', {
-        headers: { 'X-RapidAPI-Key': key, 'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com' }
-      });
-      const data = await r.json();
-      if(data && data.errors && Object.keys(data.errors).length) throw new Error('api-football key rejected');
-      const events = ((data && data.response) || []).map(normalizeApiFootballFixture);
+      const headers = { 'X-RapidAPI-Key': key, 'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com' };
+      // live=all only ever returns matches currently in-play — great for "anything live worldwide"
+      // but it silently excludes anything scheduled-but-not-started or already finished today, which
+      // made searching for a match you knew was on today's card come back "no matches found".
+      // Pull today's full fixture list too (merged in, live status still wins) so search actually
+      // covers the whole day, not just the in-play slice — cached longer since the schedule itself
+      // barely changes, to stay well within the free 100-req/day budget alongside the 5-min live poll.
+      const DAY_TTL = 20*60*1000;
+      const needDayFetch = !liveCache.footballDay || Date.now()-liveCache.footballDay.ts > DAY_TTL;
+      const liveReq = fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all', {headers});
+      const dayReq = needDayFetch
+        ? fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures?date=${new Date().toISOString().slice(0,10)}`, {headers})
+        : null;
+      const [liveRes, dayRes] = await Promise.all([liveReq, dayReq]);
+      const liveData = await liveRes.json();
+      if(liveData && liveData.errors && Object.keys(liveData.errors).length) throw new Error('api-football key rejected');
+      if(dayRes){
+        const dayData = await dayRes.json();
+        if(dayData && dayData.errors && Object.keys(dayData.errors).length) throw new Error('api-football key rejected');
+        liveCache.footballDay = { events: (dayData && dayData.response) || [], ts: Date.now() };
+      }
+      const merged = new Map();
+      (liveCache.footballDay ? liveCache.footballDay.events : []).forEach(f=> merged.set(f.fixture.id, f));
+      ((liveData && liveData.response) || []).forEach(f=> merged.set(f.fixture.id, f)); // live entries overwrite — freshest status wins
+      const events = [...merged.values()].map(normalizeApiFootballFixture);
       liveCache.football = { events, ts: Date.now() };
       renderFootballList();
       stampUpdated('live-football-updated', liveCache.football.ts);
