@@ -774,50 +774,73 @@
   .arcade-result{margin-top:12px; font-size:14.5px; color:var(--text-dim); line-height:1.55;}.arcade-result.ok{color:var(--green);}.arcade-result.no{color:var(--amber);}
   @media (max-width:480px){.arcade-options{grid-template-columns:1fr;}}
 
+  /* ---- arcade games: shared "game card" treatment, each with its own accent color ---- */
+  .snake-wrap, .typing-wrap, .bigo-wrap, .runner-wrap, .flappy-wrap{
+    background:linear-gradient(165deg, var(--panel-2) 0%, var(--panel) 100%);
+    border:1px solid var(--border-soft); border-radius:14px; padding:20px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.03), 0 10px 26px -18px rgba(0,0,0,.6);
+    position:relative; transition:border-color .3s ease, box-shadow .3s ease;
+  }
+  .snake-wrap{ --game-accent:var(--lime); text-align:center; }
+  .typing-wrap{ --game-accent:var(--cyan); }
+  .bigo-wrap{ --game-accent:var(--gold); }
+  .runner-wrap{ --game-accent:var(--coral); text-align:center; }
+  .flappy-wrap{ --game-accent:var(--blue); text-align:center; }
+  .snake-wrap:hover, .typing-wrap:hover, .bigo-wrap:hover, .runner-wrap:hover, .flappy-wrap:hover{
+    border-color:var(--game-accent); box-shadow:inset 0 1px 0 rgba(255,255,255,.03), 0 14px 32px -18px rgba(0,0,0,.65), 0 0 22px -14px var(--game-accent);
+  }
+  .snake-hud, .runner-hud, .flappy-hud{display:flex; justify-content:center; gap:10px; align-items:center; margin-bottom:16px; font-size:15px; color:var(--text-dim); flex-wrap:wrap;}
+  .typing-hud, .bigo-hud{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; font-size:15px; color:var(--text-dim);}
+  .snake-hud span, .typing-hud span, .bigo-hud span, .runner-hud span, .flappy-hud span{
+    background:var(--bg); border:1px solid var(--border-soft); border-radius:20px; padding:6px 13px; font-size:13px; color:var(--text-dim); display:inline-flex; align-items:center; gap:5px;
+  }
+  .snake-hud b, .typing-hud b, .bigo-hud b, .runner-hud b, .flappy-hud b{ color:var(--game-accent); font-family:var(--font-display); font-size:17px; text-shadow:0 0 10px var(--game-accent); }
+  .snake-wrap .secondary:hover, .typing-wrap .secondary:hover, .bigo-wrap .secondary:hover, .runner-wrap .secondary:hover, .flappy-wrap .secondary:hover{
+    border-color:var(--game-accent); color:var(--game-accent); box-shadow:0 0 14px -7px var(--game-accent);
+  }
+
   /* snake break game */
-  .snake-wrap{background:var(--panel); border:1px solid var(--border-soft); border-radius:12px; padding:20px; text-align:center;}
-  .snake-hud{display:flex; justify-content:center; gap:22px; align-items:center; margin-bottom:16px; font-size:15px; color:var(--text-dim); flex-wrap:wrap;}
-  .snake-hud b{color:var(--text); font-family:var(--font-display); font-size:17px;}
-  #snake-canvas{background:#000; border:1px solid var(--border-soft); border-radius:10px; outline:none; max-width:100%; touch-action:none; cursor:pointer;}
-  #snake-canvas:focus{border-color:var(--green);}
+  #snake-canvas{background:#0a0e0a; border:2px solid var(--border-soft); border-radius:12px; outline:none; max-width:100%; touch-action:none; cursor:pointer; box-shadow:0 14px 34px -18px rgba(0,0,0,.7); transition:border-color .3s ease, box-shadow .3s ease;}
+  #snake-canvas:focus{border-color:var(--lime); box-shadow:0 14px 34px -18px rgba(0,0,0,.7), 0 0 28px -8px var(--lime);}
   .snake-status{margin-top:14px; font-size:13px; color:var(--text-faint);}
   .snake-dpad{display:none; grid-template-columns:52px 52px 52px; grid-template-areas:". up ." "left down right"; gap:6px; justify-content:center; margin-top:16px;}
   .snake-dpad button{background:var(--bg); border:1px solid var(--border); color:var(--text-dim); border-radius:8px; font-size:16px; cursor:pointer; height:44px;}
-  .snake-dpad button:active{border-color:var(--green); color:var(--green);}
+  .snake-dpad button:active{border-color:var(--lime); color:var(--lime);}
   .snake-dpad .up{grid-area:up;} .snake-dpad .down{grid-area:down;} .snake-dpad .left{grid-area:left;} .snake-dpad .right{grid-area:right;}
   @media (max-width:700px){ .snake-dpad{display:grid;} }
 
   /* typing speed test */
-  .typing-wrap{background:var(--panel); border:1px solid var(--border-soft); border-radius:12px; padding:20px;}
-  .typing-hud{display:flex; gap:22px; align-items:center; flex-wrap:wrap; margin-bottom:16px; font-size:15px; color:var(--text-dim);}
-  .typing-hud b{color:var(--text); font-family:var(--font-display); font-size:17px;}
-  .typing-passage{font-family:var(--font-mono); font-size:18px; line-height:1.85; letter-spacing:.3px; background:var(--bg); border:1px solid var(--border-soft); border-radius:10px; padding:16px 18px; margin-bottom:12px; word-break:break-word; cursor:text;}
+  .typing-passage{font-family:var(--font-mono); font-size:18px; line-height:1.85; letter-spacing:.3px; background:var(--bg); border:1px solid var(--border-soft); border-radius:10px; padding:16px 18px; margin-bottom:12px; word-break:break-word; cursor:text; box-shadow:inset 0 2px 8px -4px rgba(0,0,0,.4);}
   .typing-passage span{transition:color .1s;}
   .typing-passage span.pending{color:var(--text-faint);}
   .typing-passage span.correct{color:var(--green);}
   .typing-passage span.incorrect{color:var(--red); text-decoration:underline; text-decoration-color:var(--red);}
-  .typing-passage span.current{background:var(--green-bg); border-radius:3px; outline:1px solid var(--green-dim);}
-  .typing-input{width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:var(--font-mono); font-size:16px; padding:10px 12px; outline:none;}
-  .typing-input:focus{border-color:var(--green-dim);}
+  .typing-passage span.current{background:var(--cyan-bg,rgba(80,200,220,.18)); border-radius:3px; outline:1px solid var(--cyan);}
+  .typing-input{width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:var(--font-mono); font-size:16px; padding:10px 12px; outline:none; transition:border-color .2s ease, box-shadow .2s ease;}
+  .typing-input:focus{border-color:var(--cyan); box-shadow:0 0 0 3px rgba(80,200,220,.12);}
   .typing-input:disabled{opacity:.5;}
   .typing-status{margin-top:10px; font-size:12.5px; color:var(--text-faint);}
-  .bigo-wrap{background:var(--panel); border:1px solid var(--border-soft); border-radius:12px; padding:20px;}
-  .bigo-hud{display:flex; gap:22px; align-items:center; flex-wrap:wrap; margin-bottom:14px; font-size:15px; color:var(--text-dim);}
-  .bigo-hud b{color:var(--text); font-family:var(--font-display); font-size:17px;}
+
+  /* complexity speedrun */
   .bigo-list{display:flex; flex-direction:column; gap:6px; user-select:none;}
-  .bigo-item{display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--border-soft); border-radius:8px; padding:10px 12px; cursor:grab; touch-action:none; transition:border-color .15s ease, box-shadow .15s ease;}
+  .bigo-item{display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--border-soft); border-radius:8px; padding:10px 12px; cursor:grab; touch-action:none; transition:border-color .15s ease, box-shadow .15s ease, transform .15s ease;}
+  .bigo-item:hover{border-color:var(--gold); transform:translateX(2px);}
   .bigo-item.dragging{cursor:grabbing; border-color:var(--blue); box-shadow:0 8px 20px -8px rgba(0,0,0,.6); position:relative;}
   .bigo-grip{color:var(--text-faint); font-size:13px; flex-shrink:0;}
   .bigo-name{flex:1; font-size:13.5px; color:var(--text);}
   .bigo-tag{font-family:var(--font-mono); font-size:12px; color:var(--gold); background:var(--gold-bg); padding:2px 8px; border-radius:6px; flex-shrink:0;}
   .bigo-status{margin-top:12px; font-size:12.5px; color:var(--text-faint);}
-  .runner-wrap{background:var(--panel); border:1px solid var(--border-soft); border-radius:12px; padding:20px; text-align:center;}
-  .runner-hud{display:flex; justify-content:center; gap:22px; align-items:center; margin-bottom:16px; font-size:15px; color:var(--text-dim); flex-wrap:wrap;}
-  .runner-hud b{color:var(--text); font-family:var(--font-display); font-size:17px;}
-  #runner-canvas{background:#f7f7f7; border:1px solid var(--border-soft); border-radius:10px; outline:none; max-width:100%; touch-action:none; cursor:pointer;}
+
+  /* offline dino run */
+  #runner-canvas{background:#f7f7f7; border:2px solid var(--border-soft); border-radius:12px; outline:none; max-width:100%; touch-action:none; cursor:pointer; box-shadow:0 14px 34px -18px rgba(0,0,0,.7); transition:border-color .3s ease, box-shadow .3s ease, background .3s ease;}
   #runner-canvas.night{background:#232323;}
-  #runner-canvas:focus{border-color:var(--coral);}
+  #runner-canvas:focus{border-color:var(--coral); box-shadow:0 14px 34px -18px rgba(0,0,0,.7), 0 0 28px -8px var(--coral);}
   .runner-status{margin-top:14px; font-size:13px; color:var(--text-faint);}
+
+  /* flappy bird */
+  #flappy-canvas{background:#5ec8f5; border:2px solid var(--border-soft); border-radius:12px; outline:none; max-width:100%; touch-action:none; cursor:pointer; box-shadow:0 14px 34px -18px rgba(0,0,0,.7); transition:border-color .3s ease, box-shadow .3s ease;}
+  #flappy-canvas:focus{border-color:var(--blue); box-shadow:0 14px 34px -18px rgba(0,0,0,.7), 0 0 28px -8px var(--blue);}
+  .flappy-status{margin-top:14px; font-size:13px; color:var(--text-faint);}
 
   ::selection{background:rgba(63,185,80,.3);}
   
@@ -1550,6 +1573,19 @@
         <div class="runner-status" id="runner-status">click the board, then hit start — space / tap to jump</div>
       </div>
     </section>
+    <section>
+      <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>flappy bird</h2></div></div>
+      <p class="solve-hint">the classic — one tap to flap, gravity does the rest. space / click / tap to flap, thread the gaps.</p>
+      <div class="flappy-wrap">
+        <div class="flappy-hud">
+          <span>score: <b id="flappy-score">0</b></span>
+          <span>best: <b id="flappy-best">0</b></span>
+          <button class="secondary" id="flappy-start-btn" type="button">start</button>
+        </div>
+        <canvas id="flappy-canvas" width="320" height="420" tabindex="0"></canvas>
+        <div class="flappy-status" id="flappy-status">click the board, then hit start — space / tap to flap</div>
+      </div>
+    </section>
   </div>
 
   <div class="panel-view" id="view-watch">
@@ -1736,11 +1772,11 @@
 
   <section>
     <div class="sec-head">
-      <div class="sec-head-left"><span class="live-dot"></span><h2>football — today</h2></div>
+      <div class="sec-head-left"><span class="live-dot"></span><h2>football — live</h2></div>
       <span class="live-updated" id="live-football-updated"></span>
     </div>
     <div class="add-row" style="margin-bottom:10px;">
-      <input id="live-football-search" type="text" placeholder="search any team, e.g. Arsenal, Real Madrid…">
+      <input id="live-football-search" type="text" placeholder="search any team or league live anywhere, e.g. Arsenal, Boca Juniors, J1 League…">
     </div>
     <div id="live-football-box"><div class="empty">fetching fixtures…</div></div>
   </section>
@@ -1775,7 +1811,11 @@
 
   <section>
     <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>settings</h2></div></div>
-    <div class="live-row-sub" style="margin-bottom:8px;">weather, crypto, football, and headlines need no key. Live cricket scores need a free CricAPI key (100 free requests/day) — get one at <a href="https://cricapi.com/" target="_blank" rel="noopener" style="color:var(--blue);">cricapi.com</a> and paste it below.</div>
+    <div class="live-row-sub" style="margin-bottom:8px;">weather, crypto, and headlines need no key. Live football needs a free api-football key via RapidAPI (100 free requests/day) for real global live scores — get one at <a href="https://rapidapi.com/api-sports/api/api-football" target="_blank" rel="noopener" style="color:var(--blue);">rapidapi.com/api-sports/api-football</a> and paste it below. Live cricket scores need a free CricAPI key (100 free requests/day) — get one at <a href="https://cricapi.com/" target="_blank" rel="noopener" style="color:var(--blue);">cricapi.com</a>.</div>
+    <div class="add-row" style="margin-bottom:8px;">
+      <input id="live-football-key-input" type="text" placeholder="api-football (RapidAPI) key (optional)">
+      <button class="lc-edit" id="live-football-key-save-btn" type="button">save</button>
+    </div>
     <div class="add-row">
       <input id="live-cricket-key-input" type="text" placeholder="CricAPI key (optional)">
       <button class="lc-edit" id="live-cricket-key-save-btn" type="button">save</button>
@@ -1918,7 +1958,7 @@ let state = {
   taskLevel:1, tasksCompleted:0, dailyTask:null,
   course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
   targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', projects:{}, pinnedMatches:[], wellness:{}, modokMemory:[], spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+    movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, flappyBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', footballApiKey:'', newsCategory:'general', projects:{}, pinnedMatches:[], wellness:{}, modokMemory:[], spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
 };
 let saveTimer = null;
 let pendingAttachment = null; 
@@ -2938,7 +2978,7 @@ async function loadState(){
         selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free',
         noteAttachments:[],
         targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', projects:{}, pinnedMatches:[], wellness:{}, modokMemory:[], spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+                movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, flappyBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', footballApiKey:'', newsCategory:'general', projects:{}, pinnedMatches:[], wellness:{}, modokMemory:[], spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
       }, loaded);
       if(!state.arcade || typeof state.arcade !== 'object') state.arcade = {xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}};
       if(!state.arcade.answers) state.arcade.answers = {};
@@ -4488,7 +4528,7 @@ document.getElementById('import-file-input').addEventListener('change', async (e
       taskLevel:1, tasksCompleted:0, dailyTask:null,
       course:{items:[]}, courseLog:[], geminiKey:'', grokKey:'', openrouterKey:'', aiProvider:'openrouter', selectedGrokModel:'grok-2-latest', selectedOpenrouterModel:'google/gemini-2.0-flash-lite-preview-02-05:free', noteAttachments:[],
       targetDate:null, achievements:[], mockInterview:{history:[], currentQuestion:null},
-            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', projects:{}, pinnedMatches:[], wellness:{}, modokMemory:[], spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+            movies:{watching:[],toWatch:[],watched:[]}, weekDigest:null, companies:[], weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest:0, typingBest:0, bigoBest:0, runnerBest:0, flappyBest:0, resumeText:'', resumeReviews:[], assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', footballApiKey:'', newsCategory:'general', projects:{}, pinnedMatches:[], wellness:{}, modokMemory:[], spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
     }, imported);
     if(!imported.geminiKey) state.geminiKey = keepKey;
     if(!imported.noteAttachments || !imported.noteAttachments.length) state.noteAttachments = keepAttachments;
@@ -4966,7 +5006,7 @@ document.getElementById('reset-btn').addEventListener('click', async ()=>{
     course:{items:[]}, courseLog:[], geminiKey: keepKey, openrouterKey: keepOpenrouterKey, grokKey: keepGrokKey,
     aiProvider: keepProvider, selectedOpenrouterModel: keepOpenrouterModel, selectedGrokModel: keepGrokModel,
     noteAttachments:[], targetDate: state.targetDate, achievements:[], mockInterview:{history:[], currentQuestion:null},
-        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', newsCategory:'general', projects:{}, pinnedMatches:[], wellness:{}, modokMemory:[], spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
+        movies: (state.movies||{watching:[],toWatch:[],watched:[]}), weekDigest:null, companies: state.companies, weeklyRecaps:[], goals:[], reminders:[], arcade:{xp:0,correct:0,total:0,dailyStreak:0,lastCorrectDate:null,answers:{}}, snakeBest: state.snakeBest, typingBest: state.typingBest, bigoBest: state.bigoBest, runnerBest: state.runnerBest, flappyBest: state.flappyBest, resumeText: state.resumeText, resumeReviews: state.resumeReviews, assistantMode:'coach', assistantWebEnabled:true, assistantDeepThink:false, topicMastery:{}, youtubeKey:'', ytClientId:'', ytClientSecret:'', ytAccessToken:'', ytRefreshToken:'', ytTokenExpiry:0, ytHomeFeedCache:null, cricketApiKey:'', footballApiKey:'', newsCategory:'general', projects:{}, pinnedMatches:[], wellness:{}, modokMemory:[], spotifyClientId:'', spotifyAccessToken:'', spotifyRefreshToken:'', spotifyTokenExpiry:0, uiLayout:'classic', githubToken:'', githubGistId:''
   };
   state.links.course = 'https://courses.aajsecode.com/s/courses/663f10c1b48d0c3f23f4ac0b/take'; await saveState(); render();
 });
@@ -5322,8 +5362,53 @@ function renderFootballList(){
     });
   });
 }
+// api-football (RapidAPI) returns a different JSON shape than TheSportsDB — normalize it into
+// the same field names footballMatchRowHtml/footballMatchKey already expect, so the render
+// pipeline doesn't need to know which source the data came from.
+function normalizeApiFootballFixture(f){
+  const statusShort = f.fixture && f.fixture.status && f.fixture.status.short || '';
+  const statusLong = f.fixture && f.fixture.status && f.fixture.status.long || '';
+  const elapsed = f.fixture && f.fixture.status && f.fixture.status.elapsed;
+  const finishedSet = new Set(['FT','AET','PEN']);
+  const notStartedSet = new Set(['NS','TBD','PST']);
+  let strStatus;
+  if(finishedSet.has(statusShort)) strStatus = 'Match Finished';
+  else if(notStartedSet.has(statusShort)) strStatus = 'Not Started';
+  else strStatus = (statusLong || statusShort || 'LIVE') + (elapsed ? ` ${elapsed}'` : '');
+  const dateIso = (f.fixture && f.fixture.date) || '';
+  return {
+    idEvent: 'af-' + (f.fixture && f.fixture.id),
+    strHomeTeam: (f.teams && f.teams.home && f.teams.home.name) || 'Home',
+    strAwayTeam: (f.teams && f.teams.away && f.teams.away.name) || 'Away',
+    strLeague: [(f.league && f.league.name), (f.league && f.league.country)].filter(Boolean).join(' · '),
+    intHomeScore: f.goals && f.goals.home,
+    intAwayScore: f.goals && f.goals.away,
+    strStatus,
+    strTime: dateIso.slice(11,16),
+    dateEvent: dateIso.slice(0,10)
+  };
+}
 async function fetchFootballScores(){
   const el = document.getElementById('live-football-box'); if(!el) return;
+  const key = (state.footballApiKey || '').trim();
+  if(key){
+    try{
+      const r = await fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all', {
+        headers: { 'X-RapidAPI-Key': key, 'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com' }
+      });
+      const data = await r.json();
+      if(data && data.errors && Object.keys(data.errors).length) throw new Error('api-football key rejected');
+      const events = ((data && data.response) || []).map(normalizeApiFootballFixture);
+      liveCache.football = { events, ts: Date.now() };
+      renderFootballList();
+      stampUpdated('live-football-updated', liveCache.football.ts);
+      return;
+    }catch(e){
+      el.innerHTML = '<div class="empty">couldn\'t reach live football scores — double check your api-football key below, or clear it to see today\'s scheduled fixtures instead.</div>';
+      return;
+    }
+  }
+  // no key set — fall back to a plain day-schedule (no real live status, sparse free-tier coverage)
   try{
     const d = new Date(); const dateStr = d.toISOString().slice(0,10);
     const r = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${dateStr}&s=Soccer`);
@@ -5472,6 +5557,13 @@ if(liveNewsCategorySelect){
 }
 const liveRefreshAllBtn = document.getElementById('live-refresh-all-btn');
 if(liveRefreshAllBtn) liveRefreshAllBtn.addEventListener('click', refreshLiveFeed);
+const liveFootballKeyInput = document.getElementById('live-football-key-input');
+const liveFootballKeySaveBtn = document.getElementById('live-football-key-save-btn');
+if(liveFootballKeyInput) liveFootballKeyInput.value = state.footballApiKey || '';
+if(liveFootballKeySaveBtn) liveFootballKeySaveBtn.addEventListener('click', ()=>{
+  state.footballApiKey = liveFootballKeyInput.value.trim();
+  saveState(); fetchFootballScores();
+});
 const liveCricketKeyInput = document.getElementById('live-cricket-key-input');
 const liveCricketKeySaveBtn = document.getElementById('live-cricket-key-save-btn');
 if(liveCricketKeyInput) liveCricketKeyInput.value = state.cricketApiKey || '';
@@ -5919,6 +6011,7 @@ function render(){
   if(window.refreshSnakeBest) window.refreshSnakeBest();
   if(window.refreshRunnerBest) window.refreshRunnerBest();
   if(window.refreshTypingBest) window.refreshTypingBest();
+  if(window.refreshFlappyBest) window.refreshFlappyBest();
   if(resumeInput) resumeInput.value = state.resumeText || '';
   notesArea.value = state.notes || '';
 }
@@ -6334,6 +6427,107 @@ setInterval(() => {
   });
   canvas.addEventListener('keyup', (e)=>{ if(e.key==='ArrowDown') setDuck(false); });
   resetGame(); draw(); window.refreshRunnerBest = ()=>{ bestEl.textContent = bestScore(); };
+})();
+
+(function initFlappy(){
+  const canvas = document.getElementById('flappy-canvas'); if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('flappy-score'); const bestEl = document.getElementById('flappy-best');
+  const statusEl = document.getElementById('flappy-status'); const startBtn = document.getElementById('flappy-start-btn');
+  const W = canvas.width, H = canvas.height;
+  const BIRD_X = 70, BIRD_R = 11, GRAVITY = 0.45, FLAP_VY = -8, PIPE_W = 50, GROUND_H = 22;
+  let bird, pipes, score, speed, running, loopId, spawnTimer, groundOffset, gapH, wingUp;
+
+  function bestScore(){ return Number(state.flappyBest)||0; }
+  function saveBestIfNeeded(){ if(score > bestScore()){ state.flappyBest = score; saveState(); } }
+  function updateHud(){ scoreEl.textContent = score; bestEl.textContent = bestScore(); }
+  function resetGame(){
+    bird = {y: H/2, vy: 0, rot: 0};
+    pipes = []; score = 0; speed = 2.5; spawnTimer = 0; groundOffset = 0; gapH = 148; wingUp = false; updateHud();
+  }
+  function spawnPipe(){
+    const margin = 46;
+    const gapY = margin + Math.random() * (H - GROUND_H - margin*2 - gapH);
+    pipes.push({x: W, gapY, passed: false});
+  }
+  function draw(){
+    // sky
+    const sky = ctx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0, '#5ec8f5'); sky.addColorStop(1, '#bfe9fb');
+    ctx.fillStyle = sky; ctx.fillRect(0,0,W,H);
+    // soft cloud dots (purely decorative, cheap to draw)
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    for(let i=0;i<3;i++){ const cx = ((i*140 - groundOffset*0.3) % (W+80) + W+80) % (W+80) - 40; ctx.beginPath(); ctx.ellipse(cx, 60+i*70, 26, 12, 0, 0, Math.PI*2); ctx.fill(); }
+    // pipes
+    pipes.forEach(p=>{
+      const grad = ctx.createLinearGradient(p.x,0,p.x+PIPE_W,0);
+      grad.addColorStop(0, '#3fb950'); grad.addColorStop(0.5, '#5fd873'); grad.addColorStop(1, '#2f9e42');
+      ctx.fillStyle = grad;
+      ctx.fillRect(p.x, 0, PIPE_W, p.gapY);
+      ctx.fillRect(p.x, p.gapY+gapH, PIPE_W, H-GROUND_H-(p.gapY+gapH));
+      ctx.fillStyle = '#2f9e42';
+      ctx.fillRect(p.x-4, p.gapY-16, PIPE_W+8, 16);
+      ctx.fillRect(p.x-4, p.gapY+gapH, PIPE_W+8, 16);
+    });
+    // ground
+    ctx.fillStyle = '#ded28f'; ctx.fillRect(0, H-GROUND_H, W, GROUND_H);
+    ctx.fillStyle = '#c9b96f';
+    for(let x = -groundOffset % 20; x < W; x += 20){ ctx.fillRect(x, H-GROUND_H, 10, 5); }
+    // bird
+    ctx.save();
+    ctx.translate(BIRD_X, bird.y);
+    ctx.rotate(bird.rot);
+    ctx.fillStyle = '#ffcb3d';
+    ctx.beginPath(); ctx.ellipse(0,0,BIRD_R,BIRD_R*0.86,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#ff9d3d'; // beak
+    ctx.beginPath(); ctx.moveTo(BIRD_R-2,-3); ctx.lineTo(BIRD_R+8,0); ctx.lineTo(BIRD_R-2,4); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(3,-4,3.5,0,Math.PI*2); ctx.fill(); // eye white
+    ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(4,-4,1.7,0,Math.PI*2); ctx.fill(); // pupil
+    ctx.fillStyle = '#f5a623'; // wing
+    ctx.beginPath(); ctx.ellipse(-3, wingUp?1:5, 7, 5, -0.3, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  function endGame(){
+    running = false; clearInterval(loopId); saveBestIfNeeded(); updateHud();
+    statusEl.textContent = `game over — score ${score}. space or click start to try again.`; startBtn.textContent = 'start';
+  }
+  function tick(){
+    groundOffset += speed;
+    bird.vy += GRAVITY; bird.y += bird.vy;
+    bird.rot = Math.max(-0.5, Math.min(1.15, bird.vy/12));
+    if(bird.y - BIRD_R < 0){ bird.y = BIRD_R; bird.vy = 0; }
+    if(bird.y + BIRD_R > H - GROUND_H){ endGame(); return; }
+    spawnTimer--;
+    if(spawnTimer <= 0){ spawnPipe(); spawnTimer = Math.max(72, 110 - Math.floor(score*1.5)); }
+    pipes.forEach(p=> p.x -= speed);
+    pipes = pipes.filter(p=> p.x + PIPE_W > -4);
+    for(const p of pipes){
+      const hitX = BIRD_X + BIRD_R > p.x && BIRD_X - BIRD_R < p.x + PIPE_W;
+      if(hitX){
+        const inGap = bird.y - BIRD_R > p.gapY && bird.y + BIRD_R < p.gapY + gapH;
+        if(!inGap){ endGame(); return; }
+      }
+      if(!p.passed && p.x + PIPE_W < BIRD_X - BIRD_R){ p.passed = true; score++; if(score % 6 === 0){ speed = Math.min(5.5, speed+0.25); gapH = Math.max(112, gapH-4); } }
+    }
+    wingUp = Math.floor(groundOffset/6) % 2 === 0;
+    updateHud(); draw();
+  }
+  function flap(){
+    if(!running) return;
+    bird.vy = FLAP_VY;
+  }
+  function startGame(){
+    resetGame(); running = true; draw();
+    statusEl.textContent = 'space / click / tap to flap'; startBtn.textContent = 'restart';
+    clearInterval(loopId); loopId = setInterval(tick, 1000/60); canvas.focus();
+  }
+  startBtn.addEventListener('click', startGame);
+  canvas.addEventListener('click', ()=>{ canvas.focus(); running ? flap() : startGame(); });
+  canvas.addEventListener('pointerdown', (e)=>{ if(running){ e.preventDefault(); flap(); } });
+  canvas.addEventListener('keydown', (e)=>{
+    if(e.key===' ' || e.key==='ArrowUp'){ e.preventDefault(); running ? flap() : startGame(); }
+  });
+  resetGame(); draw(); window.refreshFlappyBest = ()=>{ bestEl.textContent = bestScore(); };
 })();
 
 (function initTyping(){
