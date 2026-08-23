@@ -122,6 +122,7 @@
     70%{ box-shadow:0 0 0 8px rgba(63,185,80,0); }
     100%{ box-shadow:0 0 0 0 rgba(63,185,80,0); }
   }
+  .orbit-nudge-dot{width:7px; height:7px; border-radius:50%; background:var(--amber); margin-left:6px; box-shadow:0 0 0 0 rgba(230,150,50,.6); animation:pulseDot 2s ease-out infinite;}
   .subtitle{color:var(--text-dim); font-size:16px; margin:0 0 18px;}
   .boot{color:var(--text-faint); font-size:15.5px; margin-bottom:16px; background:linear-gradient(165deg, var(--panel) 0%, var(--panel-2) 100%); border:1px solid var(--border-soft); border-left:3px solid var(--green); border-radius:8px; padding:9px 14px; display:inline-block;}
   .boot .ok{color:var(--green);}
@@ -352,6 +353,9 @@
     border-color:var(--accent, var(--border)); transform:translateY(-2px);
     box-shadow:inset 0 1px 0 rgba(255,255,255,.035), 0 20px 44px -20px rgba(0,0,0,.7), 0 0 26px -14px var(--accent, transparent);
   }
+  /* the watch tab's player intentionally breaks out wider than its section (see .yt-player-wrap) —
+     overflow:hidden above would silently clip it (and anything positioned in that overhang) on both sides */
+  #view-watch section{ overflow:visible; }
   .sec-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;}
   .sec-head-left{display:flex; align-items:center; gap:8px;}
   .sec-head .dollar{color:var(--accent, var(--green)); text-shadow:0 0 12px var(--accent, transparent);}
@@ -592,6 +596,12 @@
   .insight-card .k{font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint);}
   .insight-card .v{font-family:var(--font-display); font-size:26.5px; font-weight:700; margin-top:5px;}
   .insight-card .s{font-size:13.5px; color:var(--text-dim); margin-top:3px;}
+  .cross-insight{background:var(--panel); border:1px solid var(--border-soft); border-left:3px solid var(--blue); border-radius:9px; padding:11px 14px; margin-bottom:8px;}
+  .cross-insight:last-child{margin-bottom:0;}
+  .cross-insight-good{border-left-color:var(--green);}
+  .cross-insight-watch{border-left-color:var(--amber);}
+  .ci-title{font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--text); text-transform:capitalize;}
+  .ci-text{font-size:13px; color:var(--text-dim); margin-top:3px; line-height:1.5;}
   .digest-card{background:var(--panel); border:1px solid var(--border-soft); border-radius:12px; padding:16px 18px; position:relative; overflow:hidden;}
   .digest-card::before{content:''; position:absolute; inset:0; background:linear-gradient(120deg, var(--green-bg) 0%, transparent 45%, var(--purple-bg) 100%); opacity:.6; pointer-events:none;}
   .digest-stats{display:flex; gap:26px; flex-wrap:wrap; position:relative;}
@@ -995,7 +1005,7 @@
     <div class="tab" data-tab="reminders"><span class="sq c-reminders"></span>reminders.txt</div>
     <div class="tab" data-tab="interview"><span class="sq c-interview"></span>interview.sh</div>
     <div class="tab" data-tab="resume"><span class="sq c-resume"></span>resume.md</div>
-    <div class="tab" data-tab="solve"><span class="sq c-solve"></span>orbit.ai</div>
+    <div class="tab" data-tab="solve"><span class="sq c-solve"></span>orbit.ai<span id="orbit-nudge-dot" class="orbit-nudge-dot" style="display:none;"></span></div>
     <div class="tab" data-tab="coderun"><span class="sq c-coderun"></span>code.run</div>
     <div class="tab" data-tab="notes"><span class="sq c-notes"></span>notes.txt</div>
     <div class="tab" data-tab="arcade"><span class="sq c-arcade"></span>arcade.game</div>
@@ -1082,6 +1092,11 @@
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>progress analytics</h2></div></div>
       <div class="insight-grid" id="analytics-summary"><div class="insight-card"><div class="k">this week</div><div class="v">1h</div><div class="s">1 active day</div></div><div class="insight-card"><div class="k">completion</div><div class="v">0%</div><div class="s">roadmap checklist</div></div><div class="insight-card"><div class="k">next actions</div><div class="v">0</div><div class="s">upcoming reminders</div></div></div>
       <div style="height:14px;"></div><div class="bar-list" id="analytics-categories"><div class="bar-row"><span>dsa</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--purple)"></div></div><span>1h</span></div></div>
+    </section>
+    <section>
+      <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>cross-tab insights</h2></div></div>
+      <div style="font-size:12px; color:var(--text-faint); margin-bottom:10px;">connects the dots between logs, course notes, mock interviews, resume reviews, and mastery — things that only show up once you look across tabs, not within one</div>
+      <div id="cross-insights"><div class="empty">keep logging, practicing, and reviewing — insights show up once there's enough to connect</div></div>
     </section>
     <section>
       <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>topic mastery</h2></div></div>
@@ -2948,6 +2963,7 @@ async function loadState(){
       state.links.course = 'https://courses.aajsecode.com/s/courses/663f10c1b48d0c3f23f4ac0b/take';
   }
   render();
+  orbitProactiveCheckIn();
 }
 async function saveState(){
   clearTimeout(saveTimer);
@@ -2968,6 +2984,7 @@ function activateTab(tab){
   if(view) view.classList.add('active');
   if(tab.dataset.tab !== 'watch') document.body.classList.remove('theater-active');
   if(tab.dataset.tab === 'live') startLiveFeedAutoRefresh(); else stopLiveFeedAutoRefresh();
+  if(tab.dataset.tab === 'solve'){ const dot = document.getElementById('orbit-nudge-dot'); if(dot) dot.style.display = 'none'; }
   tab.scrollIntoView({block:'nearest', inline:'center'});
   if(!wasActive) playChime(520, 0.06);
 }
@@ -3648,7 +3665,57 @@ function orbitContext(){
   return `Things you remember about this student from past sessions (use naturally, don't recite this list):\n${memoryNotes}\n\nThis is what's actually going on in the student's life right now — use it the way someone who's actually paying attention would: weave it in naturally when it changes or sharpens the answer (a deadline that affects timing, a weak topic that's relevant to what they're asking, a note or resume line that's directly related), the same way a person who knows your situation would connect dots without being asked to. Don't force it in when it doesn't fit, and don't turn it into a status report or nag about streaks/hours out of nowhere. ${computeStreak()}-day activity streak, ${Math.round(computeTotalHours()*10)/10} total hours, ${computeChecklistPct()}% roadmap complete, focus: ${focus}. Weakest topics by practice feedback: ${weakTopics}. Open goals: ${openGoals}. Upcoming: ${upcoming}. Recent activity: ${recent}. ${interviewNote}. Their own scratch notes (most recent): "${notesSnippet}". Resume excerpt: "${resumeSnippet}".`;
 }
 
-// Detects a trailing [[REMEMBER: ...]] marker in an AI reply, stores it as a durable memory note
+// ---- ORBIT proactive check-in: runs once per day on load. Instead of only ever reacting to
+// what's typed, it looks at the same signals a person paying attention would notice — a logging
+// gap, a topic that's stalled, reminders slipping — and opens the chat with a short heads-up.
+// Deliberately conservative: at most 2 things, once a day, and only when there's something real
+// to say (silence is the default, not a report card).
+function orbitDaysSince(dateStr){
+  if(!dateStr) return Infinity;
+  return Math.round((new Date(todayStr()+'T00:00:00') - new Date(dateStr+'T00:00:00')) / 86400000);
+}
+function orbitBuildNudge(){
+  const notes = [];
+  const logDates = (state.logs||[]).map(l=>l.date).filter(Boolean).sort();
+  const lastLogDate = logDates.length ? logDates[logDates.length-1] : null;
+  const gap = lastLogDate ? orbitDaysSince(lastLogDate) : Infinity;
+  if(gap >= 2 && gap !== Infinity){
+    notes.push(gap === 2 ? `you haven't logged anything in 2 days` : `it's been ${gap} days since your last log`);
+  }
+  let weakest = null, weakestScore = 101;
+  ROADMAP.forEach(p=>{
+    const m = getMastery(p.id);
+    const stale = m.lastSeen ? orbitDaysSince(m.lastSeen) : 999;
+    if(m.attempts > 0 && m.score < 55 && stale >= 4 && m.score < weakestScore){ weakestScore = m.score; weakest = p; }
+  });
+  if(weakest) notes.push(`your ${weakest.name} mastery is at ${weakestScore}/100 and hasn't moved in a while`);
+  const today = todayStr();
+  const overdue = (state.reminders||[]).filter(r=> !r.done && r.date && r.date < today);
+  if(overdue.length){
+    notes.push(overdue.length === 1 ? `you've got an overdue reminder — "${overdue[0].title}"` : `you've got ${overdue.length} overdue reminders`);
+  }else{
+    const dueToday = (state.reminders||[]).filter(r=> !r.done && r.date === today);
+    if(dueToday.length) notes.push(dueToday.length === 1 ? `"${dueToday[0].title}" is due today` : `${dueToday.length} reminders are due today`);
+  }
+  if(!notes.length) return null;
+  const picked = notes.slice(0, 2);
+  let msg = picked.length === 1
+    ? `Morning, sir. Just a heads up — ${picked[0]}.`
+    : `Morning, sir. A couple of things — ${picked[0]}, and ${picked[1]}.`;
+  msg += ' Want to tackle it now, or should I leave you be?';
+  return msg;
+}
+function orbitProactiveCheckIn(){
+  const today = todayStr();
+  if(state.lastOrbitCheckIn === today) return; // already checked in today, don't repeat on every reload
+  state.lastOrbitCheckIn = today;
+  const msg = orbitBuildNudge();
+  if(!msg){ saveState(); return; }
+  if(!Array.isArray(state.chat)) state.chat = [];
+  state.chat.push({role:'assistant', content: msg});
+  saveState(); renderChat();
+  const dot = document.getElementById('orbit-nudge-dot'); if(dot) dot.style.display = 'inline-block';
+}
 // (capped so it never bloats), and returns the reply with the marker stripped so it never shows
 // up in what the student actually sees or hears.
 function extractModokMemory(rawText){
@@ -4942,6 +5009,66 @@ function weakestTopic(){
   }
   return best;
 }
+
+// ---- Cross-tab insights: correlates data that lives on separate tabs (logs, course notes,
+// mock interviews, resume reviews, mastery, applications) — things that only surface once you
+// look across all of it together, not within any single tab's own view. ----
+const CI_STOPWORDS = new Set(['the','a','an','and','or','but','is','are','was','were','be','been','to','of','in','on','for','with','this','that','it','you','your','i','my','me','at','as','by','from','not','no','so','if','can','could','should','would','will','have','has','had','do','does','did','just','also','more','most','very','too','than','then','how','what','when','where','which','who','their','there','about','into','out','up','down','over','under','some','into']);
+function ciSignificantWords(text){
+  return ((text||'').toLowerCase().match(/[a-z][a-z+#.]{3,}/g) || []).filter(w=>!CI_STOPWORDS.has(w));
+}
+function crossInsightPracticeOverlap(){
+  const logDays = new Set((state.logs||[]).map(l=>l.date).filter(Boolean));
+  if(logDays.size < 3) return null;
+  const practiceDays = new Set([
+    ...(state.courseLog||[]).map(c=>c.date),
+    ...((state.mockInterview && state.mockInterview.history) || []).map(h=>h.date)
+  ].filter(Boolean));
+  if(!practiceDays.size) return null;
+  let overlap = 0; logDays.forEach(d=>{ if(practiceDays.has(d)) overlap++; });
+  const pct = Math.round((overlap/logDays.size)*100);
+  return pct >= 60
+    ? { title:'logging and practice line up', text:`${pct}% of your logged days also include a course note or mock interview — you're pairing time with deliberate practice, not just clocking hours.`, tone:'good' }
+    : { title:'logging outpaces deliberate practice', text:`only ${pct}% of your logged days include a course note or mock interview — most logged time isn't tied to a specific practice session.`, tone:'watch' };
+}
+function crossInsightWeakTopicInInterview(){
+  const weak = weakestTopic(); if(!weak) return null;
+  const history = (state.mockInterview && state.mockInterview.history) || [];
+  if(!history.length) return null;
+  const nameWords = ciSignificantWords(weak.name);
+  if(!nameWords.length) return null;
+  const hit = history.slice(-8).some(h=>{
+    const hay = ((h.question||'')+' '+(h.feedback||'')).toLowerCase();
+    return nameWords.some(w=> hay.includes(w));
+  });
+  if(!hit) return null;
+  return { title:'weak spot showing up twice', text:`${weak.name} is your lowest mastery score (${weak.score}/100), and it also came up in a recent mock interview — worth a dedicated session before your next one.`, tone:'watch' };
+}
+function crossInsightResumeInterviewOverlap(){
+  const reviews = state.resumeReviews || []; const history = (state.mockInterview && state.mockInterview.history) || [];
+  if(!reviews.length || !history.length) return null;
+  const resumeWords = new Set(ciSignificantWords(reviews[reviews.length-1].text));
+  const interviewWords = new Set();
+  history.slice(-5).forEach(h=> ciSignificantWords(h.feedback).forEach(w=>interviewWords.add(w)));
+  const shared = [...resumeWords].filter(w=> interviewWords.has(w) && w.length > 4);
+  if(!shared.length) return null;
+  return { title:'recurring theme', text:`"${shared[0]}" shows up in both your latest resume review and recent interview feedback — likely worth fixing directly rather than as two separate issues.`, tone:'watch' };
+}
+function crossInsightApplyVsPractice(){
+  const weekStart = currentWeekStartKey();
+  const appsThisWeek = (state.companies||[]).filter(c=> c.addedAt && c.addedAt.slice(0,10) >= weekStart).length;
+  if(appsThisWeek < 3) return null;
+  const weeklyHours = (state.logs||[]).filter(l=>l.date>=weekStart).reduce((s,l)=>s+(Number(l.hours)||0),0);
+  if(weeklyHours >= 3) return null;
+  return { title:'applying faster than practicing', text:`${appsThisWeek} applications logged this week but only ${Math.round(weeklyHours*10)/10}h of practice — worth balancing so prep keeps pace with applications.`, tone:'watch' };
+}
+function renderCrossInsights(){
+  const el = document.getElementById('cross-insights'); if(!el) return;
+  const insights = [crossInsightPracticeOverlap(), crossInsightWeakTopicInInterview(), crossInsightResumeInterviewOverlap(), crossInsightApplyVsPractice()].filter(Boolean).slice(0,3);
+  el.innerHTML = insights.length ? insights.map(i=>
+    `<div class="cross-insight cross-insight-${i.tone}"><div class="ci-title">${escapeHtml(i.title)}</div><div class="ci-text">${escapeHtml(i.text)}</div></div>`
+  ).join('') : '<div class="empty">keep logging, practicing, and reviewing — insights show up once there\'s enough to connect</div>';
+}
 function renderWeekDigest(){
   const card = document.getElementById('digest-card'); if(!card) return;
   const weekStartKey = currentWeekStartKey();
@@ -5787,7 +5914,7 @@ function render(){
   renderHeatmap(); renderFocusRow(); renderPhases(); renderLog(); renderChat(); renderAssistantModes();
   renderDailyTask(); renderCourseTab(); renderNoteAttachments(); renderAchievements();
   renderTimer(); renderInterview(); renderCompanies(); renderWeeklyRecaps(); renderResumeReviews();
-  applyLayout(); renderWeekDigest(); renderAnalytics(); renderMastery(); renderSpotify(); renderYtSubscriptions(); renderCalendar(); renderGoals(); renderReminders(); renderActivityResults(); renderArcade(); renderMovies();
+  applyLayout(); renderWeekDigest(); renderAnalytics(); renderCrossInsights(); renderMastery(); renderSpotify(); renderYtSubscriptions(); renderCalendar(); renderGoals(); renderReminders(); renderActivityResults(); renderArcade(); renderMovies();
   renderStreakBanner(); renderOrbitMemory();
   if(window.refreshSnakeBest) window.refreshSnakeBest();
   if(window.refreshRunnerBest) window.refreshRunnerBest();
@@ -6524,9 +6651,11 @@ setInterval(() => {
     if(actionsEl) actionsEl.style.display = 'flex'; // Always show action buttons when popup is visible!
   }
 
+  let _streamInFlight = false; // true while callAIStream is still receiving network chunks — a quiet gap here means "waiting on the next sentence", not "stuck"
   function speakStreamStart(){
     try { recognition.abort(); } catch(e){}
     isListening = false; isSpeaking = true; window._ttsActive = true; _speakingSinceTs = Date.now();
+    _streamInFlight = true;
     if(fab) fab.className = 'voice-fab speaking';
     if(popup){ popup.classList.remove('listening-mode','thinking-mode'); popup.classList.add('speaking-mode'); }
     window.speechSynthesis.cancel();
@@ -6595,6 +6724,7 @@ setInterval(() => {
             try{ const obj = JSON.parse(js); const t = obj?.candidates?.[0]?.content?.parts?.[0]?.text; if(t){ sentenceBuf += t; full += t; flush(false); } }catch(e){}
           });
         }
+        _streamInFlight = false;
         flush(true);
         return full;
       } else {
@@ -6619,11 +6749,13 @@ setInterval(() => {
             try{ const obj = JSON.parse(js); const t = obj?.choices?.[0]?.delta?.content; if(t){ sentenceBuf += t; full += t; flush(false); } }catch(e){}
           });
         }
+        _streamInFlight = false;
         flush(true);
         return full;
       }
     }catch(e){
       // Streaming didn't work out (older browser, network hiccup, etc.) — fall back to the reliable path.
+      _streamInFlight = false;
       const text = await callAI(messages, system);
       if(onChunk) onChunk(text);
       speakText(text.length > 400 ? text.slice(0,400)+'...' : text);
@@ -7418,7 +7550,11 @@ setInterval(() => {
   // forever, which permanently blocks the mic from restarting — ORBIT looks "not listening" even
   // though the mic has permission, because the anti-echo guard in onresult never releases.
   // Poll the browser's real speechSynthesis.speaking state as ground truth and self-heal if our
-  // flag disagrees with it for a sustained stretch (not just a brief gap between streamed sentences).
+  // flag disagrees with it for a sustained stretch — but only once the response has actually
+  // finished streaming in. A long story can have several quiet seconds between sentences purely
+  // because the AI is still generating the next one; that's not the same as a stuck utterance, and
+  // treating it as such was cutting narrations off mid-story. The 20s hard backstop still applies
+  // regardless, so a truly frozen state always recovers either way.
   let _quietChecks = 0;
   setInterval(() => {
     if (isSpeaking) {
@@ -7428,11 +7564,12 @@ setInterval(() => {
       } else {
         _quietChecks = 0;
       }
-      if (_quietChecks >= 2 || stuckTooLong) { // ~5s of the browser reporting silence, OR 20s hard cap regardless of what it reports
+      if ((_quietChecks >= 2 && !_streamInFlight) || stuckTooLong) { // ~5s of silence with nothing left generating, OR 20s hard cap regardless of what it reports
         _quietChecks = 0;
         isSpeaking = false;
         window._ttsActive = false;
         _pendingSentences = 0;
+        _streamInFlight = false;
         window._ttsCooldownUntil = Date.now() + 800;
         try { window.speechSynthesis.cancel(); } catch(e){}
         if (fab && fab.className !== 'voice-fab off' && fab.className !== 'voice-fab mic-error') fab.className = 'voice-fab';
