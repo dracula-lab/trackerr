@@ -5394,24 +5394,18 @@ async function fetchFootballScores(){
   if(key){
     try{
       const headers = { 'x-rapidapi-key': key, 'x-rapidapi-host': 'sportapi7.p.rapidapi.com' };
-      const liveReq = fetch('https://sportapi7.p.rapidapi.com/api/v1/sport/football/events/live', {headers}).then(r=>r.json());
-      // Today's scheduled-events list so a match that hasn't kicked off yet (or already finished)
-      // still turns up in search, not just whatever's live right this second. This path follows
-      // the standard SofaScore-API-family convention but wasn't individually confirmed in the
-      // playground, so it's wrapped defensively — if it's off, live results still work fine.
-      const DAY_TTL = 20*60*1000;
-      const needDayFetch = !liveCache.footballDay || Date.now()-liveCache.footballDay.ts > DAY_TTL;
-      const dateStr = new Date().toISOString().slice(0,10);
-      const dayReq = needDayFetch
-        ? fetch(`https://sportapi7.p.rapidapi.com/api/v1/sport/football/scheduled-events/${dateStr}`, {headers}).then(r=>r.ok ? r.json() : null).catch(()=>null)
-        : Promise.resolve(null);
-      const [liveData, dayData] = await Promise.all([liveReq, dayReq]);
-      if(!liveData || liveData.error) throw new Error('SportAPI key rejected');
-      if(dayData && Array.isArray(dayData.events)) liveCache.footballDay = { events: dayData.events, ts: Date.now() };
-      const merged = new Map();
-      (liveCache.footballDay ? liveCache.footballDay.events : []).forEach(ev=> merged.set(ev.id, ev));
-      (liveData.events || []).forEach(ev=> merged.set(ev.id, ev)); // live entries overwrite — freshest status wins
-      const events = [...merged.values()].map(normalizeSportApiFixture);
+      const r = await fetch('https://sportapi7.p.rapidapi.com/api/v1/sport/football/events/live', {headers});
+      if(r.status === 429){
+        el.innerHTML = '<div class="empty">SportAPI rate limit hit — too many requests in a short window (this happens fast on the free tier, especially while testing in the RapidAPI playground at the same time). It\'ll pick back up on the next auto-refresh in a few minutes.</div>';
+        return;
+      }
+      if(r.status === 403){
+        el.innerHTML = '<div class="empty">SportAPI rejected this request (403) — check the Pricing tab on your SportAPI RapidAPI page to confirm your plan includes this endpoint.</div>';
+        return;
+      }
+      if(!r.ok) throw new Error('SportAPI error ' + r.status);
+      const liveData = await r.json();
+      const events = (liveData.events || []).map(normalizeSportApiFixture);
       liveCache.football = { events, ts: Date.now() };
       renderFootballList();
       stampUpdated('live-football-updated', liveCache.football.ts);
