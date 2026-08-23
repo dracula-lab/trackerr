@@ -1811,9 +1811,9 @@
 
   <section>
     <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>settings</h2></div></div>
-    <div class="live-row-sub" style="margin-bottom:8px;">weather, crypto, and headlines need no key. Live football needs a free api-football key via RapidAPI (100 free requests/day) for real global live scores — get one at <a href="https://rapidapi.com/api-sports/api/api-football" target="_blank" rel="noopener" style="color:var(--blue);">rapidapi.com/api-sports/api-football</a> and paste it below. Live cricket scores need a free CricAPI key (100 free requests/day) — get one at <a href="https://cricapi.com/" target="_blank" rel="noopener" style="color:var(--blue);">cricapi.com</a>.</div>
+    <div class="live-row-sub" style="margin-bottom:8px;">weather, crypto, and headlines need no key. Live football needs a free SportAPI key via RapidAPI (100 free requests/day) for real global live scores — get one at <a href="https://rapidapi.com/rapidsportapi/api/sportapi7" target="_blank" rel="noopener" style="color:var(--blue);">rapidapi.com/rapidsportapi/sportapi7</a> and paste it below. Live cricket scores need a free CricAPI key (100 free requests/day) — get one at <a href="https://cricapi.com/" target="_blank" rel="noopener" style="color:var(--blue);">cricapi.com</a>.</div>
     <div class="add-row" style="margin-bottom:8px;">
-      <input id="live-football-key-input" type="text" placeholder="api-football (RapidAPI) key (optional)">
+      <input id="live-football-key-input" type="text" placeholder="SportAPI (RapidAPI) key (optional)">
       <button class="lc-edit" id="live-football-key-save-btn" type="button">save</button>
     </div>
     <div class="add-row">
@@ -5365,27 +5365,27 @@ function renderFootballList(){
 // api-football (RapidAPI) returns a different JSON shape than TheSportsDB — normalize it into
 // the same field names footballMatchRowHtml/footballMatchKey already expect, so the render
 // pipeline doesn't need to know which source the data came from.
-function normalizeApiFootballFixture(f){
-  const statusShort = f.fixture && f.fixture.status && f.fixture.status.short || '';
-  const statusLong = f.fixture && f.fixture.status && f.fixture.status.long || '';
-  const elapsed = f.fixture && f.fixture.status && f.fixture.status.elapsed;
-  const finishedSet = new Set(['FT','AET','PEN']);
-  const notStartedSet = new Set(['NS','TBD','PST']);
+// SportAPI (sportapi7.p.rapidapi.com) follows the well-known SofaScore response shape:
+// events[].homeTeam.name / awayTeam.name / homeScore.current / awayScore.current /
+// status.type+description / tournament.name+category.name / startTimestamp (unix seconds).
+function normalizeSportApiFixture(ev){
+  const statusType = (ev.status && ev.status.type) || '';
+  const statusDesc = (ev.status && ev.status.description) || '';
   let strStatus;
-  if(finishedSet.has(statusShort)) strStatus = 'Match Finished';
-  else if(notStartedSet.has(statusShort)) strStatus = 'Not Started';
-  else strStatus = (statusLong || statusShort || 'LIVE') + (elapsed ? ` ${elapsed}'` : '');
-  const dateIso = (f.fixture && f.fixture.date) || '';
+  if(statusType === 'finished') strStatus = 'Match Finished';
+  else if(statusType === 'notstarted') strStatus = 'Not Started';
+  else strStatus = statusDesc || 'LIVE';
+  const ts = ev.startTimestamp ? new Date(ev.startTimestamp*1000) : null;
   return {
-    idEvent: 'af-' + (f.fixture && f.fixture.id),
-    strHomeTeam: (f.teams && f.teams.home && f.teams.home.name) || 'Home',
-    strAwayTeam: (f.teams && f.teams.away && f.teams.away.name) || 'Away',
-    strLeague: [(f.league && f.league.name), (f.league && f.league.country)].filter(Boolean).join(' · '),
-    intHomeScore: f.goals && f.goals.home,
-    intAwayScore: f.goals && f.goals.away,
+    idEvent: 'sa-' + ev.id,
+    strHomeTeam: (ev.homeTeam && ev.homeTeam.name) || 'Home',
+    strAwayTeam: (ev.awayTeam && ev.awayTeam.name) || 'Away',
+    strLeague: [(ev.tournament && ev.tournament.name), (ev.tournament && ev.tournament.category && ev.tournament.category.name)].filter(Boolean).join(' · '),
+    intHomeScore: ev.homeScore && ev.homeScore.current,
+    intAwayScore: ev.awayScore && ev.awayScore.current,
     strStatus,
-    strTime: dateIso.slice(11,16),
-    dateEvent: dateIso.slice(0,10)
+    strTime: ts ? ts.toISOString().slice(11,16) : '',
+    dateEvent: ts ? ts.toISOString().slice(0,10) : ''
   };
 }
 async function fetchFootballScores(){
@@ -5393,37 +5393,31 @@ async function fetchFootballScores(){
   const key = (state.footballApiKey || '').trim();
   if(key){
     try{
-      const headers = { 'X-RapidAPI-Key': key, 'X-RapidAPI-Host': 'api-football-v1.p.rapidapi.com' };
-      // live=all only ever returns matches currently in-play — great for "anything live worldwide"
-      // but it silently excludes anything scheduled-but-not-started or already finished today, which
-      // made searching for a match you knew was on today's card come back "no matches found".
-      // Pull today's full fixture list too (merged in, live status still wins) so search actually
-      // covers the whole day, not just the in-play slice — cached longer since the schedule itself
-      // barely changes, to stay well within the free 100-req/day budget alongside the 5-min live poll.
+      const headers = { 'x-rapidapi-key': key, 'x-rapidapi-host': 'sportapi7.p.rapidapi.com' };
+      const liveReq = fetch('https://sportapi7.p.rapidapi.com/api/v1/sport/football/events/live', {headers}).then(r=>r.json());
+      // Today's scheduled-events list so a match that hasn't kicked off yet (or already finished)
+      // still turns up in search, not just whatever's live right this second. This path follows
+      // the standard SofaScore-API-family convention but wasn't individually confirmed in the
+      // playground, so it's wrapped defensively — if it's off, live results still work fine.
       const DAY_TTL = 20*60*1000;
       const needDayFetch = !liveCache.footballDay || Date.now()-liveCache.footballDay.ts > DAY_TTL;
-      const liveReq = fetch('https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all', {headers});
+      const dateStr = new Date().toISOString().slice(0,10);
       const dayReq = needDayFetch
-        ? fetch(`https://api-football-v1.p.rapidapi.com/v3/fixtures?date=${new Date().toISOString().slice(0,10)}`, {headers})
-        : null;
-      const [liveRes, dayRes] = await Promise.all([liveReq, dayReq]);
-      const liveData = await liveRes.json();
-      if(liveData && liveData.errors && Object.keys(liveData.errors).length) throw new Error('api-football key rejected');
-      if(dayRes){
-        const dayData = await dayRes.json();
-        if(dayData && dayData.errors && Object.keys(dayData.errors).length) throw new Error('api-football key rejected');
-        liveCache.footballDay = { events: (dayData && dayData.response) || [], ts: Date.now() };
-      }
+        ? fetch(`https://sportapi7.p.rapidapi.com/api/v1/sport/football/scheduled-events/${dateStr}`, {headers}).then(r=>r.ok ? r.json() : null).catch(()=>null)
+        : Promise.resolve(null);
+      const [liveData, dayData] = await Promise.all([liveReq, dayReq]);
+      if(!liveData || liveData.error) throw new Error('SportAPI key rejected');
+      if(dayData && Array.isArray(dayData.events)) liveCache.footballDay = { events: dayData.events, ts: Date.now() };
       const merged = new Map();
-      (liveCache.footballDay ? liveCache.footballDay.events : []).forEach(f=> merged.set(f.fixture.id, f));
-      ((liveData && liveData.response) || []).forEach(f=> merged.set(f.fixture.id, f)); // live entries overwrite — freshest status wins
-      const events = [...merged.values()].map(normalizeApiFootballFixture);
+      (liveCache.footballDay ? liveCache.footballDay.events : []).forEach(ev=> merged.set(ev.id, ev));
+      (liveData.events || []).forEach(ev=> merged.set(ev.id, ev)); // live entries overwrite — freshest status wins
+      const events = [...merged.values()].map(normalizeSportApiFixture);
       liveCache.football = { events, ts: Date.now() };
       renderFootballList();
       stampUpdated('live-football-updated', liveCache.football.ts);
       return;
     }catch(e){
-      el.innerHTML = '<div class="empty">couldn\'t reach live football scores — double check your api-football key below, or clear it to see today\'s scheduled fixtures instead.</div>';
+      el.innerHTML = '<div class="empty">couldn\'t reach live football scores — double check your SportAPI key below, or clear it to see today\'s scheduled fixtures instead.</div>';
       return;
     }
   }
