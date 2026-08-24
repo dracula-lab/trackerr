@@ -1811,9 +1811,9 @@
 
   <section>
     <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>settings</h2></div></div>
-    <div class="live-row-sub" style="margin-bottom:8px;">weather, crypto, and headlines need no key. Live football needs a free football-data.org key (10 requests/min, no RapidAPI needed) — covers top competitions worldwide (Premier League, La Liga, Bundesliga, Serie A, Champions League, and more). Get one at <a href="https://www.football-data.org/client/register" target="_blank" rel="noopener" style="color:var(--blue);">football-data.org/client/register</a> and paste it below. Live cricket scores need a free CricAPI key (100 free requests/day) — get one at <a href="https://cricapi.com/" target="_blank" rel="noopener" style="color:var(--blue);">cricapi.com</a>.</div>
+    <div class="live-row-sub" style="margin-bottom:8px;">weather, crypto, and headlines need no key. Live football needs a free SportAPI key via RapidAPI (get one at <a href="https://rapidapi.com/rapidsportapi/api/sportapi7" target="_blank" rel="noopener" style="color:var(--blue);">rapidapi.com/rapidsportapi/sportapi7</a>) — note: football-data.org's free tier only allows requests from localhost, so it can't be used here at all; SportAPI via RapidAPI does work from this site. Paste your key below. Live cricket scores need a free CricAPI key (100 free requests/day) — get one at <a href="https://cricapi.com/" target="_blank" rel="noopener" style="color:var(--blue);">cricapi.com</a>.</div>
     <div class="add-row" style="margin-bottom:8px;">
-      <input id="live-football-key-input" type="text" placeholder="football-data.org key (optional)">
+      <input id="live-football-key-input" type="text" placeholder="SportAPI (RapidAPI) key (optional)">
       <button class="lc-edit" id="live-football-key-save-btn" type="button">save</button>
     </div>
     <div class="add-row">
@@ -5362,25 +5362,28 @@ function renderFootballList(){
     });
   });
 }
-// football-data.org: direct signup (no RapidAPI), 10 req/min free tier, covers top competitions
-// worldwide (Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League, etc — not
-// every regional league, but far more headroom than the previous RapidAPI attempts were giving us).
-// One /v4/matches?dateFrom&dateTo call returns the WHOLE day — live, scheduled, and finished —
-// so search covers all of today's matches, not just whatever's in-play this second.
-function normalizeFootballDataMatch(m){
-  const statusMap = { SCHEDULED:'Not Started', TIMED:'Not Started', FINISHED:'Match Finished', POSTPONED:'Postponed', SUSPENDED:'Suspended', CANCELLED:'Cancelled' };
-  const strStatus = statusMap[m.status] || (m.status === 'PAUSED' ? 'Half Time' : 'LIVE'); // IN_PLAY and anything else unmapped shows as live
-  const ft = (m.score && m.score.fullTime) || {};
+// SportAPI (sportapi7.p.rapidapi.com, via RapidAPI) — follows the well-known SofaScore response
+// shape. Confirmed working from this site's actual origin (requests reach their server and get
+// real HTTP responses back, not a browser-level CORS block) — unlike football-data.org, whose
+// free tier hard-locks CORS to localhost only and can never work from a GitHub Pages-hosted site.
+function normalizeSportApiFixture(ev){
+  const statusType = (ev.status && ev.status.type) || '';
+  const statusDesc = (ev.status && ev.status.description) || '';
+  let strStatus;
+  if(statusType === 'finished') strStatus = 'Match Finished';
+  else if(statusType === 'notstarted') strStatus = 'Not Started';
+  else strStatus = statusDesc || 'LIVE';
+  const ts = ev.startTimestamp ? new Date(ev.startTimestamp*1000) : null;
   return {
-    idEvent: 'fd-' + m.id,
-    strHomeTeam: (m.homeTeam && m.homeTeam.name) || 'Home',
-    strAwayTeam: (m.awayTeam && m.awayTeam.name) || 'Away',
-    strLeague: (m.competition && m.competition.name) || '',
-    intHomeScore: ft.home,
-    intAwayScore: ft.away,
+    idEvent: 'sa-' + ev.id,
+    strHomeTeam: (ev.homeTeam && ev.homeTeam.name) || 'Home',
+    strAwayTeam: (ev.awayTeam && ev.awayTeam.name) || 'Away',
+    strLeague: [(ev.tournament && ev.tournament.name), (ev.tournament && ev.tournament.category && ev.tournament.category.name)].filter(Boolean).join(' · '),
+    intHomeScore: ev.homeScore && ev.homeScore.current,
+    intAwayScore: ev.awayScore && ev.awayScore.current,
     strStatus,
-    strTime: (m.utcDate || '').slice(11,16),
-    dateEvent: (m.utcDate || '').slice(0,10)
+    strTime: ts ? ts.toISOString().slice(11,16) : '',
+    dateEvent: ts ? ts.toISOString().slice(0,10) : ''
   };
 }
 async function fetchFootballScores(){
@@ -5388,27 +5391,26 @@ async function fetchFootballScores(){
   const key = (state.footballApiKey || '').trim();
   if(key){
     try{
-      const dateStr = new Date().toISOString().slice(0,10);
-      const r = await fetch(`https://api.football-data.org/v4/matches?dateFrom=${dateStr}&dateTo=${dateStr}`, {
-        headers: { 'X-Auth-Token': key }
+      const r = await fetch('https://sportapi7.p.rapidapi.com/api/v1/sport/football/events/live', {
+        headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': 'sportapi7.p.rapidapi.com' }
       });
       if(r.status === 429){
-        el.innerHTML = '<div class="empty">football-data.org rate limit hit (10 requests/min on the free tier) — it\'ll pick back up on the next auto-refresh in a few minutes.</div>';
+        el.innerHTML = '<div class="empty">SportAPI rate limit hit — too many requests in a short window. It\'ll pick back up on the next auto-refresh in a few minutes; avoid testing this same endpoint in the RapidAPI playground at the same time, since that shares the same limit.</div>';
         return;
       }
       if(r.status === 403){
-        el.innerHTML = '<div class="empty">football-data.org rejected this key (403) — double check it below, or confirm it\'s active at football-data.org.</div>';
+        el.innerHTML = '<div class="empty">SportAPI rejected this request (403) — check the Pricing tab on your SportAPI RapidAPI page to confirm your plan includes this endpoint.</div>';
         return;
       }
-      if(!r.ok) throw new Error('football-data.org error ' + r.status);
-      const data = await r.json();
-      const events = ((data && data.matches) || []).map(normalizeFootballDataMatch);
+      if(!r.ok) throw new Error('SportAPI error ' + r.status);
+      const liveData = await r.json();
+      const events = ((liveData && liveData.events) || []).map(normalizeSportApiFixture);
       liveCache.football = { events, ts: Date.now() };
       renderFootballList();
       stampUpdated('live-football-updated', liveCache.football.ts);
       return;
     }catch(e){
-      el.innerHTML = '<div class="empty">couldn\'t reach live football scores — double check your football-data.org key below, or clear it to see today\'s scheduled fixtures instead.</div>';
+      el.innerHTML = '<div class="empty">couldn\'t reach live football scores — double check your SportAPI key below, or clear it to see today\'s scheduled fixtures instead.</div>';
       return;
     }
   }
