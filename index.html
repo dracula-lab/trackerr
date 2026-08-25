@@ -1811,11 +1811,7 @@
 
   <section>
     <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>settings</h2></div></div>
-    <div class="live-row-sub" style="margin-bottom:8px;">weather, crypto, and headlines need no key. Live football needs a free SportAPI key via RapidAPI (get one at <a href="https://rapidapi.com/rapidsportapi/api/sportapi7" target="_blank" rel="noopener" style="color:var(--blue);">rapidapi.com/rapidsportapi/sportapi7</a>) — note: football-data.org's free tier only allows requests from localhost, so it can't be used here at all; SportAPI via RapidAPI does work from this site. Paste your key below. Live cricket scores need a free CricAPI key (100 free requests/day) — get one at <a href="https://cricapi.com/" target="_blank" rel="noopener" style="color:var(--blue);">cricapi.com</a>.</div>
-    <div class="add-row" style="margin-bottom:8px;">
-      <input id="live-football-key-input" type="text" placeholder="SportAPI (RapidAPI) key (optional)">
-      <button class="lc-edit" id="live-football-key-save-btn" type="button">save</button>
-    </div>
+    <div class="live-row-sub" style="margin-bottom:8px;">weather, crypto, headlines, and live football all need no key now — football tries SofaScore's live feed first (richer match detail), falling back automatically to ESPN's scoreboard across the major leagues if that's ever unreachable. Live cricket scores need a free CricAPI key (100 free requests/day) — get one at <a href="https://cricapi.com/" target="_blank" rel="noopener" style="color:var(--blue);">cricapi.com</a>.</div>
     <div class="add-row">
       <input id="live-cricket-key-input" type="text" placeholder="CricAPI key (optional)">
       <button class="lc-edit" id="live-cricket-key-save-btn" type="button">save</button>
@@ -5362,11 +5358,60 @@ function renderFootballList(){
     });
   });
 }
-// SportAPI (sportapi7.p.rapidapi.com, via RapidAPI) — follows the well-known SofaScore response
-// shape. Confirmed working from this site's actual origin (requests reach their server and get
-// real HTTP responses back, not a browser-level CORS block) — unlike football-data.org, whose
-// free tier hard-locks CORS to localhost only and can never work from a GitHub Pages-hosted site.
-function normalizeSportApiFixture(ev){
+// ESPN's public scoreboard feed (site.api.espn.com) — same undocumented-but-open JSON API
+// ESPN's own site uses client-side. No signup, no key, no rate-limit wall like the paid
+// RapidAPI options this app tried before — it's openly fetchable straight from browser JS,
+// same tier as the key-less weather/crypto/news sources already on this tab. Trade-off: covers
+// the major leagues (not literally every regional league worldwide) and is unofficial, so ESPN
+// could change the shape without notice — the try/catch below falls back to a day-schedule if so.
+const ESPN_SOCCER_LEAGUES = [
+  { slug:'eng.1', name:'Premier League' },
+  { slug:'esp.1', name:'La Liga' },
+  { slug:'ger.1', name:'Bundesliga' },
+  { slug:'ita.1', name:'Serie A' },
+  { slug:'fra.1', name:'Ligue 1' },
+  { slug:'uefa.champions', name:'Champions League' },
+  { slug:'uefa.europa', name:'Europa League' },
+  { slug:'ned.1', name:'Eredivisie' },
+  { slug:'por.1', name:'Primeira Liga' },
+  { slug:'usa.1', name:'MLS' },
+  { slug:'mex.1', name:'Liga MX' },
+  { slug:'arg.1', name:'Argentine Primera' },
+  { slug:'bra.1', name:'Brasileirão' },
+  { slug:'jpn.1', name:'J1 League' },
+  { slug:'kor.1', name:'K League 1' },
+  { slug:'ksa.1', name:'Saudi Pro League' },
+  { slug:'aus.1', name:'A-League' },
+];
+function normalizeEspnFixture(ev, leagueName){
+  const comp = (ev.competitions && ev.competitions[0]) || {};
+  const competitors = comp.competitors || [];
+  const home = competitors.find(c => c.homeAway === 'home') || {};
+  const away = competitors.find(c => c.homeAway === 'away') || {};
+  const statusType = (ev.status && ev.status.type) || {};
+  let strStatus;
+  if(statusType.state === 'post') strStatus = 'Match Finished';
+  else if(statusType.state === 'pre') strStatus = 'Not Started';
+  else strStatus = statusType.shortDetail || statusType.detail || 'LIVE';
+  const dt = ev.date ? new Date(ev.date) : null;
+  return {
+    idEvent: 'espn-' + ev.id,
+    strHomeTeam: (home.team && (home.team.shortDisplayName || home.team.displayName)) || 'Home',
+    strAwayTeam: (away.team && (away.team.shortDisplayName || away.team.displayName)) || 'Away',
+    strLeague: leagueName,
+    intHomeScore: home.score != null ? home.score : null,
+    intAwayScore: away.score != null ? away.score : null,
+    strStatus,
+    strTime: dt ? dt.toISOString().slice(11,16) : '',
+    dateEvent: dt ? dt.toISOString().slice(0,10) : ''
+  };
+}
+// SofaScore's own internal feed (api.sofascore.com) — richer live detail (real match-minute status
+// text, fuller worldwide coverage) than ESPN, but it's undocumented and SofaScore's own FAQ says
+// they don't sanction third-party API use of it, so it may be CORS-locked to sofascore.com itself
+// at any time without warning. Tried first for that reason; on any failure this silently falls
+// through to the already-reliable ESPN multi-league fetch below rather than showing an error.
+function normalizeSofascoreFixture(ev){
   const statusType = (ev.status && ev.status.type) || '';
   const statusDesc = (ev.status && ev.status.description) || '';
   let strStatus;
@@ -5375,7 +5420,7 @@ function normalizeSportApiFixture(ev){
   else strStatus = statusDesc || 'LIVE';
   const ts = ev.startTimestamp ? new Date(ev.startTimestamp*1000) : null;
   return {
-    idEvent: 'sa-' + ev.id,
+    idEvent: 'sofa-' + ev.id,
     strHomeTeam: (ev.homeTeam && ev.homeTeam.name) || 'Home',
     strAwayTeam: (ev.awayTeam && ev.awayTeam.name) || 'Away',
     strLeague: [(ev.tournament && ev.tournament.name), (ev.tournament && ev.tournament.category && ev.tournament.category.name)].filter(Boolean).join(' · '),
@@ -5386,44 +5431,51 @@ function normalizeSportApiFixture(ev){
     dateEvent: ts ? ts.toISOString().slice(0,10) : ''
   };
 }
+async function fetchFootballFromEspn(){
+  const results = await Promise.allSettled(ESPN_SOCCER_LEAGUES.map(async lg => {
+    const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${lg.slug}/scoreboard`);
+    if(!r.ok) throw new Error('espn ' + lg.slug + ' ' + r.status);
+    const data = await r.json();
+    return ((data && data.events) || []).map(ev => normalizeEspnFixture(ev, lg.name));
+  }));
+  let events = [];
+  results.forEach(res => { if(res.status === 'fulfilled') events = events.concat(res.value); });
+  if(!events.length) throw new Error('espn returned nothing');
+  return events;
+}
 async function fetchFootballScores(){
   const el = document.getElementById('live-football-box'); if(!el) return;
-  const key = (state.footballApiKey || '').trim();
-  if(key){
-    try{
-      const r = await fetch('https://sportapi7.p.rapidapi.com/api/v1/sport/football/events/live', {
-        headers: { 'x-rapidapi-key': key, 'x-rapidapi-host': 'sportapi7.p.rapidapi.com' }
-      });
-      if(r.status === 429){
-        el.innerHTML = '<div class="empty">SportAPI rate limit hit — too many requests in a short window. It\'ll pick back up on the next auto-refresh in a few minutes; avoid testing this same endpoint in the RapidAPI playground at the same time, since that shares the same limit.</div>';
-        return;
-      }
-      if(r.status === 403){
-        el.innerHTML = '<div class="empty">SportAPI rejected this request (403) — check the Pricing tab on your SportAPI RapidAPI page to confirm your plan includes this endpoint.</div>';
-        return;
-      }
-      if(!r.ok) throw new Error('SportAPI error ' + r.status);
-      const liveData = await r.json();
-      const events = ((liveData && liveData.events) || []).map(normalizeSportApiFixture);
-      liveCache.football = { events, ts: Date.now() };
-      renderFootballList();
-      stampUpdated('live-football-updated', liveCache.football.ts);
-      return;
-    }catch(e){
-      el.innerHTML = '<div class="empty">couldn\'t reach live football scores — double check your SportAPI key below, or clear it to see today\'s scheduled fixtures instead.</div>';
-      return;
-    }
+  let events = null;
+  // 1) try SofaScore direct first — richer live detail when it works
+  try{
+    const r = await fetch('https://api.sofascore.com/api/v1/sport/football/events/live');
+    if(!r.ok) throw new Error('sofascore ' + r.status);
+    const data = await r.json();
+    const sofaEvents = ((data && data.events) || []).map(normalizeSofascoreFixture);
+    if(sofaEvents.length) events = sofaEvents;
+  }catch(e){ /* silent — fall through to ESPN */ }
+  // 2) ESPN multi-league fallback (proven reliable, covers live + upcoming + finished)
+  if(!events){
+    try{ events = await fetchFootballFromEspn(); }catch(e){ /* fall through to day-schedule */ }
   }
-  // no key set — fall back to a plain day-schedule (no real live status, sparse free-tier coverage)
+  if(events){
+    const rank = ev => ev.strStatus === 'Match Finished' ? 2 : (ev.strStatus === 'Not Started' ? 1 : 0);
+    events.sort((a,b) => rank(a)-rank(b) || (a.strTime||'').localeCompare(b.strTime||''));
+    liveCache.football = { events, ts: Date.now() };
+    renderFootballList();
+    stampUpdated('live-football-updated', liveCache.football.ts);
+    return;
+  }
+  // 3) last resort — plain day-schedule so the tab still shows something instead of going blank
   try{
     const d = new Date(); const dateStr = d.toISOString().slice(0,10);
     const r = await fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${dateStr}&s=Soccer`);
     const data = await r.json();
-    const events = (data && data.events) ? data.events : [];
-    liveCache.football = { events, ts: Date.now() };
+    const dayEvents = (data && data.events) ? data.events : [];
+    liveCache.football = { events: dayEvents, ts: Date.now() };
     renderFootballList();
     stampUpdated('live-football-updated', liveCache.football.ts);
-  }catch(e){
+  }catch(e2){
     el.innerHTML = '<div class="empty">couldn\'t reach football scores right now.</div>';
   }
 }
@@ -5563,13 +5615,6 @@ if(liveNewsCategorySelect){
 }
 const liveRefreshAllBtn = document.getElementById('live-refresh-all-btn');
 if(liveRefreshAllBtn) liveRefreshAllBtn.addEventListener('click', refreshLiveFeed);
-const liveFootballKeyInput = document.getElementById('live-football-key-input');
-const liveFootballKeySaveBtn = document.getElementById('live-football-key-save-btn');
-if(liveFootballKeyInput) liveFootballKeyInput.value = state.footballApiKey || '';
-if(liveFootballKeySaveBtn) liveFootballKeySaveBtn.addEventListener('click', ()=>{
-  state.footballApiKey = liveFootballKeyInput.value.trim();
-  saveState(); fetchFootballScores();
-});
 const liveCricketKeyInput = document.getElementById('live-cricket-key-input');
 const liveCricketKeySaveBtn = document.getElementById('live-cricket-key-save-btn');
 if(liveCricketKeyInput) liveCricketKeyInput.value = state.cricketApiKey || '';
