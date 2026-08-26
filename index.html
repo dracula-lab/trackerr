@@ -219,6 +219,7 @@
   .tab[data-tab="movies"].active{border-color:var(--gold);}
   .tab[data-tab="live"].active{border-color:var(--blue);}
   .tab[data-tab="projects"].active{border-color:var(--purple);}
+  .tab[data-tab="finance"].active{border-color:var(--green);}
   .tab[data-tab="watch"].active{border-color:var(--ytred);}
   .tab[data-tab="spotify"].active{border-color:var(--spotify);}
 
@@ -329,6 +330,7 @@
   .sq.c-movies{background:var(--gold);}
   .sq.c-live{background:var(--blue);}
   .sq.c-projects{background:var(--purple);}
+  .sq.c-finance{background:var(--green);}
 
   .panel-view{display:none; animation:fadeIn .2s ease;}
   .panel-view.active{display:block;}
@@ -858,6 +860,8 @@
   .voice-fab.speaking { border-color: rgba(63,185,80,.8); box-shadow: 0 0 26px rgba(63,185,80,.45), 0 6px 20px rgba(0,0,0,.55); animation:none; }
   .voice-fab.thinking { border-color: rgba(255,138,101,.8); box-shadow: 0 0 26px rgba(255,138,101,.4), 0 6px 20px rgba(0,0,0,.55); animation:none; }
   .voice-fab.off { opacity:.4; filter:grayscale(.8); animation:none; box-shadow:0 6px 20px rgba(0,0,0,.55); }
+  .orb-caption{ position:fixed; bottom:92px; right:24px; max-width:260px; background:rgba(10,13,17,.94); border:1px solid rgba(176,131,247,.35); border-radius:10px; padding:8px 12px; font-size:12.5px; line-height:1.4; color:var(--text-dim); z-index:999; opacity:0; transform:translateY(6px); pointer-events:none; transition:opacity .25s, transform .25s; box-shadow:0 6px 18px rgba(0,0,0,.4); }
+  .orb-caption.show{ opacity:1; transform:translateY(0); }
   .voice-fab.off::before { display:none; }
   .voice-fab.off:hover { opacity:.65; }
   .voice-fab.mic-error { border-color: rgba(255,110,110,.85); box-shadow: 0 0 26px rgba(255,110,110,.5), 0 6px 20px rgba(0,0,0,.55); animation:none; }
@@ -1037,6 +1041,7 @@
     <div class="tab" data-tab="movies"><span class="sq c-movies"></span>movie.night</div>
     <div class="tab" data-tab="live"><span class="sq c-live"></span>live.feed</div>
     <div class="tab" data-tab="projects"><span class="sq c-projects"></span>projects.blueprint</div>
+    <div class="tab" data-tab="finance"><span class="sq c-finance"></span>budget.tsv</div>
   </div>
 
   <!-- TODAY'S TASK -->
@@ -1052,6 +1057,12 @@
         </div>
       </div>
     </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>today's agenda</h2></div></div>
+      <p class="solve-hint">everything with a date on it, in one place — reminders and goals merged, closest first.</p>
+      <div id="agenda-list"></div>
     </section>
   </div>
 
@@ -1462,7 +1473,7 @@
           </div>
         </div>
         <div class="output-pane">
-          <div class="pane-head"><span class="code-output-label">output</span><button class="copy-btn" id="copy-output-btn" type="button">copy output</button></div>
+          <div class="pane-head"><span class="code-output-label">output</span><button class="copy-btn" id="debug-with-orbit-btn" type="button" title="send this code + output to ORBIT for debugging help">🐛 debug with ORBIT</button><button class="copy-btn" id="copy-output-btn" type="button">copy output</button></div>
           <div class="code-output" id="code-output"><span class="placeholder">run something to see output here</span></div>
         </div>
       </div>
@@ -1827,10 +1838,27 @@
     <div id="projects-list"></div>
   </section>
 </div>
+
+<div class="panel-view" id="view-finance">
+  <section>
+    <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>budget</h2></div></div>
+    <div class="live-row-sub" style="margin-bottom:14px;">a simple running log for job-hunt and study costs — course fees, subscriptions, application costs. nothing fancy, just so it's tracked somewhere.</div>
+    <div id="finance-summary" style="display:flex; gap:16px; margin-bottom:14px; flex-wrap:wrap;"></div>
+    <div class="add-row" style="margin-bottom:14px;">
+      <select id="finance-type-input" style="max-width:110px;"><option value="expense">expense</option><option value="income">income</option></select>
+      <input id="finance-desc-input" type="text" placeholder="what for? e.g. LeetCode premium">
+      <input id="finance-amount-input" type="number" step="0.01" placeholder="amount" style="max-width:110px;">
+      <input id="finance-category-input" type="text" placeholder="category (optional)" style="max-width:140px;">
+      <button class="lc-edit" id="finance-add-btn" type="button">add</button>
+    </div>
+    <div id="finance-list"></div>
+  </section>
+</div>
 </div>
 
 <!-- Voice Assistant Elements -->
 <button class="voice-fab listening" id="voice-fab" title="ORBIT Voice Assistant (Click, say ORBIT, or press Ctrl+Space — Ctrl+Alt to turn off)"><canvas id="voice-orb" width="120" height="120"></canvas></button>
+<div class="orb-caption" id="orb-caption"></div>
 <div class="voice-popup" id="voice-popup">
   <div class="voice-popup-title">
     <span id="voice-status">Listening...</span> 
@@ -3021,6 +3049,18 @@ function activateTab(tab){
   if(tab.dataset.tab !== 'watch') document.body.classList.remove('theater-active');
   if(tab.dataset.tab === 'live') startLiveFeedAutoRefresh(); else stopLiveFeedAutoRefresh();
   if(tab.dataset.tab === 'solve'){ const dot = document.getElementById('orbit-nudge-dot'); if(dot) dot.style.display = 'none'; }
+  // Ambient glue: going into a mock interview should be quiet — auto-pause Spotify if it's
+  // playing, and only resume it (on leaving) if we're the ones who paused it.
+  if(tab.dataset.tab === 'interview'){
+    if(spotifyPlayer){
+      spotifyPlayer.getCurrentState().then(st=>{
+        if(st && !st.paused){ spotifyPlayer.pause(); window._orbitAutoPausedSpotify = true; }
+      }).catch(()=>{});
+    }
+  }else if(window._orbitAutoPausedSpotify && spotifyPlayer){
+    window._orbitAutoPausedSpotify = false;
+    spotifyPlayer.resume().catch(()=>{});
+  }
   tab.scrollIntoView({block:'nearest', inline:'center'});
   if(!wasActive) playChime(520, 0.06);
 }
@@ -3140,16 +3180,20 @@ window.addEventListener('keydown', (event)=>{
 
 function renderApiKeyRow(){
   const el = document.getElementById('apikey-row');
-  const provider = (state.aiProvider === 'gemini') ? 'gemini' : 'openrouter';
-  
+  const provider = ['gemini','nvidia'].includes(state.aiProvider) ? state.aiProvider : 'openrouter';
+
   let currentKey = '';
   let providerLink = '';
   let keyPrompt = '';
-  
+
   if (provider === 'openrouter') {
     currentKey = state.openrouterKey || '';
     providerLink = `<a href="https://openrouter.ai/keys" target="_blank" rel="noopener">Powered by OpenRouter · get a free key ↗</a>`;
     keyPrompt = 'Paste your free OpenRouter API key (from openrouter.ai/keys — starts with "sk-or-"):';
+  } else if (provider === 'nvidia') {
+    currentKey = state.nvidiaKey || '';
+    providerLink = `<a href="https://build.nvidia.com/" target="_blank" rel="noopener">Powered by NVIDIA NIM · free key ↗</a>`;
+    keyPrompt = 'Paste your free NVIDIA NIM API key (from build.nvidia.com, click any model → Get API Key — starts with "nvapi-"):';
   } else {
     currentKey = state.geminiKey || '';
     providerLink = `<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Powered by Google Gemini · free key ↗</a>`;
@@ -3158,9 +3202,10 @@ function renderApiKeyRow(){
 
   const has = !!(currentKey && currentKey.trim());
   const masked = has ? ('•••• ' + currentKey.trim().slice(-4)) : 'not set';
-  
+
   const geminiModel = state.selectedModel || 'gemini-2.0-flash';
   const openrouterModel = state.selectedOpenrouterModel || 'google/gemini-2.0-flash-lite-preview-02-05:free';
+  const nvidiaModel = state.selectedNvidiaModel || 'meta/llama-3.3-70b-instruct';
 
   let modelSelectHtml = '';
   if (provider === 'openrouter') {
@@ -3173,6 +3218,17 @@ function renderApiKeyRow(){
         <option value="openrouter/auto" ${openrouterModel==='openrouter/auto'?'selected':''}>OpenRouter Auto (Best Free)</option>
       </select>
     `;
+  } else if (provider === 'nvidia') {
+    modelSelectHtml = `
+      <select id="model-selector" class="lc-select">
+        <option value="meta/llama-3.3-70b-instruct" ${nvidiaModel==='meta/llama-3.3-70b-instruct'?'selected':''}>Llama 3.3 70B (Free 🦙 all-round)</option>
+        <option value="meta/llama-3.1-405b-instruct" ${nvidiaModel==='meta/llama-3.1-405b-instruct'?'selected':''}>Llama 3.1 405B (Free 🐘 most powerful)</option>
+        <option value="deepseek-ai/deepseek-r1" ${nvidiaModel==='deepseek-ai/deepseek-r1'?'selected':''}>DeepSeek R1 (Free 🧠 reasoning)</option>
+        <option value="qwen/qwen2.5-coder-32b-instruct" ${nvidiaModel==='qwen/qwen2.5-coder-32b-instruct'?'selected':''}>Qwen 2.5 Coder 32B (Free 💻 coding)</option>
+        <option value="nvidia/llama-3.1-nemotron-70b-instruct" ${nvidiaModel==='nvidia/llama-3.1-nemotron-70b-instruct'?'selected':''}>Nemotron 70B (Free 🎯 NVIDIA-tuned)</option>
+        <option value="mistralai/mixtral-8x22b-instruct-v0.1" ${nvidiaModel==='mistralai/mixtral-8x22b-instruct-v0.1'?'selected':''}>Mixtral 8x22B (Free ⚙️ efficient)</option>
+      </select>
+    `;
   } else {
     modelSelectHtml = `
       <select id="model-selector" class="lc-select">
@@ -3183,7 +3239,7 @@ function renderApiKeyRow(){
     `;
   }
 
-  const providerColor = provider === 'openrouter' ? 'var(--blue)' : 'var(--purple)';
+  const providerColor = provider === 'openrouter' ? 'var(--blue)' : provider === 'nvidia' ? 'var(--green)' : 'var(--purple)';
   el.innerHTML = `
     <div class="apikey-card" style="box-shadow:inset 3px 0 0 ${providerColor}, 0 8px 24px -16px rgba(0,0,0,.6);">
       <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap; position:relative;">
@@ -3194,6 +3250,7 @@ function renderApiKeyRow(){
             <select id="provider-selector" class="lc-select lc-select-strong">
               <option value="openrouter" ${provider==='openrouter'?'selected':''}>OpenRouter (Free Keys 🌐)</option>
               <option value="gemini" ${provider==='gemini'?'selected':''}>Google Gemini ♊</option>
+              <option value="nvidia" ${provider==='nvidia'?'selected':''}>NVIDIA NIM (Free Keys 🟩)</option>
             </select>
           </div>
         </div>
@@ -3225,6 +3282,7 @@ function renderApiKeyRow(){
   if(selEl) {
     selEl.addEventListener('change', (e) => {
       if (provider === 'openrouter') state.selectedOpenrouterModel = e.target.value;
+      else if (provider === 'nvidia') state.selectedNvidiaModel = e.target.value;
       else state.selectedModel = e.target.value;
       saveState();
     });
@@ -3234,15 +3292,17 @@ function renderApiKeyRow(){
     const entered = prompt(keyPrompt, currentKey);
     if(entered===null) return;
     if (provider === 'openrouter') state.openrouterKey = entered.trim();
+    else if (provider === 'nvidia') state.nvidiaKey = entered.trim();
     else state.geminiKey = entered.trim();
     saveState(); renderApiKeyRow();
   });
 
   const clearBtn = document.getElementById('apikey-clear-btn');
   if(clearBtn) clearBtn.addEventListener('click', ()=>{
-    const name = provider === 'openrouter' ? 'OpenRouter' : 'Gemini';
+    const name = provider === 'openrouter' ? 'OpenRouter' : provider === 'nvidia' ? 'NVIDIA NIM' : 'Gemini';
     if(!confirm(`Remove your saved ${name} API key?`)) return;
     if (provider === 'openrouter') state.openrouterKey = '';
+    else if (provider === 'nvidia') state.nvidiaKey = '';
     else state.geminiKey = '';
     saveState(); renderApiKeyRow();
   });
@@ -3615,6 +3675,38 @@ async function callAIOnce(provider, messages, system, maxRetries = 1){
     throw new Error(lastErrorMsg);
   }
 
+  if (provider === 'nvidia') {
+    const key = (state.nvidiaKey || '').trim();
+    if (!key) {
+      throw new Error('Add your free NVIDIA NIM API key first — click "set key" in the top bar (get one at build.nvidia.com).');
+    }
+    const model = state.selectedNvidiaModel || 'meta/llama-3.3-70b-instruct';
+    const formattedMsgs = [];
+    if (system) formattedMsgs.push({ role: 'system', content: system });
+    messages.forEach(m => {
+      let content = m.content;
+      if (m.attachment && (m.attachment.mimeType || '').startsWith('image/')) {
+        content = [{ type: 'text', text: m.content }, { type: 'image_url', image_url: { url: `data:${m.attachment.mimeType};base64,${m.attachment.data}` } }];
+      }
+      formattedMsgs.push({ role: m.role === 'assistant' ? 'assistant' : m.role === 'error' ? 'assistant' : 'user', content });
+    });
+    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({ model, messages: formattedMsgs, temperature: 0.6, max_tokens: 2048 })
+    });
+    const data = await response.json();
+    if (response.status === 401 || (data?.error?.message && /invalid|unauthorized|key/i.test(data.error.message))) {
+      throw new Error('Invalid NVIDIA NIM API key — check it at build.nvidia.com (starts with "nvapi-").');
+    }
+    if (data && data.choices && data.choices.length) {
+      const reply = data.choices[0].message && data.choices[0].message.content;
+      if (reply) return reply.trim();
+    }
+    const errMsg = data && data.error ? (typeof data.error === 'string' ? data.error : (data.error.message || JSON.stringify(data.error))) : 'NVIDIA NIM request failed';
+    throw new Error(errMsg);
+  }
+
   // Google Gemini provider implementation
   const key = (state.geminiKey||'').trim();
   if(!key){ throw new Error('Add your free Gemini API key first — see the bar near the top of the page.'); }
@@ -3701,6 +3793,21 @@ function orbitContext(){
   return `Things you remember about this student from past sessions (use naturally, don't recite this list):\n${memoryNotes}\n\nThis is what's actually going on in the student's life right now — use it the way someone who's actually paying attention would: weave it in naturally when it changes or sharpens the answer (a deadline that affects timing, a weak topic that's relevant to what they're asking, a note or resume line that's directly related), the same way a person who knows your situation would connect dots without being asked to. Don't force it in when it doesn't fit, and don't turn it into a status report or nag about streaks/hours out of nowhere. ${computeStreak()}-day activity streak, ${Math.round(computeTotalHours()*10)/10} total hours, ${computeChecklistPct()}% roadmap complete, focus: ${focus}. Weakest topics by practice feedback: ${weakTopics}. Open goals: ${openGoals}. Upcoming: ${upcoming}. Recent activity: ${recent}. ${interviewNote}. Their own scratch notes (most recent): "${notesSnippet}". Resume excerpt: "${resumeSnippet}".`;
 }
 
+// ===== ORBIT "eyes": lets ORBIT actually read the student's current code + last run output/error =====
+// ===== from the code.run tab when they ask for debugging help, instead of answering blind. =====
+const DEBUG_INTENT_RE = /\b(debug|why (is|does|isn'?t|won'?t) (this|it|my code)|what'?s wrong with (this|my) code|fix (this|my) (code|error|bug)|help me (debug|fix)|explain (this|my) error|code (isn'?t|won'?t|is not) working)\b/i;
+function buildCodeDebugContext(userText){
+  if(!DEBUG_INTENT_RE.test(userText)) return '';
+  const editorEl = document.getElementById('code-editor');
+  const outputEl = document.getElementById('code-output');
+  const code = editorEl ? editorEl.value.trim() : '';
+  if(!code) return '';
+  const output = outputEl ? outputEl.innerText.trim() : '';
+  const lang = (typeof codeLang !== 'undefined' && codeLang) ? codeLang : 'code';
+  return `\n\nThe student is asking about their code in the code.run tab. Here is exactly what's actually there right now — read it for real, don't guess:\n\nLanguage: ${lang}\n\`\`\`${lang}\n${code.slice(0, 4000)}\n\`\`\`\n\nLast run output/error shown on screen:\n\`\`\`\n${output ? output.slice(0, 1500) : '(nothing has been run yet, or output is empty)'}\n\`\`\`\n\nDiagnose the actual bug from this real code and real output — don't give generic debugging advice, point to the specific line or logic that's wrong and how to fix it.`;
+}
+
+
 // ---- ORBIT proactive check-in: runs once per day on load. Instead of only ever reacting to
 // what's typed, it looks at the same signals a person paying attention would notice — a logging
 // gap, a topic that's stalled, reminders slipping — and opens the chat with a short heads-up.
@@ -3751,7 +3858,49 @@ function orbitProactiveCheckIn(){
   state.chat.push({role:'assistant', content: msg});
   saveState(); renderChat();
   const dot = document.getElementById('orbit-nudge-dot'); if(dot) dot.style.display = 'inline-block';
+  // Heart: speak the greeting out loud instead of just leaving a silent dot — feels like ORBIT
+  // actually greeting you, not a background job. A short delay lets the page settle first.
+  if(window.speakText){ setTimeout(()=>{ try{ window.speakText(msg); }catch(e){} }, 900); }
 }
+
+// Ambient interjections: small, occasional comments during a live session — not just once a day.
+// Deliberately rare and quiet (caption only, no forced popup) — capped per day and spaced out so
+// it never turns into nagging. Checks a couple of genuinely noticeable, real-time signals.
+window._ambientNudgesToday = 0; window._ambientLastTs = 0; window._ambientTabSince = Date.now();
+function orbitAmbientTick(){
+  try{
+    if(window.isSpeaking || window._ttsActive) return;
+    const today = todayStr();
+    if(state._ambientNudgeDate !== today){ state._ambientNudgeDate = today; state._ambientNudgeCount = 0; }
+    if((state._ambientNudgeCount||0) >= 2) return; // hard daily cap beyond the morning greeting
+    if(Date.now() - window._ambientLastTs < 55*60*1000) return; // at least ~1hr between them
+    const activeTab = document.querySelector('.tab.active');
+    const tabName = activeTab ? activeTab.dataset.tab : null;
+    let msg = null;
+    // Long unbroken session on the same tab — a small, genuine nod, not a nag.
+    const minsOnTab = Math.round((Date.now() - (window._ambientTabSince||Date.now())) / 60000);
+    if(tabName === 'coderun' && minsOnTab >= 45){
+      msg = `Still at it, sir? ${minsOnTab} minutes in — worth a short stretch when you hit a natural stopping point.`;
+    } else if(tabName === 'course' && minsOnTab >= 45){
+      msg = `You've been deep in the course tab a while now, sir — going well, or stuck on something?`;
+    }
+    if(!msg){
+      const streak = computeStreak();
+      if(streak > 0 && streak % 7 === 0 && state._ambientStreakAckAt !== streak){
+        state._ambientStreakAckAt = streak;
+        msg = `${streak} days running, sir. Genuinely solid.`;
+      }
+    }
+    if(!msg) return;
+    window._ambientLastTs = Date.now();
+    state._ambientNudgeCount = (state._ambientNudgeCount||0) + 1;
+    saveState();
+    if(window.orbCaption) window.orbCaption(msg, 8000);
+  }catch(e){ /* ambient nudges are best-effort, never break the app */ }
+}
+document.querySelectorAll('.tab').forEach(t=> t.addEventListener('click', ()=>{ window._ambientTabSince = Date.now(); }));
+setInterval(orbitAmbientTick, 5*60*1000);
+
 // (capped so it never bloats), and returns the reply with the marker stripped so it never shows
 // up in what the student actually sees or hears.
 function extractModokMemory(rawText){
@@ -3799,8 +3948,51 @@ Each action must be exactly one of these shapes:
 {"type":"add_note","text":"..."}
 {"type":"log_hours","hours":number,"category":"...","message":"..."}
 {"type":"add_target_company","name":"...","role":"..."}
+{"type":"delete_reminder","match":"..."}
+{"type":"delete_goal","match":"..."}
+{"type":"delete_watchlist","match":"..."}
 
-Rules: every "match" value must be a substring of an EXISTING title shown above — never invent a match for something that isn't listed, use an add_* action instead if it doesn't exist yet. Never propose more than 6 actions. Only propose actions that genuinely help with what the student actually asked — don't pad the list to look busy. If nothing concrete should change, return {"summary":"...", "actions":[]}. Never delete anything — there is no delete action, only add/update/complete.`;
+Rules: every "match" value must be a substring of an EXISTING title shown above — never invent a match for something that isn't listed, use an add_* action instead if it doesn't exist yet. Never propose more than 6 actions. Only propose actions that genuinely help with what the student actually asked — don't pad the list to look busy. If nothing concrete should change, return {"summary":"...", "actions":[]}. The three delete_* types are the only way to remove something — they are never applied automatically, the student always confirms them first, so use them freely when it genuinely helps (e.g. clearing stale reminders) rather than avoiding them.`;
+}
+const AGENT_DELETE_TYPES = ['delete_reminder','delete_goal','delete_watchlist'];
+// Resolves a proposed delete against real current state and returns what WOULD be removed,
+// without touching anything yet — the student must confirm before executeDeleteAction runs.
+function resolvePendingDelete(action){
+  const q = (action.match||'').toLowerCase().trim(); if(!q) return null;
+  if(action.type === 'delete_reminder'){
+    const r = (state.reminders||[]).find(x=>!x.done && x.title.toLowerCase().includes(q));
+    return r ? { type:action.type, id:r.id, label:`reminder "${r.title}"` } : null;
+  }
+  if(action.type === 'delete_goal'){
+    const g = (state.goals||[]).find(x=>x.title.toLowerCase().includes(q));
+    return g ? { type:action.type, id:g.id, label:`goal "${g.title}"` } : null;
+  }
+  if(action.type === 'delete_watchlist'){
+    const w = ensureMovies().toWatch.find(x=>x.title.toLowerCase().includes(q));
+    return w ? { type:action.type, id:w.id, label:`"${w.title}" from your watchlist` } : null;
+  }
+  return null;
+}
+function executeDeleteAction(pending){
+  if(pending.type === 'delete_reminder'){ state.reminders = (state.reminders||[]).filter(x=>x.id!==pending.id); renderReminders(); }
+  else if(pending.type === 'delete_goal'){ state.goals = (state.goals||[]).filter(x=>x.id!==pending.id); renderGoals(); }
+  else if(pending.type === 'delete_watchlist'){ ensureMovies().toWatch = ensureMovies().toWatch.filter(x=>x.id!==pending.id); renderMovies(); }
+  saveState();
+}
+// Called from the confirm button rendered in chat — actually deletes everything staged on that
+// message, then rewrites the message so the buttons disappear and the outcome is visible.
+function confirmPendingDeletes(chatIndex){
+  const m = state.chat[chatIndex]; if(!m || !m.pendingDeletes) return;
+  m.pendingDeletes.forEach(executeDeleteAction);
+  m.content += `\n\n✓ Removed: ${m.pendingDeletes.map(p=>p.label).join(', ')}.`;
+  m.pendingDeletes = null;
+  saveState(); renderChat();
+}
+function cancelPendingDeletes(chatIndex){
+  const m = state.chat[chatIndex]; if(!m || !m.pendingDeletes) return;
+  m.content += `\n\nOkay — left those as they are.`;
+  m.pendingDeletes = null;
+  saveState(); renderChat();
 }
 
 function executeAgentAction(action){
@@ -3891,13 +4083,19 @@ async function runAgentPlan(userText){
   }
   const actions = Array.isArray(parsed.actions) ? parsed.actions.slice(0,6) : [];
   const log = [];
+  const pendingDeletes = [];
   actions.forEach(a=>{
     if(!a || typeof a !== 'object' || !a.type) return;
+    if(AGENT_DELETE_TYPES.includes(a.type)){
+      const resolved = resolvePendingDelete(a);
+      if(resolved) pendingDeletes.push(resolved);
+      return;
+    }
     const result = executeAgentAction(a);
     if(result) log.push(result);
   });
   if(log.length){ saveState(); renderAnalytics(); if(window.orbitPulse) window.orbitPulse('176,131,247', 2200); }
-  return { summary: parsed.summary || (log.length ? 'Done.' : "I didn't find anything concrete to change."), log, degraded: false };
+  return { summary: parsed.summary || (log.length ? 'Done.' : "I didn't find anything concrete to change."), log, pendingDeletes, degraded: false };
 }
 function renderAssistantModes(){
   const status=document.getElementById('assistant-mode-status'); const wrap=document.getElementById('assistant-modes'); const webToggle=document.getElementById('assistant-web-toggle'); const actionWrap=document.getElementById('assistant-actions');
@@ -3919,13 +4117,18 @@ function renderChat(){
   const el = document.getElementById('chat-thread');
   el.innerHTML='';
   if(!state.chat.length){ el.innerHTML = '<div class="empty">no questions yet — ask something below to get started</div>'; return; }
-  state.chat.forEach(m=>{
+  state.chat.forEach((m,idx)=>{
     const row = document.createElement('div');
     row.className = 'msg ' + (m.role==='user' ? 'user' : m.role==='error' ? 'error' : 'assistant');
     const who = m.role==='user' ? 'you' : m.role==='error' ? 'error' : 'orbit';
     const attachHtml = m.attachmentName ? `<div class="msg-attach">📎 ${escapeHtml(m.attachmentName)}</div>` : '';
-    row.innerHTML = `<div class="who">${who}</div>${attachHtml}<div class="msg-text">${m.role==='user' ? escapeHtml(m.content) : formatAssistantText(m.content)}</div><div style="margin-top:8px;"><button class="copy-btn msg-copy" type="button">copy</button></div>`;
+    const deleteConfirmHtml = (m.pendingDeletes && m.pendingDeletes.length)
+      ? `<div style="margin-top:8px; display:flex; gap:8px;"><button class="lc-edit" data-confirm-delete="${idx}" type="button">confirm delete</button><button class="secondary" data-cancel-delete="${idx}" type="button">leave as is</button></div>`
+      : '';
+    row.innerHTML = `<div class="who">${who}</div>${attachHtml}<div class="msg-text">${m.role==='user' ? escapeHtml(m.content) : formatAssistantText(m.content)}</div>${deleteConfirmHtml}<div style="margin-top:8px;"><button class="copy-btn msg-copy" type="button">copy</button></div>`;
     row.querySelector('.msg-copy').addEventListener('click', (e)=> copyText(m.content, e.currentTarget));
+    const confirmBtn = row.querySelector('[data-confirm-delete]'); if(confirmBtn) confirmBtn.addEventListener('click', ()=> confirmPendingDeletes(idx));
+    const cancelBtn = row.querySelector('[data-cancel-delete]'); if(cancelBtn) cancelBtn.addEventListener('click', ()=> cancelPendingDeletes(idx));
     el.appendChild(row);
   });
   el.scrollTop = el.scrollHeight;
@@ -3986,10 +4189,13 @@ async function askSolver(){
     try{
       const result = await runAgentPlan(q);
       thinkingRow0.remove();
+      const deleteNote = (result.pendingDeletes && result.pendingDeletes.length)
+        ? `\n\nI can also remove: ${result.pendingDeletes.map(p=>p.label).join(', ')} — confirm below if you want that.`
+        : '';
       const body = result.degraded
         ? result.summary
-        : `🤖 ${result.summary}` + (result.log.length ? `\n\n${result.log.map(l=>'✓ '+l).join('\n')}` : '');
-      state.chat.push({role:'assistant', content: body});
+        : `🤖 ${result.summary}` + (result.log.length ? `\n\n${result.log.map(l=>'✓ '+l).join('\n')}` : '') + deleteNote;
+      state.chat.push({role:'assistant', content: body, pendingDeletes: result.pendingDeletes && result.pendingDeletes.length ? result.pendingDeletes : null});
     }catch(e){
       thinkingRow0.remove();
       state.chat.push({role:'error', content: e.message || 'agent run failed — try again.'});
@@ -4013,7 +4219,8 @@ async function askSolver(){
   try{
     const history = state.chat.slice(-14).map(m=>({role: m.role==='error' ? 'assistant' : m.role, content: m.content}));
     if(attachmentForThisMsg && history.length){ history[history.length-1].attachment = { mimeType: attachmentForThisMsg.mimeType, data: attachmentForThisMsg.base64 }; }
-    const text = await callAI(history, orbitSystem());
+    const debugCtx = buildCodeDebugContext(q);
+    const text = await callAI(history, orbitSystem() + debugCtx);
     thinkingRow.remove(); state.chat.push({role:'assistant', content: (text ? extractModokMemory(text) : '') || '(no response text returned)'});
   }catch(e){
     thinkingRow.remove(); state.chat.push({role:'error', content: e.message || 'network error reaching the API. try again.'});
@@ -4737,6 +4944,13 @@ document.getElementById('save-code-btn').addEventListener('click', ()=>{
   const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); updateCodeLabel();
 });
 document.getElementById('copy-output-btn').addEventListener('click', (e)=> copyText(document.getElementById('code-output').innerText, e.currentTarget));
+document.getElementById('debug-with-orbit-btn').addEventListener('click', ()=>{
+  if(!codeEditor.value.trim()){ alert('Write or run some code first.'); return; }
+  const target = document.querySelector('.tab[data-tab="solve"]'); if(target) activateTab(target);
+  const input = document.getElementById('solve-input');
+  input.value = "Something's wrong with my code — can you debug it?";
+  askSolver();
+});
 
 async function ensurePyodide(runBtn){
   if(pyodideInstance) return pyodideInstance;
@@ -5189,7 +5403,51 @@ function renderHotstarChip(){
     saveState(); renderHotstarChip();
   });
 }
+function ensureFinance(){ if(!Array.isArray(state.finance)) state.finance=[]; return state.finance; }
 function ensureMovies(){ if(!state.movies) state.movies={watching:[],toWatch:[],watched:[]}; return state.movies; }
+function renderFinance(){
+  const list = document.getElementById('finance-list');
+  const summary = document.getElementById('finance-summary');
+  if(!list || !summary) return;
+  const items = ensureFinance();
+  const income = items.filter(i=>i.type==='income').reduce((s,i)=>s+(Number(i.amount)||0),0);
+  const expense = items.filter(i=>i.type==='expense').reduce((s,i)=>s+(Number(i.amount)||0),0);
+  const balance = income - expense;
+  summary.innerHTML = `<div class="task-card hud-corners" style="--task-color:var(--green); --hud-color:var(--green); padding:10px 16px;"><b style="color:var(--green);">income ₹${income.toFixed(2)}</b></div><div class="task-card hud-corners" style="--task-color:var(--red); --hud-color:var(--red); padding:10px 16px;"><b style="color:var(--red);">expenses ₹${expense.toFixed(2)}</b></div><div class="task-card hud-corners" style="--task-color:var(--blue); --hud-color:var(--blue); padding:10px 16px;"><b>balance ₹${balance.toFixed(2)}</b></div>`;
+  if(!items.length){ list.innerHTML = '<div class="empty">no entries yet — add one above.</div>'; return; }
+  const sorted = [...items].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  list.innerHTML = sorted.map(i=>`<div class="reminder"><div><div class="reminder-title">${escapeHtml(i.desc)} ${i.category?`<span class="proj-tag">${escapeHtml(i.category)}</span>`:''}</div><div class="reminder-date">${i.date}</div></div><div class="company-actions"><b style="color:${i.type==='income'?'var(--green)':'var(--red)'};">${i.type==='income'?'+':'-'}₹${Number(i.amount).toFixed(2)}</b><button class="del-btn" data-del-finance="${i.id}" title="remove">×</button></div></div>`).join('');
+  list.querySelectorAll('[data-del-finance]').forEach(btn=>btn.addEventListener('click', ()=>{
+    state.finance = ensureFinance().filter(x=>x.id!==btn.dataset.delFinance);
+    saveState(); renderFinance();
+  }));
+}
+const financeAddBtn = document.getElementById('finance-add-btn');
+if(financeAddBtn) financeAddBtn.addEventListener('click', ()=>{
+  const desc = document.getElementById('finance-desc-input').value.trim();
+  const amount = Number(document.getElementById('finance-amount-input').value);
+  const type = document.getElementById('finance-type-input').value;
+  const category = document.getElementById('finance-category-input').value.trim();
+  if(!desc || !amount) return;
+  ensureFinance().push({id:id(), desc, amount, type, category, date: todayStr()});
+  document.getElementById('finance-desc-input').value=''; document.getElementById('finance-amount-input').value=''; document.getElementById('finance-category-input').value='';
+  saveState(); renderFinance();
+});
+
+// Unified daily agenda: merges dated reminders + goals with a target into one closest-first list,
+// so the today tab shows everything with a deadline instead of checking each tab separately.
+function renderAgenda(){
+  const el = document.getElementById('agenda-list'); if(!el) return;
+  const today = todayStr();
+  const items = [];
+  (state.reminders||[]).filter(r=>!r.done && r.date).forEach(r=> items.push({title:r.title, date:r.date, kind:'reminder', overdue: r.date<today}));
+  (state.goals||[]).filter(g=>(Number(g.current)||0)<(Number(g.target)||0) && g.dueDate).forEach(g=> items.push({title:`${g.title} (${g.current||0}/${g.target||0})`, date:g.dueDate, kind:'goal', overdue: g.dueDate<today}));
+  items.sort((a,b)=>a.date.localeCompare(b.date));
+  el.innerHTML = items.length ? items.map(i=>`<div class="reminder ${i.overdue?'urgent':''}"><div><div class="reminder-title">${escapeHtml(i.title)} <span class="proj-tag">${i.kind}</span></div><div class="reminder-date">${i.overdue?'overdue — ':'due '}${escapeHtml(i.date)}</div></div></div>`).join('')
+    : '<div class="empty">nothing dated right now — add a due date to a reminder or goal to see it here.</div>';
+}
+
+
 function movieStars(rating, id){
   let s='<span class="movie-stars'+(id?'':' readonly')+'">';
   for(let i=1;i<=5;i++){
@@ -6058,7 +6316,7 @@ function render(){
   renderDailyTask(); renderCourseTab(); renderNoteAttachments(); renderAchievements();
   renderTimer(); renderInterview(); renderCompanies(); renderWeeklyRecaps(); renderResumeReviews();
   applyLayout(); renderWeekDigest(); renderAnalytics(); renderCrossInsights(); renderMastery(); renderSpotify(); renderYtSubscriptions(); renderCalendar(); renderGoals(); renderReminders(); renderActivityResults(); renderArcade(); renderMovies();
-  renderStreakBanner(); renderOrbitMemory();
+  renderStreakBanner(); renderOrbitMemory(); renderFinance(); renderAgenda();
   if(window.refreshSnakeBest) window.refreshSnakeBest();
   if(window.refreshRunnerBest) window.refreshRunnerBest();
   if(window.refreshTypingBest) window.refreshTypingBest();
@@ -6950,8 +7208,7 @@ setInterval(() => {
       if(force){ speakStreamSentence(sentenceBuf.trim(), true); sentenceBuf=''; }
     };
     try{
-      if(provider === 'gemini'){
-        const key = (state.geminiKey||'').trim(); if(!key) throw new Error('no key');
+      if(provider === 'gemini'){        const key = (state.geminiKey||'').trim(); if(!key) throw new Error('no key');
         const contents = messages.map(m => ({role: m.role==='assistant' ? 'model' : 'user', parts: [{text: m.content}]}));
         const body = { contents, generationConfig:{maxOutputTokens:1024} };
         if(system) body.systemInstruction = {parts:[{text:system}]};
@@ -6967,6 +7224,31 @@ setInterval(() => {
             if(!line.startsWith('data: ')) return;
             const js = line.slice(6).trim(); if(!js) return;
             try{ const obj = JSON.parse(js); const t = obj?.candidates?.[0]?.content?.parts?.[0]?.text; if(t){ sentenceBuf += t; full += t; flush(false); } }catch(e){}
+          });
+        }
+        _streamInFlight = false;
+        flush(true);
+        return full;
+      } else if(provider === 'nvidia'){
+        const key = (state.nvidiaKey||'').trim(); if(!key) throw new Error('no key');
+        const model = state.selectedNvidiaModel || 'meta/llama-3.3-70b-instruct';
+        const formatted = []; if(system) formatted.push({role:'system', content:system});
+        messages.forEach(m => formatted.push({role: m.role==='assistant' ? 'assistant' : 'user', content: m.content}));
+        const res = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
+          method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+          body: JSON.stringify({model, messages: formatted, temperature:0.6, stream:true})
+        });
+        if(!res.ok || !res.body) throw new Error('nvidia nim stream unavailable');
+        speakStreamStart();
+        const reader = res.body.getReader(); const decoder = new TextDecoder(); let partial = '';
+        while(true){
+          const {done, value} = await reader.read(); if(done) break;
+          partial += decoder.decode(value, {stream:true});
+          const lines = partial.split('\n'); partial = lines.pop();
+          lines.forEach(line => {
+            line = line.trim(); if(!line.startsWith('data:')) return;
+            const js = line.slice(5).trim(); if(!js || js === '[DONE]') return;
+            try{ const obj = JSON.parse(js); const t = obj?.choices?.[0]?.delta?.content; if(t){ sentenceBuf += t; full += t; flush(false); } }catch(e){}
           });
         }
         _streamInFlight = false;
@@ -7016,6 +7298,7 @@ setInterval(() => {
     _speakingSinceTs = Date.now();
     if(fab) fab.className = 'voice-fab speaking';
     if(popup) { popup.classList.remove('listening-mode'); popup.classList.add('speaking-mode'); }
+    if(window.orbCaption) window.orbCaption(spokenText);
     
     window.speechSynthesis.cancel();
     
@@ -7078,6 +7361,17 @@ setInterval(() => {
     utterance.onerror = finish;
     window.speechSynthesis.speak(utterance);
   }
+  window.speakText = speakText;
+  // Persistent HUD: show a short caption near the orb whenever it speaks, so it feels present
+  // ambiently instead of only when you've opened the popup.
+  function orbCaption(text, ms){
+    const cap = document.getElementById('orb-caption'); if(!cap) return;
+    cap.textContent = text.length > 140 ? text.slice(0,137) + '…' : text;
+    cap.classList.add('show');
+    clearTimeout(window._orbCaptionTimer);
+    window._orbCaptionTimer = setTimeout(()=> cap.classList.remove('show'), ms || 6000);
+  }
+  window.orbCaption = orbCaption;
 
   function stopAll() {
     clearTimeout(silenceTimer);
@@ -7615,10 +7909,14 @@ setInterval(() => {
       showPopup('ORBIT · Agent Mode', `<b>You:</b> ${escapeHtml(commandText)}<br><br><i>Reworking your plan…</i>`, true);
       try {
         const result = await runAgentPlan(commandText);
-        const spoken = result.degraded ? result.summary : (result.summary + (result.log.length ? ` I made ${result.log.length} change${result.log.length>1?'s':''}.` : ''));
+        const hasDeletes = result.pendingDeletes && result.pendingDeletes.length;
+        const spoken = result.degraded ? result.summary : (result.summary + (result.log.length ? ` I made ${result.log.length} change${result.log.length>1?'s':''}.` : '') + (hasDeletes ? ` I also found ${result.pendingDeletes.length} thing${result.pendingDeletes.length>1?'s':''} you could delete — check the orbit.ai tab to confirm, I won't remove anything without you saying so.` : ''));
         const displayBody = result.degraded
           ? escapeHtml(result.summary)
-          : `${escapeHtml(result.summary)}` + (result.log.length ? `<br><br>` + result.log.map(l=>'✓ '+escapeHtml(l)).join('<br>') : '');
+          : `${escapeHtml(result.summary)}` + (result.log.length ? `<br><br>` + result.log.map(l=>'✓ '+escapeHtml(l)).join('<br>') : '') + (hasDeletes ? `<br><br>Possible deletions (confirm in orbit.ai tab): ${result.pendingDeletes.map(p=>escapeHtml(p.label)).join(', ')}` : '');
+        if(!result.degraded && !Array.isArray(state.chat)) state.chat = [];
+        if(!result.degraded) state.chat.push({role:'assistant', content: `🤖 ${result.summary}` + (result.log.length ? `\n\n${result.log.map(l=>'✓ '+l).join('\n')}` : '') + (hasDeletes ? `\n\nI can also remove: ${result.pendingDeletes.map(p=>p.label).join(', ')} — confirm below if you want that.` : ''), pendingDeletes: hasDeletes ? result.pendingDeletes : null});
+        if(!result.degraded) saveState();
         popup.classList.add('speaking-mode');
         showPopup('ORBIT · Agent Mode', `<b>You:</b> ${escapeHtml(commandText)}<br><br><b>Assistant:</b> ${displayBody}`, true, spoken);
         speakText(spoken);
@@ -7647,6 +7945,8 @@ setInterval(() => {
     let providerName = 'OpenRouter';
     if (state.aiProvider === 'gemini') {
       activeKey = state.geminiKey; providerName = 'Gemini';
+    } else if (state.aiProvider === 'nvidia') {
+      activeKey = state.nvidiaKey; providerName = 'NVIDIA NIM';
     } else {
       activeKey = state.openrouterKey; providerName = 'OpenRouter';
     }
@@ -7674,7 +7974,7 @@ setInterval(() => {
       const lengthDirective = state.assistantDeepThink
         ? 'DEEP THINK MODE IS ON — the student is studying, not asking for small talk. Actually teach the concept: explain the reasoning, not just the headline answer. Speak it as 4-8 well-structured sentences, the way a sharp tutor would explain it out loud. Still no filler or repetition.'
         : "Speak like someone who's actually thought about the question, not a one-liner machine — give the real answer plus the one thing they'd want to know next, as many natural sentences as that genuinely takes. Never pad, never ramble, never clip a real answer short just to hit a length.";
-      const systemInstruction = `You are ORBIT, the student's personal J.A.R.V.I.S. from Iron Man. Speak with Paul Bettany's iconic JARVIS persona: impeccably polite, articulate, cultured British delivery, addressing the student as 'sir', with subtle dry wit and absolute competence. Use simple, plain, everyday words — avoid fancy or obscure vocabulary even while staying articulate. ${streakDirective} ${lengthDirective} Never sound robotic, preachy, or repetitive. If — and only if — something in this exchange is genuinely worth remembering for future sessions (a real struggle they named, a decision they made, a plan they committed to) — end your reply on its own new line with [[REMEMBER: one short plain sentence]]. Do this rarely. Never mention this marker or that you're doing it.\n\n${orbitContext()}`;
+      const systemInstruction = `You are ORBIT, the student's personal J.A.R.V.I.S. from Iron Man. Speak with Paul Bettany's iconic JARVIS persona: impeccably polite, articulate, cultured British delivery, addressing the student as 'sir', with subtle dry wit and absolute competence. Use simple, plain, everyday words — avoid fancy or obscure vocabulary even while staying articulate. ${streakDirective} ${lengthDirective} Never sound robotic, preachy, or repetitive. If — and only if — something in this exchange is genuinely worth remembering for future sessions (a real struggle they named, a decision they made, a plan they committed to) — end your reply on its own new line with [[REMEMBER: one short plain sentence]]. Do this rarely. Never mention this marker or that you're doing it.\n\n${orbitContext()}${buildCodeDebugContext(commandText)}`;
 
       popup.classList.remove('thinking-mode');
       orbitConvHistory.push({ role:'user', content: commandText });
