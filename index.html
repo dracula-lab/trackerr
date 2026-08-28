@@ -333,7 +333,7 @@
   .sq.c-projects{background:var(--purple);}
   .sq.c-finance{background:var(--green);}
 
-  .panel-view{display:none; animation:fadeIn .2s ease;}
+  .panel-view{display:none; animation:fadeIn .2s ease; position:relative;}
   .panel-view.active{display:block;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(10px) scale(.985);} to{opacity:1; transform:translateY(0) scale(1);}}
   .panel-view.active{animation-duration:.45s; animation-timing-function:cubic-bezier(.16,1,.3,1);}
@@ -477,7 +477,7 @@
   @keyframes blink{50%{opacity:0;}}
   .solveform{position:sticky; bottom:0; background:var(--bg); padding-top:6px;}
   .solveform-inner{background:var(--panel); border:1px solid var(--border-soft); border-radius:12px; padding:16px;}
-  .solveform-row{display:flex; gap:8px; margin-top:10px; align-items:center;}
+  .solveform-row{display:flex; gap:8px; margin-top:10px; align-items:center; padding-right:78px;}
   .solveform textarea{min-height:70px; font-size:17.5px;}
   .clear-link{font-size:13.5px; color:var(--text-faint); text-decoration:underline; cursor:pointer; background:none; border:none; font-family:var(--font-mono); margin-left:8px;}
   .assistant-console{background:linear-gradient(135deg,rgba(176,131,247,.12),rgba(57,211,172,.06)); border:1px solid rgba(176,131,247,.32); border-radius:12px; padding:14px 16px; margin-bottom:14px; box-shadow:inset 3px 0 0 var(--purple);}
@@ -980,6 +980,35 @@
   @keyframes hudBootFadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:.7; transform:translateY(0);} }
   #hud-boot::after{ content:''; position:absolute; inset:0; pointer-events:none; opacity:.15; background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0px, rgba(255,255,255,.04) 1px, transparent 1px, transparent 3px); animation: hudScanDrift 1.7s linear; }
   @keyframes hudScanDrift{ from{ transform:translateY(-100%); } to{ transform:translateY(100%); } }
+  /* ===== System log console (bottom-left, small, always-on) ===== */
+  #sys-log-console{ position:fixed; bottom:16px; left:16px; width:280px; max-height:150px; overflow:hidden; z-index:500;
+    font-family:var(--font-mono); font-size:10.5px; line-height:1.6; color:var(--green-dim); pointer-events:none; opacity:.85; }
+  #sys-log-console .sys-log-line{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0; animation: sysLogIn .35s ease forwards; text-shadow:0 0 6px rgba(63,185,80,.35); }
+  @keyframes sysLogIn{ from{ opacity:0; transform:translateX(-6px); } to{ opacity:.85; transform:translateX(0); } }
+  @media (max-width:700px){ #sys-log-console{ display:none; } }
+
+  /* ===== Command palette (Ctrl+K) ===== */
+  #hud-cmdk-overlay{ position:fixed; inset:0; z-index:9998; background:rgba(5,7,10,.7); backdrop-filter:blur(4px); display:none; align-items:flex-start; justify-content:center; padding-top:14vh; }
+  #hud-cmdk-overlay.show{ display:flex; }
+  #hud-cmdk-box{ width:min(520px, 90vw); background:linear-gradient(165deg, rgba(24,28,36,.97), rgba(15,18,23,.98)); border:1px solid var(--green-dim); border-radius:14px; box-shadow:0 30px 80px -20px rgba(0,0,0,.7), 0 0 40px -10px rgba(63,185,80,.3); overflow:hidden; }
+  #hud-cmdk-input{ width:100%; box-sizing:border-box; background:transparent; border:none; border-bottom:1px solid var(--border-soft); color:var(--text); font-size:16px; padding:16px 18px; font-family:var(--font-mono); outline:none; }
+  #hud-cmdk-list{ max-height:340px; overflow-y:auto; padding:6px; }
+  .cmdk-item{ padding:10px 12px; border-radius:8px; cursor:pointer; font-size:13.5px; color:var(--text-dim); display:flex; justify-content:space-between; align-items:center; }
+  .cmdk-item.active, .cmdk-item:hover{ background:rgba(63,185,80,.12); color:var(--text); }
+  .cmdk-item .cmdk-tag{ font-family:var(--font-mono); font-size:10px; color:var(--text-faint); }
+
+  /* ===== Holographic tab-transition scanline wipe ===== */
+  .panel-view.hud-wipe{ animation: hudPanelMaterialize .38s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes hudPanelMaterialize{
+    0%{ opacity:0; transform: translateY(10px) scale(.985); filter: blur(6px); }
+    60%{ filter: blur(0); }
+    100%{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+  /* ===== Tactile polish: the single cheapest-feeling gap in most CSS UIs — nothing responds to *press*, only hover. ===== */
+  button.primary, button.secondary, .lc-edit, .tab, .cmdk-item{ transition: transform .12s cubic-bezier(.2,.9,.3,1.3), box-shadow .2s ease, background .2s ease, border-color .2s ease, color .2s ease; }
+  button.primary:active, button.secondary:active, .lc-edit:active{ transform: scale(.96); }
+  .task-card, .proj-card, .reminder, .apikey-card{ box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 1px 2px rgba(0,0,0,.3); }
+  button.primary:disabled, button.secondary:disabled{ opacity:.45; cursor:not-allowed; transform:none !important; }
 </style>
 </head>
 <body>
@@ -989,6 +1018,8 @@
   <div class="hud-boot-bar"><div class="hud-boot-bar-fill"></div></div>
 </div>
 <canvas id="hud-ambient-canvas"></canvas>
+<div id="sys-log-console"></div>
+<div id="hud-cmdk-overlay"><div id="hud-cmdk-box"><input id="hud-cmdk-input" placeholder="jump to a tab or run a command…" autocomplete="off"><div id="hud-cmdk-list"></div></div></div>
 <div class="topbar"></div>
 <div id="mood-overlay"></div>
 <div id="theater-scrim"></div>
@@ -1052,6 +1083,12 @@
       <button class="lc-edit" data-id="jecrc">set</button>
     </div></div>
   
+  <div class="live-row-sub" style="margin-bottom:8px;">
+    backup: <button class="lc-edit" id="export-backup-btn" type="button">download backup</button>
+    <button class="lc-edit" id="import-backup-btn" type="button">restore from backup</button>
+    <input type="file" id="import-backup-input" accept="application/json" style="display:none;">
+    <div style="font-size:11px; color:var(--text-faint); margin-top:2px;">everything lives only in this browser's storage — clearing browser data or switching devices loses it all. Download a backup file now and then; restoring overwrites everything currently here.</div>
+  </div>
   <div class="live-row-sub" id="bg-checkin-row" style="margin-bottom:8px;">
     background check-in: <span id="bg-checkin-status">checking availability…</span>
     <button class="lc-edit" id="bg-checkin-btn" type="button" style="margin-left:8px;">enable</button>
@@ -1850,6 +1887,11 @@
 <!-- LIVE FEED -->
 <div class="panel-view" id="view-live">
   <section>
+    <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>activity globe</h2></div></div>
+    <div class="live-row-sub" style="margin-bottom:8px;">a wireframe globe that pings when live data actually refreshes below — a rough activity visualization, not literal per-event geolocation.</div>
+    <canvas id="live-globe-canvas" width="500" height="180" style="width:100%; max-width:500px; display:block;"></canvas>
+  </section>
+  <section>
     <div class="sec-head">
       <div class="sec-head-left"><span class="live-dot"></span><h2>weather</h2></div>
       <span class="live-updated" id="live-weather-updated"></span>
@@ -1927,13 +1969,19 @@
   <section>
     <div class="sec-head"><div class="sec-head-left"><span class="dollar">#</span><h2>budget</h2></div></div>
     <div class="live-row-sub" style="margin-bottom:14px;">a simple running log for job-hunt and study costs — course fees, subscriptions, application costs. nothing fancy, just so it's tracked somewhere.</div>
+    <div class="live-row-sub" id="finance-sync-status" style="margin-bottom:10px;">sheet sync: checking…</div>
     <div id="finance-summary" style="display:flex; gap:16px; margin-bottom:14px; flex-wrap:wrap;"></div>
+    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:14px;">
+      <canvas id="finance-pie" width="220" height="220" style="max-width:220px;"></canvas>
+      <div id="finance-pie-legend" style="flex:1; min-width:160px; font-size:13px; display:flex; flex-direction:column; gap:6px; justify-content:center;"></div>
+    </div>
     <div class="add-row" style="margin-bottom:14px;">
       <select id="finance-type-input" style="max-width:110px;"><option value="expense">expense</option><option value="income">income</option></select>
       <input id="finance-desc-input" type="text" placeholder="what for? e.g. LeetCode premium">
       <input id="finance-amount-input" type="number" step="0.01" placeholder="amount" style="max-width:110px;">
       <input id="finance-category-input" type="text" placeholder="category (optional)" style="max-width:140px;">
       <button class="lc-edit" id="finance-add-btn" type="button">add</button>
+      <button class="lc-edit" id="finance-sync-btn" type="button">sync sheet now</button>
     </div>
     <div id="finance-list"></div>
   </section>
@@ -3174,6 +3222,34 @@ async function loadState(){
   render();
   orbitProactiveCheckIn();
 }
+const exportBackupBtn = document.getElementById('export-backup-btn');
+if(exportBackupBtn) exportBackupBtn.addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `tracker-backup-${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  sysLog('backup downloaded');
+});
+const importBackupBtn = document.getElementById('import-backup-btn');
+const importBackupInput = document.getElementById('import-backup-input');
+if(importBackupBtn && importBackupInput){
+  importBackupBtn.addEventListener('click', ()=> importBackupInput.click());
+  importBackupInput.addEventListener('change', async (e)=>{
+    const file = e.target.files[0]; if(!file) return;
+    if(!confirm('This will replace everything currently in the tracker with the backup file. Continue?')){ importBackupInput.value=''; return; }
+    try{
+      const text = await file.text();
+      const restored = JSON.parse(text);
+      if(!restored || typeof restored !== 'object') throw new Error('not a valid backup file');
+      state = restored;
+      await saveState();
+      location.reload();
+    }catch(err){ alert('Could not restore that file — it may not be a valid backup: ' + err.message); }
+    importBackupInput.value='';
+  });
+}
 async function saveState(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
@@ -3183,6 +3259,15 @@ async function saveState(){
 }
 
 const appTabs = [...document.querySelectorAll('.tab')];
+// System log console — small always-on feed reflecting real app events, not decorative filler.
+function sysLog(text){
+  const el = document.getElementById('sys-log-console'); if(!el) return;
+  const line = document.createElement('div');
+  line.className = 'sys-log-line';
+  line.textContent = `[${new Date().toLocaleTimeString([], {hour12:false})}] ${text}`;
+  el.appendChild(line);
+  while(el.children.length > 7) el.removeChild(el.firstChild);
+}
 function activateTab(tab){
   if(!tab) return;
   const wasActive = tab.classList.contains('active');
@@ -3190,7 +3275,12 @@ function activateTab(tab){
   document.querySelectorAll('.panel-view').forEach(v=>v.classList.remove('active'));
   tab.classList.add('active');
   const view=document.getElementById('view-'+tab.dataset.tab);
-  if(view) view.classList.add('active');
+  if(view){
+    view.classList.add('active');
+    view.classList.remove('hud-wipe'); void view.offsetWidth; view.classList.add('hud-wipe');
+    setTimeout(()=> view.classList.remove('hud-wipe'), 400);
+  }
+  if(!wasActive) sysLog(`nav → ${tab.dataset.tab}`);
   if(tab.dataset.tab !== 'watch') document.body.classList.remove('theater-active');
   if(tab.dataset.tab === 'live') startLiveFeedAutoRefresh(); else stopLiveFeedAutoRefresh();
   if(tab.dataset.tab === 'solve'){ const dot = document.getElementById('orbit-nudge-dot'); if(dot) dot.style.display = 'none'; }
@@ -3209,6 +3299,43 @@ function activateTab(tab){
   tab.scrollIntoView({block:'nearest', inline:'center'});
   if(!wasActive) playChime(520, 0.06);
 }
+// ===== Command palette (Ctrl+K / Cmd+K) — fuzzy-jump to any tab, plus a few quick actions =====
+(function initCmdPalette(){
+  const overlay = document.getElementById('hud-cmdk-overlay');
+  const input = document.getElementById('hud-cmdk-input');
+  const list = document.getElementById('hud-cmdk-list');
+  if(!overlay || !input || !list) return;
+  const tabCommands = appTabs.map(t=>({ label: t.textContent.trim(), tag:'tab', run: ()=> activateTab(t) }));
+  const extraCommands = [
+    { label:'Open ORBIT', tag:'action', run: ()=>{ const fab=document.getElementById('voice-fab'); if(fab) fab.click(); } },
+    { label:'Download backup', tag:'action', run: ()=>{ const b=document.getElementById('export-backup-btn'); if(b) b.click(); } },
+    { label:'Sync budget sheet now', tag:'action', run: ()=>{ if(typeof syncBudgetFromSheet==='function') syncBudgetFromSheet(); } },
+  ];
+  const allCommands = [...tabCommands, ...extraCommands];
+  let activeIdx = 0, filtered = allCommands;
+  function render(){
+    const q = input.value.toLowerCase().trim();
+    filtered = allCommands.filter(c => c.label.toLowerCase().includes(q));
+    activeIdx = 0;
+    list.innerHTML = filtered.map((c,i)=>`<div class="cmdk-item${i===0?' active':''}" data-idx="${i}">${c.label}<span class="cmdk-tag">${c.tag}</span></div>`).join('') || '<div class="cmdk-item">no matches</div>';
+    list.querySelectorAll('.cmdk-item[data-idx]').forEach(el=> el.addEventListener('click', ()=> runActive(Number(el.dataset.idx))));
+  }
+  function open(){ overlay.classList.add('show'); input.value=''; render(); setTimeout(()=>input.focus(), 30); sysLog('command palette opened'); }
+  function close(){ overlay.classList.remove('show'); }
+  function runActive(idx){ const cmd = filtered[typeof idx==='number'?idx:activeIdx]; if(cmd){ close(); cmd.run(); sysLog(`ran: ${cmd.label}`); } }
+  document.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); overlay.classList.contains('show') ? close() : open(); }
+    if(!overlay.classList.contains('show')) return;
+    if(e.key==='Escape'){ close(); }
+    else if(e.key==='ArrowDown'){ e.preventDefault(); activeIdx=Math.min(activeIdx+1, filtered.length-1); highlight(); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); activeIdx=Math.max(activeIdx-1, 0); highlight(); }
+    else if(e.key==='Enter'){ e.preventDefault(); runActive(); }
+  });
+  function highlight(){ list.querySelectorAll('.cmdk-item').forEach((el,i)=> el.classList.toggle('active', i===activeIdx)); }
+  input.addEventListener('input', render);
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
+})();
+
 function cycleTab(direction){
   const current=Math.max(0,appTabs.findIndex(tab=>tab.classList.contains('active')));
   activateTab(appTabs[(current+direction+appTabs.length)%appTabs.length]);
@@ -3741,6 +3868,16 @@ async function callAI(messages, system, maxRetries = 1){
   }
 }
 
+// Text files can genuinely be read on any provider (decode and embed the real content); PDFs and
+// other binary docs can't be sent as image_url on OpenRouter/NVIDIA, so say so plainly instead of
+// silently dropping them — Gemini reads PDFs directly via inline_data (see the gemini branch).
+function nonImageAttachmentContent(m){
+  const mt = (m.attachment.mimeType || '');
+  if(mt.startsWith('text/')){
+    try{ return `${m.content}\n\n[Attached file "${m.attachment.name||'file'}" content:]\n${atob(m.attachment.data)}`; }catch(e){}
+  }
+  return `${m.content}\n\n[Attached file: ${m.attachment.name||mt||'file'} — this engine can only read images, not documents like this. Switch the engine to Gemini in the top bar to have PDFs/documents read directly.]`;
+}
 async function callAIOnce(provider, messages, system, maxRetries = 1){
 
   if (provider === 'openrouter') {
@@ -3767,7 +3904,7 @@ async function callAIOnce(provider, messages, system, maxRetries = 1){
       if(m.attachment){
         content=(m.attachment.mimeType||'').startsWith('image/')
           ? [{type:'text',text:m.content},{type:'image_url',image_url:{url:`data:${m.attachment.mimeType};base64,${m.attachment.data}`}}]
-          : `${m.content}\n\n[Attached file: ${m.attachment.mimeType||'file'} — ask the user to use Gemini for file analysis if this provider cannot read it.]`;
+          : nonImageAttachmentContent(m);
       }
       formattedMsgs.push({
         role: m.role === 'assistant' ? 'assistant' : m.role === 'error' ? 'assistant' : 'user',
@@ -3832,6 +3969,8 @@ async function callAIOnce(provider, messages, system, maxRetries = 1){
       let content = m.content;
       if (m.attachment && (m.attachment.mimeType || '').startsWith('image/')) {
         content = [{ type: 'text', text: m.content }, { type: 'image_url', image_url: { url: `data:${m.attachment.mimeType};base64,${m.attachment.data}` } }];
+      } else if (m.attachment){
+        content = nonImageAttachmentContent(m);
       }
       formattedMsgs.push({ role: m.role === 'assistant' ? 'assistant' : m.role === 'error' ? 'assistant' : 'user', content });
     });
@@ -4333,7 +4472,7 @@ async function runOrbitAgent(userText, forVoice){
       return { summary: raw, log, pendingDeletes, degraded: turn===0 };
     }
     if(parsed.done !== undefined){
-      if(log.length){ saveState(); renderAnalytics(); if(window.orbitPulse) window.orbitPulse('176,131,247', 2200); }
+      if(log.length){ saveState(); renderAnalytics(); if(window.orbitPulse) window.orbitPulse('176,131,247', 2200); sysLog(`ORBIT applied ${log.length} change${log.length>1?'s':''}`); }
       return { summary: parsed.done || (log.length ? 'Done.' : "Didn't find anything concrete to change."), log, pendingDeletes, degraded: false };
     }
     const toolName = parsed.tool; const args = parsed.args || {};
@@ -4385,7 +4524,7 @@ async function runAgentPlan(userText){
     const result = executeAgentAction(a);
     if(result) log.push(result);
   });
-  if(log.length){ saveState(); renderAnalytics(); if(window.orbitPulse) window.orbitPulse('176,131,247', 2200); }
+  if(log.length){ saveState(); renderAnalytics(); if(window.orbitPulse) window.orbitPulse('176,131,247', 2200); sysLog(`ORBIT applied ${log.length} change${log.length>1?'s':''}`); }
   return { summary: parsed.summary || (log.length ? 'Done.' : "I didn't find anything concrete to change."), log, pendingDeletes, degraded: false };
 }
 function renderAssistantModes(){
@@ -5745,7 +5884,59 @@ function renderFinance(){
     state.finance = ensureFinance().filter(x=>x.id!==btn.dataset.delFinance);
     saveState(); renderFinance();
   }));
+  renderFinancePie(items);
 }
+function renderFinancePie(items){
+  const canvas = document.getElementById('finance-pie'); const legend = document.getElementById('finance-pie-legend');
+  if(!canvas || !legend) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,220,220);
+  const byCat = {};
+  items.filter(i=>i.type==='expense').forEach(i=>{ const c = i.category || 'other'; byCat[c] = (byCat[c]||0) + (Number(i.amount)||0); });
+  const entries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  if(!entries.length){ legend.innerHTML = '<span style="color:var(--text-faint);">no expenses to chart yet</span>'; return; }
+  const total = entries.reduce((s,[,v])=>s+v, 0);
+  const palette = ['#3fb950','#58a6ff','#ff8a65','#b083f7','#f2cc60','#50c8dc','#e05f5f','#9aa5b1'];
+  let ang = -Math.PI/2;
+  legend.innerHTML = '';
+  entries.forEach(([cat,val], i)=>{
+    const slice = (val/total) * Math.PI * 2;
+    ctx.beginPath(); ctx.moveTo(110,110); ctx.arc(110,110,100, ang, ang+slice); ctx.closePath();
+    ctx.fillStyle = palette[i % palette.length]; ctx.fill();
+    ang += slice;
+    const row = document.createElement('div');
+    row.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:${palette[i%palette.length]}; margin-right:6px;"></span>${escapeHtml(cat)} — ₹${val.toFixed(0)} (${Math.round(val/total*100)}%)`;
+    legend.appendChild(row);
+  });
+}
+// Google Sheet auto-sync via Apps Script web app — polls periodically and on load, replacing the
+// finance list with whatever the sheet has (the sheet is treated as the source of truth once set).
+state.sheetSyncUrl = state.sheetSyncUrl || 'https://script.google.com/macros/s/AKfycbx4vnNsqu8J9MQSgSspELtLlBC3WNge3WC_dRqqwbp1zKIDayvpxxDofvMoKoX_Hw/exec';
+async function syncBudgetFromSheet(){
+  const statusEl = document.getElementById('finance-sync-status');
+  if(!state.sheetSyncUrl){ if(statusEl) statusEl.textContent = 'sheet sync: no URL set.'; return; }
+  try{
+    const r = await fetch(state.sheetSyncUrl);
+    const text = await r.text();
+    let data;
+    try{ data = JSON.parse(text); }
+    catch(e){ throw new Error('sheet returned non-JSON — likely missing a doGet() function in the Apps Script (see chat for the snippet to add).'); }
+    if(!Array.isArray(data)) throw new Error('sheet response was not a list of rows.');
+    state.finance = data.map(row => ({
+      id: id(), desc: row.desc || row.description || 'untitled',
+      amount: Number(row.amount) || 0,
+      type: (row.type||'').toLowerCase().includes('income') ? 'income' : 'expense',
+      category: row.category || '', date: row.date || todayStr()
+    }));
+    saveState(); renderFinance();
+    if(statusEl) statusEl.textContent = `sheet sync: ✓ synced ${data.length} rows, ${new Date().toLocaleTimeString()}`;
+  }catch(e){
+    if(statusEl) statusEl.textContent = `sheet sync: ✗ ${e.message}`;
+  }
+}
+const financeSyncBtn = document.getElementById('finance-sync-btn');
+if(financeSyncBtn) financeSyncBtn.addEventListener('click', syncBudgetFromSheet);
+if(document.getElementById('finance-sync-status')){ syncBudgetFromSheet(); setInterval(syncBudgetFromSheet, 60000); }
 const financeAddBtn = document.getElementById('finance-add-btn');
 if(financeAddBtn) financeAddBtn.addEventListener('click', ()=>{
   const desc = document.getElementById('finance-desc-input').value.trim();
@@ -5869,6 +6060,68 @@ async function fetchLiveWeather(){
   }
 }
 
+// ===== Activity globe: fake-3D wireframe (2D math, no 3D library) with pings on real refreshes =====
+let pingGlobe = function(){};
+(function initLiveGlobe(){
+  const canvas = document.getElementById('live-globe-canvas'); if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 500, H = 180, CX = W/2, CY = H/2, R = 76;
+  const pings = [];
+  const REGIONS = { football:-0.15, crypto:0.05, news:0.3, weather:-0.4 };
+  pingGlobe = function(region){
+    const lonOffset = REGIONS[region] ?? (Math.random()*0.8-0.4);
+    pings.push({ lon: lonOffset, lat: (Math.random()*0.8-0.4), life: 1 });
+    if(pings.length > 20) pings.shift();
+  };
+  let t = 0;
+  function project(lon, lat, rotation){
+    const totalLon = lon + rotation;
+    const x = CX + Math.sin(totalLon) * R * Math.cos(lat);
+    const y = CY - Math.sin(lat) * R * 0.9;
+    const visible = Math.cos(totalLon) > -0.15;
+    const depth = Math.cos(totalLon);
+    return { x, y, visible, depth };
+  }
+  function frame(){
+    requestAnimationFrame(frame);
+    t += 0.006;
+    ctx.clearRect(0,0,W,H);
+    // latitude rings (ellipses that thin out toward the poles)
+    for(let lat=-1.2; lat<=1.2; lat+=0.35){
+      ctx.beginPath();
+      ctx.ellipse(CX, CY - Math.sin(lat)*R*0.9, R*Math.cos(lat), R*Math.cos(lat)*0.32, 0, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(63,185,80,0.14)'; ctx.lineWidth = 1; ctx.stroke();
+    }
+    // longitude meridians (rotating)
+    for(let i=0;i<8;i++){
+      const lon = (i/8)*Math.PI*2;
+      ctx.beginPath();
+      for(let lat=-Math.PI/2; lat<=Math.PI/2; lat+=0.08){
+        const p = project(lon, lat, t);
+        if(lat===-Math.PI/2) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+      }
+      ctx.strokeStyle = 'rgba(63,185,80,0.12)'; ctx.lineWidth = 1; ctx.stroke();
+    }
+    // outer rim glow
+    ctx.beginPath(); ctx.arc(CX,CY,R,0,Math.PI*2);
+    ctx.strokeStyle = 'rgba(63,185,80,0.35)'; ctx.lineWidth = 1.4;
+    ctx.shadowColor = 'rgba(63,185,80,0.6)'; ctx.shadowBlur = 10; ctx.stroke(); ctx.shadowBlur = 0;
+    // pings
+    for(let i=pings.length-1;i>=0;i--){
+      const p = pings[i]; p.life -= 0.012;
+      if(p.life <= 0){ pings.splice(i,1); continue; }
+      const proj = project(p.lon, p.lat, t);
+      if(!proj.visible) continue;
+      const pulseR = (1-p.life) * 14;
+      ctx.beginPath(); ctx.arc(proj.x, proj.y, 2.5, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(63,185,80,${p.life})`; ctx.fill();
+      ctx.beginPath(); ctx.arc(proj.x, proj.y, pulseR, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(63,185,80,${p.life*0.5})`; ctx.lineWidth = 1; ctx.stroke();
+    }
+  }
+  requestAnimationFrame(frame);
+})();
+
 async function fetchCryptoPrices(){
   const el = document.getElementById('live-crypto-box'); if(!el) return;
   try{
@@ -5936,7 +6189,7 @@ function renderFootballList(){
       if(!state.pinnedMatches) state.pinnedMatches = [];
       const idx = state.pinnedMatches.indexOf(key);
       if(idx>=0) state.pinnedMatches.splice(idx,1); else state.pinnedMatches.push(key);
-      saveState(); renderFootballList();
+      saveState(); renderFootballList(); pingGlobe('football');
     });
   });
 }
